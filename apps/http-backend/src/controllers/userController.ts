@@ -1,7 +1,11 @@
 import { prisma } from "@repo/database/prisma";
 import { type Request, type Response } from "express";
-import { JWT_SECRET } from "@repo/backend-common/config";
-import { createUserSchema, signinSchema } from "@repo/common/types";
+const JWT_SECRET = process.env.JWT_SECRET
+import {
+  createUserSchema,
+  signinSchema,
+  roomCreateSchema,
+} from "@repo/zod/types";
 import z from "zod";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -79,8 +83,6 @@ export const userSignin = async (req: Request, res: Response) => {
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
 
-    console.log(JWT_SECRET);
-
     if (findUser && passwordMatch) {
       const token = jwt.sign({ userId: findUser.id }, JWT_SECRET as string);
       return res.status(200).json({
@@ -97,8 +99,48 @@ export const userSignin = async (req: Request, res: Response) => {
 };
 
 export const createRoom = async (req: Request, res: Response) => {
-  res.status(200).json({
-    roomId: 112,
-    message: "Room successfully created",
-  });
+  try {
+    const parsedData = roomCreateSchema.safeParse(req.body);
+    const userId = req.userId;
+
+    if (!parsedData.success) {
+      return res.status(400).json({
+        errors: z.flattenError(parsedData.error),
+      });
+    }
+
+    const slug = parsedData.data.slug;
+
+    const roomAlreadyExists = await prisma.room.findUnique({
+      where: {
+        slug: slug,
+        adminId: userId,
+      }
+    })
+
+    if(roomAlreadyExists) {
+      return res.status(409).json({
+        message: "Room already exists",
+      });
+    }
+
+    const roomCreated = await prisma.room.create({
+      data: {
+        slug: slug,
+        adminId: userId,
+      },
+    });
+
+    if (roomCreated) {
+      return res.status(200).json({
+        roomId: roomCreated.id,
+        message: "Room created successfully",
+      });
+    }
+  } catch (e) {
+    console.error("Error while creating room", e);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
 };

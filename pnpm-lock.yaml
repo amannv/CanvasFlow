@@ -20,18 +20,15 @@ importers:
 
   apps/http-backend:
     dependencies:
-      '@repo/backend-common':
-        specifier: workspace:*
-        version: link:../../packages/backend-common
-      '@repo/common':
-        specifier: workspace:*
-        version: link:../../packages/common
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
+      '@repo/zod':
+        specifier: workspace:*
+        version: link:../../packages/zod
       '@types/bcrypt':
         specifier: ^6.0.0
         version: 6.0.0
@@ -99,9 +96,6 @@ importers:
 
   apps/ws-backend:
     dependencies:
-      '@repo/backend-common':
-        specifier: workspace:*
-        version: link:../../packages/backend-common
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -126,32 +120,6 @@ importers:
       ws:
         specifier: ^8.21.0
         version: 8.21.0
-
-  packages/backend-common:
-    dependencies:
-      '@types/dotenv':
-        specifier: ^8.2.3
-        version: 8.2.3
-      '@types/node':
-        specifier: ^22.15.3
-        version: 22.15.3
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-
-  packages/common:
-    dependencies:
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
 
   packages/database:
     dependencies:
@@ -246,6 +214,16 @@ importers:
       typescript:
         specifier: 5.9.2
         version: 5.9.2
+
+  packages/zod:
+    dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
 
 packages:
 

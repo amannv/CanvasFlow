@@ -1,12 +1,13 @@
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "@repo/backend-common/config";
+import "dotenv/config";
+const JWT_SECRET = process.env.JWT_SECRET;
 import { type Request, type Response, type NextFunction } from "express";
 
 const userMiddleware = (req: Request, res: Response, next: NextFunction) => {
   try {
     const header = req.headers.authorization;
 
-    if (!header || header.startsWith("Bearer ")) {
+    if (!header || !header.startsWith("Bearer ")) {
       return res.status(400).json({
         message: "Invalid header!",
       });
@@ -27,7 +28,7 @@ const userMiddleware = (req: Request, res: Response, next: NextFunction) => {
     }
 
     const userVerified = jwt.verify(token, JWT_SECRET) as {
-      userId: string;
+      userId: number;
     };
 
     if (userVerified) {

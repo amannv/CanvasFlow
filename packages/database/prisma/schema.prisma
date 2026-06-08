@@ -7,30 +7,40 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+
+  rooms    Room[]
+  elements Element[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  rooms     Room[]
-  chats     Chat[]
 }
 
 model Room {
-  id        Int      @id @default(autoincrement())
-  slug      String   @unique
+  id   Int    @id @default(autoincrement())
+  slug String @unique
+
+  adminId Int
+  admin   User @relation(fields: [adminId], references: [id])
+
+  elements Element[]
+
   createdAt DateTime @default(now())
-  adminId   Int
-  admin     User     @relation(fields: [adminId], references: [id])
-  chats     Chat[]
+  updatedAt DateTime @updatedAt
 }
 
-model Chat {
-  id      Int    @id @default(autoincrement())
-  message String
-  userId  Int
-  roomId  Int
-  user    User   @relation(fields: [userId], references: [id])
-  room    Room   @relation(fields: [roomId], references: [id])
+model Element {
+  id Int @id @default(autoincrement())
+
+  type String
+  data Json
+
+  roomId Int
+  room   Room @relation(fields: [roomId], references: [id])
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }
