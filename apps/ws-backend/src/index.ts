@@ -3,9 +3,19 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 const JWT_SECRET = process.env.JWT_SECRET;
 
-
 const wss = new WebSocketServer({ port: 8080 });
 
+const verifiedUser = (token: string): number | null => {
+  const verified = jwt.verify(token, JWT_SECRET as string) as {
+    userId: number;
+  };
+
+  if (!verified || !verified.userId) {
+    return null;
+  }
+
+  return verified.userId;
+};
 
 wss.on("connection", (socket, request) => {
   const url = request.url;
@@ -19,13 +29,10 @@ wss.on("connection", (socket, request) => {
     return;
   }
 
-  const verified = jwt.verify(token, JWT_SECRET as string) as {
-    userId: string;
-  };
+  const userId = verifiedUser(token);
 
-  if (!verified || !verified.userId) {
+  if (!userId) {
     socket.close();
-    return;
   }
 
   socket.on("message", (message) => {
