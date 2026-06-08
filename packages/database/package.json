@@ -1,28 +1,22 @@
 {
   "name": "@repo/database",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
-  "type": "module",
-  "scripts": {
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+  "exports": {
+    "./prisma": "./src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "description": "",
   "devDependencies": {
-    "@types/node": "^22.15.3",
-    "@types/pg": "^8.20.0",
-    "prisma": "latest",
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "@repo/typescript-config": "workspace:*"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@types/dotenv": "^8.2.3",
     "dotenv": "^17.4.2",
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "prisma": "^7.8.0"
   }
 }

@@ -1,12 +1,22 @@
-import { prisma } from "@repo/database";
+import { prisma } from "@repo/database/prisma";
 import { type Request, type Response } from "express";
 import { JWT_SECRET } from "@repo/backend-common/config";
+import { createUserSchema, signinSchema } from "@repo/common/types";
+import z from "zod";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 export const userSignup = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const requiredBody = createUserSchema.safeParse(req.body);
+
+    if (!requiredBody.success) {
+      return res.status(400).json({
+        errors: z.flattenError(requiredBody.error),
+      });
+    }
+
+    const { name, email, password } = requiredBody.data;
 
     const userCheck = await prisma.user.findUnique({
       where: {
@@ -45,7 +55,15 @@ export const userSignup = async (req: Request, res: Response) => {
 
 export const userSignin = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const requiredBody = signinSchema.safeParse(req.body);
+
+    if (!requiredBody.success) {
+      return res.status(400).json({
+        errors: z.flattenError(requiredBody.error),
+      });
+    }
+
+    const { email, password } = requiredBody.data;
 
     const findUser = await prisma.user.findUnique({
       where: {
@@ -60,6 +78,8 @@ export const userSignin = async (req: Request, res: Response) => {
     }
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
+
+    console.log(JWT_SECRET);
 
     if (findUser && passwordMatch) {
       const token = jwt.sign({ userId: findUser.id }, JWT_SECRET as string);
@@ -77,9 +97,8 @@ export const userSignin = async (req: Request, res: Response) => {
 };
 
 export const createRoom = async (req: Request, res: Response) => {
-
-    res.status(200).json({
-        roomId: 112,
-        message: "Room successfully created",
-    });
+  res.status(200).json({
+    roomId: 112,
+    message: "Room successfully created",
+  });
 };
