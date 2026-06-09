@@ -1,6 +1,6 @@
 import { prisma } from "@repo/database/prisma";
 import { type Request, type Response } from "express";
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
 import {
   createUserSchema,
   signinSchema,
@@ -115,10 +115,10 @@ export const createRoom = async (req: Request, res: Response) => {
       where: {
         slug: slug,
         adminId: userId,
-      }
-    })
+      },
+    });
 
-    if(roomAlreadyExists) {
+    if (roomAlreadyExists) {
       return res.status(409).json({
         message: "Room already exists",
       });
@@ -141,6 +141,43 @@ export const createRoom = async (req: Request, res: Response) => {
     console.error("Error while creating room", e);
     return res.status(500).json({
       message: "Internal server error",
+    });
+  }
+};
+
+export const getElements = async (req: Request, res: Response) => {
+  try {
+    const roomId = req.params.roomId;
+
+    const room = Number(roomId);
+
+    if (!roomId) {
+      return res.status(400).json({
+        message: "Invalid params",
+      });
+    }
+
+    const elements = await prisma.element.findMany({
+      where: {
+        roomId: room,
+      },
+      take: 50,
+      orderBy: { id: "desc" },
+    });
+
+    if (!elements) {
+      return res.status(200).json({
+        message: "No elements present",
+      });
+    }
+
+    return res.status(200).json({
+      elements,
+    });
+  } catch (e) {
+    console.error("Error while fetching elements");
+    return res.status(500).json({
+      message: "Something went wrong",
     });
   }
 };

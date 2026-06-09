@@ -1,14 +1,14 @@
-import { WebSocketServer, WebSocket } from "ws";
-import { prisma } from "@repo/database/prisma";
-import jwt from "jsonwebtoken";
 import "dotenv/config";
+import { WebSocketServer, WebSocket } from "ws";
+import jwt from "jsonwebtoken";
+import { prisma } from "@repo/database/prisma";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const wss = new WebSocketServer({ port: 8080 });
 
 const socketToUserId = new Map<WebSocket, number>();
-const socketToRoomId = new Map<WebSocket, Set<string>>();
-const roomToSockets = new Map<string, Set<WebSocket>>();
+const socketToRoomId = new Map<WebSocket, Set<number>>();
+const roomToSockets = new Map<number, Set<WebSocket>>();
 
 const verifiedUser = (token: string): number | null => {
   try {
@@ -48,7 +48,7 @@ wss.on("connection", (socket, request) => {
 
   socketToUserId.set(socket, userId);
 
-  socket.on("message", (message) => {
+  socket.on("message", async (message) => {
     const parsedMessage = JSON.parse(message as unknown as string);
 
     if (parsedMessage.type === "join_room") {
@@ -111,17 +111,27 @@ wss.on("connection", (socket, request) => {
       }
     }
 
-    if (parsedMessage.type === "chat") {
-      const message = parsedMessage.payload.message;
+    if (parsedMessage.type === "draw") {
+      const shape = parsedMessage.payload.shape;
       const roomId = parsedMessage.payload.roomId;
 
       const sockets = roomToSockets.get(roomId);
 
+      await prisma.element.create({
+        data: {
+          type: shape.type,
+          roomId: roomId,
+          userId: userId,
+          data: shape,
+        }
+      })
+
       const sentMessage = {
         id: crypto.randomUUID(),
-        type: "chat",
+        type: "draw",
         userId: userId,
-        message: message,
+        shape: shape,
+        shapeType: shape.type,
         roomId: roomId,
       };
 
@@ -129,5 +139,21 @@ wss.on("connection", (socket, request) => {
         socket.send(JSON.stringify(sentMessage));
       });
     }
+  });
+
+  socket.on("close", () => {
+    const rooms = socketToRoomId.get(socket);
+
+    rooms?.forEach((room) => {
+      const sockets = roomToSockets.get(room);
+      sockets?.delete(socket);
+
+      if (sockets?.size === 0) {
+        roomToSockets.delete(room);
+      }
+    });
+
+    socketToRoomId.delete(socket);
+    socketToUserId.delete(socket);
   });
 });
