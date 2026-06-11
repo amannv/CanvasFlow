@@ -2,6 +2,7 @@ import "dotenv/config";
 import { WebSocketServer, WebSocket } from "ws";
 import jwt from "jsonwebtoken";
 import { prisma } from "@repo/database/prisma";
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const wss = new WebSocketServer({ port: 8080 });
@@ -71,7 +72,7 @@ wss.on("connection", (socket, request) => {
       sockets?.add(socket);
 
       const message = {
-        id: crypto.randomUUID(),
+        messageId: crypto.randomUUID(),
         type: "join_room",
         roomId: roomId,
         userId: userId,
@@ -89,7 +90,7 @@ wss.on("connection", (socket, request) => {
       ws?.delete(socket);
 
       const message = {
-        id: crypto.randomUUID(),
+        messageId: crypto.randomUUID(),
         type: "leave_room",
         userId: userId,
         roomId: roomId,
@@ -111,31 +112,144 @@ wss.on("connection", (socket, request) => {
       }
     }
 
-    if (parsedMessage.type === "draw") {
+    if (parsedMessage.type === "create_element") {
       const shape = parsedMessage.payload.shape;
       const roomId = parsedMessage.payload.roomId;
 
+      const roomExist = await prisma.room.findUnique({
+        where: {
+          id: roomId,
+        },
+      });
+
+      if (!roomExist) {
+        console.error("Room doesn't exists!");
+        return;
+      }
+
+      const rooms = socketToRoomId.get(socket);
+      if (!rooms?.has(roomId)) {
+        console.error("This user has not joined this room");
+        return;
+      }
+
       const sockets = roomToSockets.get(roomId);
 
-      await prisma.element.create({
+      const shapeCreated = await prisma.element.create({
         data: {
           type: shape.type,
           roomId: roomId,
           userId: userId,
           data: shape,
-        }
-      })
+        },
+      });
 
       const sentMessage = {
-        id: crypto.randomUUID(),
-        type: "draw",
-        userId: userId,
-        shape: shape,
-        shapeType: shape.type,
-        roomId: roomId,
+        messageId: crypto.randomUUID(),
+        elementId: shapeCreated.id,
+        type: "create_element",
+        userId: shapeCreated.userId,
+        shape: shapeCreated.data,
+        shapeType: shapeCreated.type,
+        roomId: shapeCreated.roomId,
       };
 
       sockets?.forEach((socket) => {
+        socket.send(JSON.stringify(sentMessage));
+      });
+    }
+
+    if (parsedMessage.type === "update_element") {
+      const elementId = parsedMessage.payload.elementId;
+      const data = parsedMessage.payload.data;
+      const roomId = parsedMessage.payload.roomId;
+
+      const sockets = roomToSockets.get(roomId);
+      if (!sockets?.has(socket)) {
+        console.error("User doesn't belongs to the room!");
+        return;
+      }
+
+      const elementExist = await prisma.element.findUnique({
+        where: {
+          id: elementId,
+        },
+      });
+
+      if (!elementExist || elementExist.roomId !== roomId) {
+        console.error("Element doesn't exist in this room!");
+        return;
+      }
+
+      const updateElement = await prisma.element.update({
+        where: {
+          id: elementId,
+        },
+        data: {
+          data: data,
+        },
+      });
+
+      if (!updateElement) {
+        console.error("Error while updating element!");
+        return;
+      }
+
+      const sentMessage = {
+        messageId: crypto.randomUUID(),
+        elementId: updateElement.id,
+        type: "update_element",
+        shapeType: updateElement.type,
+        shape: updateElement.data,
+        roomId: updateElement.roomId,
+        userId: updateElement.userId,
+      };
+
+      sockets.forEach((socket) => {
+        socket.send(JSON.stringify(sentMessage));
+      });
+    }
+
+    if (parsedMessage.type === "delete_element") {
+      const elementId = parsedMessage.payload.elementId;
+      const roomId = parsedMessage.payload.roomId;
+
+      const sockets = roomToSockets.get(roomId);
+      if (!sockets?.has(socket)) {
+        console.error("User doesn't belongs to the room!");
+        return;
+      }
+
+      const elementExist = await prisma.element.findUnique({
+        where: {
+          id: elementId,
+        },
+      });
+
+      if (!elementExist || elementExist.roomId !== roomId) {
+        console.error("Element doesn't exist in this room!");
+        return;
+      }
+
+      const deleteElement = await prisma.element.delete({
+        where: {
+          id: elementId,
+        },
+      });
+
+      if (!deleteElement) {
+        console.error("Error while deleting element!");
+        return;
+      }
+
+      const sentMessage = {
+        messageId: crypto.randomUUID(),
+        elementId: deleteElement.id,
+        type: "delete_element",
+        message: "Element successfully deleted",
+      };
+
+      sockets.forEach((socket) => {
         socket.send(JSON.stringify(sentMessage));
       });
     }

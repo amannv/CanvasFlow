@@ -6,7 +6,7 @@ import {
   signinSchema,
   roomCreateSchema,
 } from "@repo/zod/types";
-import z, { string } from "zod";
+import z from "zod";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -114,7 +114,6 @@ export const createRoom = async (req: Request, res: Response) => {
     const roomAlreadyExists = await prisma.room.findUnique({
       where: {
         slug: slug,
-        adminId: userId,
       },
     });
 
