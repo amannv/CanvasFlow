@@ -1,32 +1,21 @@
 import "dotenv/config";
 import { WebSocketServer, WebSocket } from "ws";
-import jwt from "jsonwebtoken";
+import { verifiedUser } from "./helpers/verifyUser";
 import { prisma } from "@repo/database/prisma";
-
-const JWT_SECRET = process.env.JWT_SECRET;
+import {
+  createElementSchema,
+  deleteElementSchema,
+  joinRoomSchema,
+  leaveRoomSchema,
+  updateElementSchema,
+} from "@repo/zod/types";
+import { safeParseJson } from "./helpers/safeParseJson";
 
 const wss = new WebSocketServer({ port: 8080 });
 
 const socketToUserId = new Map<WebSocket, number>();
 const socketToRoomId = new Map<WebSocket, Set<number>>();
 const roomToSockets = new Map<number, Set<WebSocket>>();
-
-const verifiedUser = (token: string): number | null => {
-  try {
-    const verified = jwt.verify(token, JWT_SECRET as string) as {
-      userId: number;
-    };
-
-    if (!verified || !verified.userId) {
-      return null;
-    }
-
-    return verified.userId;
-  } catch (e) {
-    console.error("Unauthorized user!");
-    return null;
-  }
-};
 
 wss.on("connection", (socket, request) => {
   const url = request.url;
@@ -50,10 +39,20 @@ wss.on("connection", (socket, request) => {
   socketToUserId.set(socket, userId);
 
   socket.on("message", async (message) => {
-    const parsedMessage = JSON.parse(message as unknown as string);
+    const parsedMessage = safeParseJson(message as unknown as string);
+
+    if (!parsedMessage) {
+      return;
+    }
 
     if (parsedMessage.type === "join_room") {
-      const roomId = parsedMessage.payload.roomId;
+      const result = joinRoomSchema.safeParse(parsedMessage);
+
+      if (!result.success) {
+        return;
+      }
+
+      const roomId = result.data.payload.roomId;
 
       if (!socketToRoomId.has(socket)) {
         socketToRoomId.set(socket, new Set());
@@ -84,7 +83,13 @@ wss.on("connection", (socket, request) => {
     }
 
     if (parsedMessage.type === "leave_room") {
-      const roomId = parsedMessage.payload.roomId;
+      const result = leaveRoomSchema.safeParse(parsedMessage);
+
+      if (!result.success) {
+        return;
+      }
+
+      const roomId = result.data.payload.roomId;
 
       const ws = roomToSockets.get(roomId);
       ws?.delete(socket);
@@ -113,8 +118,14 @@ wss.on("connection", (socket, request) => {
     }
 
     if (parsedMessage.type === "create_element") {
-      const shape = parsedMessage.payload.shape;
-      const roomId = parsedMessage.payload.roomId;
+      const result = createElementSchema.safeParse(parsedMessage);
+
+      if (!result.success) {
+        return;
+      }
+
+      const shape = result.data.payload.shape;
+      const roomId = result.data.payload.roomId;
 
       const roomExist = await prisma.room.findUnique({
         where: {
@@ -160,9 +171,15 @@ wss.on("connection", (socket, request) => {
     }
 
     if (parsedMessage.type === "update_element") {
-      const elementId = parsedMessage.payload.elementId;
-      const data = parsedMessage.payload.data;
-      const roomId = parsedMessage.payload.roomId;
+      const result = updateElementSchema.safeParse(parsedMessage);
+
+      if (!result.success) {
+        return;
+      }
+
+      const elementId = result.data.payload.elementId;
+      const data = result.data.payload.data;
+      const roomId = result.data.payload.roomId;
 
       const sockets = roomToSockets.get(roomId);
       if (!sockets?.has(socket)) {
@@ -211,8 +228,14 @@ wss.on("connection", (socket, request) => {
     }
 
     if (parsedMessage.type === "delete_element") {
-      const elementId = parsedMessage.payload.elementId;
-      const roomId = parsedMessage.payload.roomId;
+      const result = deleteElementSchema.safeParse(parsedMessage);
+
+      if (!result.success) {
+        return;
+      }
+
+      const elementId = result.data.payload.elementId;
+      const roomId = result.data.payload.roomId;
 
       const sockets = roomToSockets.get(roomId);
       if (!sockets?.has(socket)) {
