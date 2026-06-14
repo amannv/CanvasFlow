@@ -126,6 +126,7 @@ wss.on("connection", (socket, request) => {
 
       const shape = result.data.payload.shape;
       const roomId = result.data.payload.roomId;
+      const type = result.data.payload.shape.type;
 
       const roomExist = await prisma.room.findUnique({
         where: {
@@ -148,7 +149,7 @@ wss.on("connection", (socket, request) => {
 
       const shapeCreated = await prisma.element.create({
         data: {
-          type: shape.type,
+          type: type,
           roomId: roomId,
           userId: userId,
           data: shape,
