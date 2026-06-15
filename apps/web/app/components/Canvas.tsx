@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { initDraw } from "../draw";
 
-export function Canvas({ slug } : {
-    slug: string;
+export function Canvas({ roomId, socket } : {
+    roomId: string;
+    socket: WebSocket;
 }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -13,7 +14,7 @@ export function Canvas({ slug } : {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
 
-      initDraw(canvas, slug);
+      initDraw(canvas, roomId, socket);
     }
   }, [canvasRef]);
 

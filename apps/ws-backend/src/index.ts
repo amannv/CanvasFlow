@@ -117,6 +117,7 @@ wss.on("connection", (socket, request) => {
       }
     }
 
+  
     if (parsedMessage.type === "create_element") {
       const result = createElementSchema.safeParse(parsedMessage);
 
@@ -126,7 +127,6 @@ wss.on("connection", (socket, request) => {
 
       const shape = result.data.payload.shape;
       const roomId = result.data.payload.roomId;
-      const type = result.data.payload.shape.type;
 
       const roomExist = await prisma.room.findUnique({
         where: {
@@ -149,12 +149,12 @@ wss.on("connection", (socket, request) => {
 
       const shapeCreated = await prisma.element.create({
         data: {
-          type: type,
           roomId: roomId,
           userId: userId,
           data: shape,
         },
       });
+
 
       const sentMessage = {
         messageId: crypto.randomUUID(),
@@ -162,7 +162,6 @@ wss.on("connection", (socket, request) => {
         type: "create_element",
         userId: shapeCreated.userId,
         shape: shapeCreated.data,
-        shapeType: shapeCreated.type,
         roomId: shapeCreated.roomId,
       };
 
@@ -217,7 +216,6 @@ wss.on("connection", (socket, request) => {
         messageId: crypto.randomUUID(),
         elementId: updateElement.id,
         type: "update_element",
-        shapeType: updateElement.type,
         shape: updateElement.data,
         roomId: updateElement.roomId,
         userId: updateElement.userId,

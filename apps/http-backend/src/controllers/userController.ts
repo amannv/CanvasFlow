@@ -147,7 +147,6 @@ export const createRoom = async (req: Request, res: Response) => {
 export const getElements = async (req: Request, res: Response) => {
   try {
     const roomId = req.params.roomId;
-    console.log("roomid:", req.params.roomId);
     const room = Number(roomId);
 
     if (!roomId) {
@@ -184,7 +183,6 @@ export const getElements = async (req: Request, res: Response) => {
 export const returnRoomId = async (req: Request, res: Response) => {
   try {
   const { slug } = req.params;
-  console.log("slug:", slug);
 
 if (!slug) {
   return res.status(400).json({
@@ -204,8 +202,10 @@ if (!slug) {
     });
   }
 
+  const roomId = room.id;
+
   return res.status(200).json({
-    room
+    roomId
   });
 } catch (e) {
   console.error("Error while finding room", e);

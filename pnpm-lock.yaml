@@ -68,6 +68,9 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@repo/zod':
+        specifier: workspace:*
+        version: link:../../packages/zod
       '@tailwindcss/postcss':
         specifier: ^4.3.0
         version: 4.3.0

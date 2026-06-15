@@ -35,9 +35,7 @@ export const leaveRoomSchema = z.object({
 export const createElementSchema = z.object({
   type: z.literal("create_element"),
   payload: z.object({
-    shape: z.object({
-      type: z.string(),
-    }),
+    shape: z.any(),
     roomId: z.number(),
   }),
 });

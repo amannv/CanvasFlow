@@ -35,7 +35,6 @@ model Room {
 model Element {
   id Int @id @default(autoincrement())
 
-  type String
   data Json
 
   roomId Int

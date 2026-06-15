@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
+    "@repo/zod": "workspace:*",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/axios": "^0.14.4",
     "axios": "^1.17.0",
