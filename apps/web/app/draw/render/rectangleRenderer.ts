@@ -1,12 +1,9 @@
 import { RectangleShape } from "../types";
 
-export function renderRectangle({
-  ctx,
-  shape,
-}: {
-  ctx: CanvasRenderingContext2D;
-  shape: RectangleShape;
-}) {
-  ctx.strokeStyle = "white";
+export function renderRectangle(
+  ctx: CanvasRenderingContext2D,
+  shape: RectangleShape,
+) {
+  ctx.strokeStyle = "black";
   ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
 }

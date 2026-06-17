@@ -159,7 +159,7 @@ export const getElements = async (req: Request, res: Response) => {
       where: {
         roomId: room,
       },
-      take: 50,
+      take: 1000,
       orderBy: { id: "desc" },
     });
 

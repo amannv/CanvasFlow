@@ -13,4 +13,16 @@ export type CircleShape = {
   radius: number;
 };
 
-export type Shape = RectangleShape | CircleShape;
+export type LineShape = {
+  type: "line";
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+}
+
+export type DrawState = {
+  clicked: boolean;
+};
+
+export type Shape = RectangleShape | CircleShape | LineShape;

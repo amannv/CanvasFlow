@@ -6,12 +6,10 @@ import { getCanvasCoordinates } from "./utils/getCanvasCoordinates";
 import { previewCircle } from "./tools/circleTool";
 import { createCircle } from "./shapes/circle";
 import { socketMessageSender, socketMessageListener } from "./network/socket";
-import {
-  handleMouseDown,
-  handleMouseUp,
-  previewRectangle,
-} from "./tools/rectangleTool";
-import React from "react";
+import { handleMouseDown, handleMouseUp } from "./tools/mouse";
+import { previewRectangle } from "./tools/rectangleTool";
+import { previewLine } from "./tools/lineTool";
+import { createLine } from "./shapes/line";
 
 type ShapeType = "circle" | "rectangle" | "line" | "pencil" | "none";
 
@@ -59,6 +57,9 @@ export async function initDraw(
     if (shape.current === "circle") {
       previewCircle(ctx, state.startX, state.startY, pos.x, pos.y);
     }
+    if (shape.current === "line") {
+      previewLine(ctx, state.startX, state.startY, pos.x, pos.y);
+    }
   });
 
   canvas.addEventListener("mouseup", (e) => {
@@ -79,6 +80,11 @@ export async function initDraw(
       const circle = createCircle(state.startX, state.startY, pos.x, pos.y);
       existingShapes.push(circle);
       socketMessageSender(socket, circle, roomId);
+    }
+    if (shape.current === "line") {
+      const line = createLine(state.startX, state.startY, pos.x, pos.y);
+      existingShapes.push(line);
+      socketMessageSender(socket, line, roomId);
     }
   });
 }

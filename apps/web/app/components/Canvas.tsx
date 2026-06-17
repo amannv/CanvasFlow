@@ -38,14 +38,14 @@ export function Canvas({
 
   return (
     <div>
-      <canvas ref={canvasRef} className="fixed inset-0 bg-neutral-900" />
+      <canvas ref={canvasRef} className="fixed inset-0 bg-neutral-50" />
       <div className="w-screen h-screen flex justify-center items-center">
-        <div className="absolute bottom-5 flex gap-2 bg-neutral-800 p-2 rounded">
+        <div className="absolute bottom-5 flex gap-2 bg-neutral-200 p-2 rounded">
           <div
             onClick={() => {
               setShape("rectangle");
             }}
-            className="bg-neutral-700 text-white p-2 rounded cursor-pointer hover:scale-110"
+            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110"
           >
             <RectangleHorizontal />
           </div>
@@ -53,7 +53,7 @@ export function Canvas({
             onClick={() => {
               setShape("circle");
             }}
-            className="bg-neutral-700 text-white p-2 rounded cursor-pointer hover:scale-110"
+            className="bg-neutral-100 text-black  p-2 rounded cursor-pointer hover:scale-110"
           >
             <Circle />
           </div>
@@ -61,7 +61,7 @@ export function Canvas({
             onClick={() => {
               setShape("line");
             }}
-            className="bg-neutral-700 text-white p-2 rounded cursor-pointer hover:scale-110"
+            className="bg-neutral-100 text-black  p-2 rounded cursor-pointer hover:scale-110"
           >
             <Minus />
           </div>
@@ -69,7 +69,7 @@ export function Canvas({
             onClick={() => {
               setShape("pencil");
             }}
-            className="bg-neutral-700 text-white p-2 rounded cursor-pointer hover:scale-110"
+            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110"
           >
             <PencilLine />
           </div>
@@ -77,7 +77,7 @@ export function Canvas({
             onClick={() => {
               setShape("none");
             }}
-            className="bg-neutral-700 text-white p-2 rounded cursor-pointer hover:scale-110"
+            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110 "
           >
             <MousePointer />
           </div>

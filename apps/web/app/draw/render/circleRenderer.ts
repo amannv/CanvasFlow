@@ -6,6 +6,6 @@ export function renderCircle(
 ) {
   ctx.beginPath();
   ctx.arc(shape.centreX, shape.centreY, shape.radius, 0, 2 * Math.PI);
-  ctx.strokeStyle = "white";
+  ctx.strokeStyle = "black";
   ctx.stroke();
 }
