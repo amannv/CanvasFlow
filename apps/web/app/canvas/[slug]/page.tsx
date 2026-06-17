@@ -1,5 +1,5 @@
-import { RoomCanvas } from "../../components/RoomCanvas";
 import axios from "axios";
+import { RoomCanvas } from "../../components/RoomCanvas";
 import { BACKEND_URL } from "../../config/config";
 
 export default async function CanvasPage({
