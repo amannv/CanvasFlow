@@ -1,4 +1,4 @@
-import { DrawState } from "../types";
+import { DrawState } from "../utils/types";
 
 export function handleMouseDown(state: DrawState) {
   state.clicked = true;

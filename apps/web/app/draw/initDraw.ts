@@ -1,17 +1,20 @@
 import { getExistingShapes } from "./network/api";
-import { clearCanvas } from "./render/clearCanvas";
-import { createRectangle } from "./shapes/rectangle";
-import { Shape } from "./types";
-import { getCanvasCoordinates } from "./utils/getCanvasCoordinates";
-import { previewCircle } from "./tools/circleTool";
-import { createCircle } from "./shapes/circle";
 import { socketMessageSender, socketMessageListener } from "./network/socket";
+import { clearCanvas } from "./utils/clearCanvas";
+import { createRectangle } from "./tools/rectangle/createRectangle";
+import { Shape } from "./utils/types";
+import { getCanvasCoordinates } from "./utils/getCanvasCoordinates";
+import { previewCircle } from "./tools/circle/previewCircle";
+import { createCircle } from "./tools/circle/createCircle";
 import { handleMouseDown, handleMouseUp } from "./tools/mouse";
-import { previewRectangle } from "./tools/rectangleTool";
-import { previewLine } from "./tools/lineTool";
-import { createLine } from "./shapes/line";
+import { previewRectangle } from "./tools/rectangle/previewRectangle";
+import { previewLine } from "./tools/line/previewLine";
+import { createLine } from "./tools/line/createLine";
+import { createText } from "./tools/text/createText";
+import { previewPencil } from "./tools/pencil/previewPencil";
+import { createPencil } from "./tools/pencil/createPencil";
 
-type ShapeType = "circle" | "rectangle" | "line" | "pencil" | "none";
+type ShapeType = "circle" | "rectangle" | "line" | "pencil" | "none" | "text";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -35,6 +38,10 @@ export async function initDraw(
     clicked: false,
     startX: 0,
     startY: 0,
+    currentStroke: [] as {
+      x: number;
+      y: number;
+    }[],
   };
 
   canvas.addEventListener("mousedown", (e) => {
@@ -42,6 +49,25 @@ export async function initDraw(
     state.startX = pos.x;
     state.startY = pos.y;
     handleMouseDown(state);
+
+    if (shape.current === "pencil") {
+      state.currentStroke = [];
+
+      state.currentStroke.push({
+        x: pos.x,
+        y: pos.y,
+      });
+    }
+
+    if (shape.current === "text") {
+      const text = prompt("text");
+
+      if (!text) return;
+
+      const textShape = createText(pos.x, pos.y, text);
+
+      socketMessageSender(socket, textShape, roomId);
+    }
   });
 
   canvas.addEventListener("mousemove", (e) => {
@@ -59,6 +85,14 @@ export async function initDraw(
     }
     if (shape.current === "line") {
       previewLine(ctx, state.startX, state.startY, pos.x, pos.y);
+    }
+    if (shape.current === "pencil") {
+      state.currentStroke.push({
+        x: pos.x,
+        y: pos.y,
+      });
+
+      previewPencil(ctx, state.currentStroke);
     }
   });
 
@@ -85,6 +119,11 @@ export async function initDraw(
       const line = createLine(state.startX, state.startY, pos.x, pos.y);
       existingShapes.push(line);
       socketMessageSender(socket, line, roomId);
+    }
+    if (shape.current === "pencil") {
+      const pencil = createPencil(state.currentStroke);
+      existingShapes.push(pencil);
+      socketMessageSender(socket, pencil, roomId);
     }
   });
 }

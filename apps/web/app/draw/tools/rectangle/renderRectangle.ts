@@ -1,4 +1,4 @@
-import { RectangleShape } from "../types";
+import { RectangleShape } from "../../utils/types";
 
 export function renderRectangle(
   ctx: CanvasRenderingContext2D,

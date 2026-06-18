@@ -1,4 +1,4 @@
-import { CircleShape } from "../types";
+import { CircleShape } from "../../utils/types";
 
 export function createCircle(
   startX: number,

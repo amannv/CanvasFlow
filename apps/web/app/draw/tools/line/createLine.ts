@@ -1,4 +1,4 @@
-import { LineShape } from "../types";
+import { LineShape } from "../../utils/types";
 
 export function createLine(
   startX: number,

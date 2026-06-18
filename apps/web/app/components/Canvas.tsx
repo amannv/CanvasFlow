@@ -6,9 +6,10 @@ import {
   Minus,
   PencilLine,
   MousePointer,
+  Type,
 } from "lucide-react";
 
-type ShapeType = "circle" | "rectangle" | "line" | "pencil" | "none";
+type ShapeType = "circle" | "rectangle" | "line" | "pencil" | "none" | "text";
 
 export function Canvas({
   roomId,
@@ -72,6 +73,14 @@ export function Canvas({
             className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110"
           >
             <PencilLine />
+          </div>
+           <div
+            onClick={() => {
+              setShape("text");
+            }}
+            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110"
+          >
+            <Type />
           </div>
           <div
             onClick={() => {

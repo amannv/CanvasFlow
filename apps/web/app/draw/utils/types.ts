@@ -21,8 +21,23 @@ export type LineShape = {
   endY: number;
 }
 
+export type TextShape = {
+  type: "text",
+  x: number,
+  y: number,
+  text: string,
+}
+
 export type DrawState = {
   clicked: boolean;
 };
 
-export type Shape = RectangleShape | CircleShape | LineShape;
+export type PencilShape = {
+  type: "pencil",
+  points: {
+    x: number,
+    y: number,
+  }[];
+};
+
+export type Shape = RectangleShape | CircleShape | LineShape | TextShape | PencilShape;

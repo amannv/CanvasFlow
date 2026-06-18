@@ -1,5 +1,5 @@
-import { Shape } from "../types";
-import { clearCanvas } from "../render/clearCanvas";
+import { Shape } from "../utils/types";
+import { clearCanvas } from "../utils/clearCanvas";
 
 export function socketMessageListener(
   socket: WebSocket,

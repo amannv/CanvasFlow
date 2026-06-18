@@ -1,4 +1,4 @@
-import { RectangleShape } from "../types";
+import { RectangleShape } from "../../utils/types";
 
 export function createRectangle(
   startX: number,
