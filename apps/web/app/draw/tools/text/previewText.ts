@@ -4,6 +4,8 @@ export function previewText(
   y: number,
   text: string,
 ) {
-  ctx.font = "48px serif";
+  ctx.font = "24px Arial";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "black";
   ctx.fillText(text, x, y);
 }

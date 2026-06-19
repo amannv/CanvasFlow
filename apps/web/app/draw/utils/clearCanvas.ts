@@ -4,6 +4,7 @@ import { renderLine } from "../tools/line/renderLine";
 import { renderPencil } from "../tools/pencil/renderPencil";
 import { renderRectangle } from "../tools/rectangle/renderRectangle";
 import { renderText } from "../tools/text/renderText";
+import { renderArrow } from "../tools/arrow/renderArrow";
 
 export function clearCanvas(
   existingShapes: Shape[],
@@ -27,6 +28,9 @@ export function clearCanvas(
     }
     if (shape.type === "pencil") {
       renderPencil(ctx, shape);
+    }
+    if (shape.type === "arrow") {
+      renderArrow(ctx, shape);
     }
   });
 }

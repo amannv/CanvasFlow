@@ -13,14 +13,17 @@ import { createLine } from "./tools/line/createLine";
 import { createText } from "./tools/text/createText";
 import { previewPencil } from "./tools/pencil/previewPencil";
 import { createPencil } from "./tools/pencil/createPencil";
+import { previewArrow } from "./tools/arrow/previewArrow";
+import { createArrow } from "./tools/arrow/createArrow";
 
-type ShapeType = "circle" | "rectangle" | "line" | "pencil" | "none" | "text";
+type ShapeType = "circle" | "rectangle" | "line" | "pencil" | "none" | "text" | "arrow";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
   roomId: string,
   socket: WebSocket,
   shape: React.RefObject<ShapeType>,
+  onTextClick: (x: number, y: number) => void,
 ) {
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -60,13 +63,7 @@ export async function initDraw(
     }
 
     if (shape.current === "text") {
-      const text = prompt("text");
-
-      if (!text) return;
-
-      const textShape = createText(pos.x, pos.y, text);
-
-      socketMessageSender(socket, textShape, roomId);
+      onTextClick(pos.x, pos.y);
     }
   });
 
@@ -91,9 +88,11 @@ export async function initDraw(
         x: pos.x,
         y: pos.y,
       });
-
       previewPencil(ctx, state.currentStroke);
     }
+    if (shape.current === "arrow") {
+      previewArrow(ctx, state.startX, state.startY, pos.x, pos.y);
+    } 
   });
 
   canvas.addEventListener("mouseup", (e) => {
@@ -124,6 +123,11 @@ export async function initDraw(
       const pencil = createPencil(state.currentStroke);
       existingShapes.push(pencil);
       socketMessageSender(socket, pencil, roomId);
+    }
+    if (shape.current === "arrow") {
+      const arrow = createArrow(state.startX, state.startY, pos.x, pos.y);
+      existingShapes.push(arrow);
+      socketMessageSender(socket, arrow, roomId);
     }
   });
 }
