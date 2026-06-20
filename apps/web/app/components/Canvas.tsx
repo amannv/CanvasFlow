@@ -10,7 +10,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { createText } from "../draw/tools/text/createText";
-import { socketMessageSender } from "../draw/network/socket";
+import { createElementSender } from "../draw/network/socket";
 
 type ShapeType =
   | "circle"
@@ -80,7 +80,7 @@ export function Canvas({
                 textValue,
               );
 
-              socketMessageSender(socket, textShape, roomId);
+              createElementSender(socket, textShape, roomId);
 
               setTextEditor(null);
               setTextValue("");

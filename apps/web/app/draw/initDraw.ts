@@ -1,5 +1,9 @@
 import { getExistingShapes } from "./network/api";
-import { socketMessageSender, socketMessageListener } from "./network/socket";
+import {
+  createElementSender,
+  socketMessageListener,
+  updateElementSender,
+} from "./network/socket";
 import { clearCanvas } from "./utils/clearCanvas";
 import { createRectangle } from "./tools/rectangle/createRectangle";
 import { Shape } from "./utils/types";
@@ -15,8 +19,16 @@ import { previewPencil } from "./tools/pencil/previewPencil";
 import { createPencil } from "./tools/pencil/createPencil";
 import { previewArrow } from "./tools/arrow/previewArrow";
 import { createArrow } from "./tools/arrow/createArrow";
+import { isPointInsideRectangle } from "./tools/rectangle/isPointInsideRectangle";
 
-type ShapeType = "circle" | "rectangle" | "line" | "pencil" | "none" | "text" | "arrow";
+type ShapeType =
+  | "circle"
+  | "rectangle"
+  | "line"
+  | "pencil"
+  | "none"
+  | "text"
+  | "arrow";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -33,10 +45,6 @@ export async function initDraw(
 
   let existingShapes: Shape[] = await getExistingShapes(roomId);
 
-  socketMessageListener(socket, existingShapes, canvas, ctx);
-
-  clearCanvas(existingShapes, canvas, ctx);
-
   const state = {
     clicked: false,
     startX: 0,
@@ -45,9 +53,25 @@ export async function initDraw(
       x: number;
       y: number;
     }[],
+    selectedShapeId: null as number | null,
+
+    isDraggingShape: false,
+    dragOffsetX: 0,
+    dragOffsetY: 0,
   };
 
+  socketMessageListener(
+    socket,
+    existingShapes,
+    canvas,
+    ctx,
+    state.selectedShapeId,
+  );
+
+  clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
+
   canvas.addEventListener("mousedown", (e) => {
+    console.log(existingShapes);
     const pos = getCanvasCoordinates(e, canvas);
     state.startX = pos.x;
     state.startY = pos.y;
@@ -65,12 +89,31 @@ export async function initDraw(
     if (shape.current === "text") {
       onTextClick(pos.x, pos.y);
     }
+
+    for (let i = 0; i < existingShapes.length; i++) {
+      const shape = existingShapes[i];
+
+      if (!shape?.id) continue;
+
+      if (shape.type !== "rect") continue;
+
+      if (isPointInsideRectangle(pos.x, pos.y, shape)) {
+        state.selectedShapeId = shape.id;
+        state.isDraggingShape = true;
+
+        state.dragOffsetX = pos.x - shape.x;
+        state.dragOffsetY = pos.y - shape.y;
+
+        clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
+        break;
+      }
+    }
   });
 
   canvas.addEventListener("mousemove", (e) => {
     if (!state.clicked) return;
 
-    clearCanvas(existingShapes, canvas, ctx);
+    clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
 
     const pos = getCanvasCoordinates(e, canvas);
 
@@ -92,12 +135,38 @@ export async function initDraw(
     }
     if (shape.current === "arrow") {
       previewArrow(ctx, state.startX, state.startY, pos.x, pos.y);
-    } 
+    }
+
+    if (state.isDraggingShape && state.selectedShapeId) {
+      const selectedShape = existingShapes.find(
+        (shape) => shape.id === state.selectedShapeId,
+      );
+
+      if (selectedShape && selectedShape.type === "rect") {
+        selectedShape.x = pos.x - state.dragOffsetX;
+        selectedShape.y = pos.y - state.dragOffsetY;
+      }
+
+      clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
+      return;
+    }
   });
 
   canvas.addEventListener("mouseup", (e) => {
     handleMouseUp(state);
     const pos = getCanvasCoordinates(e, canvas);
+
+    if (state.isDraggingShape && state.selectedShapeId) {
+      const selectedShape = existingShapes.find(
+        (shape) => shape.id === state.selectedShapeId,
+      );
+
+      if (selectedShape?.id) {
+        updateElementSender(selectedShape.id, socket, selectedShape, roomId);
+      }
+      state.isDraggingShape = false;
+      return;
+    }
 
     if (shape.current === "rectangle") {
       const rectangle = createRectangle(
@@ -107,27 +176,27 @@ export async function initDraw(
         pos.y,
       );
       existingShapes.push(rectangle);
-      socketMessageSender(socket, rectangle, roomId);
+      createElementSender(socket, rectangle, roomId);
     }
     if (shape.current === "circle") {
       const circle = createCircle(state.startX, state.startY, pos.x, pos.y);
       existingShapes.push(circle);
-      socketMessageSender(socket, circle, roomId);
+      createElementSender(socket, circle, roomId);
     }
     if (shape.current === "line") {
       const line = createLine(state.startX, state.startY, pos.x, pos.y);
       existingShapes.push(line);
-      socketMessageSender(socket, line, roomId);
+      createElementSender(socket, line, roomId);
     }
     if (shape.current === "pencil") {
       const pencil = createPencil(state.currentStroke);
       existingShapes.push(pencil);
-      socketMessageSender(socket, pencil, roomId);
+      createElementSender(socket, pencil, roomId);
     }
     if (shape.current === "arrow") {
       const arrow = createArrow(state.startX, state.startY, pos.x, pos.y);
       existingShapes.push(arrow);
-      socketMessageSender(socket, arrow, roomId);
+      createElementSender(socket, arrow, roomId);
     }
   });
 }

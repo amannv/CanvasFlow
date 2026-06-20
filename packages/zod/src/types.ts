@@ -44,7 +44,7 @@ export const updateElementSchema = z.object({
   type: z.literal("update_element"),
   payload: z.object({
     elementId: z.number(),
-    data: z.object(),
+    data: z.any(),
     roomId: z.number(),
   }),
 });

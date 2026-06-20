@@ -5,9 +5,10 @@ export async function getExistingShapes(roomId: string) {
   const response = await axios.get(`${BACKEND_URL}/elements/${roomId}`);
   const data = response.data.elements;
   const shapes = data.map((s: any) => ({
-    type: s.type,
+    id: s.id,
     ...s.data,
   }));
 
+  
   return shapes;
 }

@@ -10,12 +10,13 @@ export function clearCanvas(
   existingShapes: Shape[],
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
+  selectedShapeId: number | null,
 ) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   existingShapes.map((shape) => {
     if (shape.type === "rect") {
-      renderRectangle(ctx, shape);
+      renderRectangle(ctx, shape, selectedShapeId);
     }
     if (shape.type === "circle") {
       renderCircle(ctx, shape);

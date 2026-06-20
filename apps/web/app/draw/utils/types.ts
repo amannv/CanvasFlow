@@ -1,4 +1,5 @@
 export type RectangleShape = {
+  id?: number;
   type: "rect";
   x: number;
   y: number;
@@ -7,6 +8,7 @@ export type RectangleShape = {
 };
 
 export type CircleShape = {
+  id?: number;
   type: "circle";
   centreX: number;
   centreY: number;
@@ -14,6 +16,7 @@ export type CircleShape = {
 };
 
 export type LineShape = {
+  id?: number;
   type: "line";
   startX: number;
   startY: number;
@@ -22,6 +25,7 @@ export type LineShape = {
 }
 
 export type TextShape = {
+  id?: number;
   type: "text",
   x: number,
   y: number,
@@ -33,6 +37,7 @@ export type DrawState = {
 };
 
 export type PencilShape = {
+  id?: number;
   type: "pencil",
   points: {
     x: number,
@@ -41,6 +46,7 @@ export type PencilShape = {
 };
 
 export type ArrowType = {
+  id?: number;
   type: "arrow",
   x1: number,
   y1: number,

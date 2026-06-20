@@ -117,7 +117,6 @@ wss.on("connection", (socket, request) => {
       }
     }
 
-  
     if (parsedMessage.type === "create_element") {
       const result = createElementSchema.safeParse(parsedMessage);
 
@@ -154,7 +153,6 @@ wss.on("connection", (socket, request) => {
           data: shape,
         },
       });
-
 
       const sentMessage = {
         messageId: crypto.randomUUID(),
@@ -206,6 +204,9 @@ wss.on("connection", (socket, request) => {
           data: data,
         },
       });
+
+      console.log("DATA RECEIVED:", data);
+      console.log("DATA STORED:", updateElement.data);
 
       if (!updateElement) {
         console.error("Error while updating element!");
