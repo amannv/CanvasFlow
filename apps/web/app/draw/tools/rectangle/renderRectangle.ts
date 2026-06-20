@@ -28,12 +28,13 @@ export function renderRectangle(
     ctx.setLineDash([5, 5]);
 
     ctx.strokeRect(
-      shape.x - 5,
-      shape.y - 5,
-      shape.width + 10,
-      shape.height + 10
+      shape.x - 10,
+      shape.y - 10,
+      shape.width + 20,
+      shape.height + 20
     );
   }
 
+  ctx.strokeStyle = "black";
   ctx.restore();
 }

@@ -37,6 +37,7 @@ export async function initDraw(
   shape: React.RefObject<ShapeType>,
   onTextClick: (x: number, y: number) => void,
 ) {
+  console.log("INIT DRAW");
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
   if (!ctx) {
@@ -44,6 +45,7 @@ export async function initDraw(
   }
 
   let existingShapes: Shape[] = await getExistingShapes(roomId);
+  console.log("FETCHED SHAPES", existingShapes);
 
   const state = {
     clicked: false,
@@ -90,6 +92,8 @@ export async function initDraw(
       onTextClick(pos.x, pos.y);
     }
 
+    console.log("SHAPES BEFORE HIT TEST");
+    console.table(existingShapes);
     for (let i = 0; i < existingShapes.length; i++) {
       const shape = existingShapes[i];
 
@@ -153,6 +157,7 @@ export async function initDraw(
   });
 
   canvas.addEventListener("mouseup", (e) => {
+  console.log("MOUSEUP FIRED");
     handleMouseUp(state);
     const pos = getCanvasCoordinates(e, canvas);
 
@@ -175,7 +180,8 @@ export async function initDraw(
         pos.x,
         pos.y,
       );
-      existingShapes.push(rectangle);
+
+      console.log("CREATED RECT", rectangle);
       createElementSender(socket, rectangle, roomId);
     }
     if (shape.current === "circle") {

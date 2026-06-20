@@ -118,6 +118,7 @@ wss.on("connection", (socket, request) => {
     }
 
     if (parsedMessage.type === "create_element") {
+      console.log("WS CREATE RECEIVED", parsedMessage.shape);
       const result = createElementSchema.safeParse(parsedMessage);
 
       if (!result.success) {
@@ -204,9 +205,6 @@ wss.on("connection", (socket, request) => {
           data: data,
         },
       });
-
-      console.log("DATA RECEIVED:", data);
-      console.log("DATA STORED:", updateElement.data);
 
       if (!updateElement) {
         console.error("Error while updating element!");
