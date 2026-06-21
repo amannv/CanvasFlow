@@ -5,7 +5,6 @@ export function renderRectangle(
   shape: RectangleShape,
   selectedShapeId: number | null,
 ) {
-  console.log("RENDER", shape.id, selectedShapeId);
 
   ctx.save();
 
@@ -21,9 +20,8 @@ export function renderRectangle(
   );
 
   if (shape.id === selectedShapeId) {
-    console.log("DRAWING SELECTION");
 
-    ctx.strokeStyle = "blue";
+    ctx.strokeStyle = "black";
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 5]);
 
@@ -35,6 +33,5 @@ export function renderRectangle(
     );
   }
 
-  ctx.strokeStyle = "black";
   ctx.restore();
 }

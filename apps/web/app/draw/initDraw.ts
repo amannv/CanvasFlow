@@ -14,21 +14,12 @@ import { handleMouseDown, handleMouseUp } from "./tools/mouse";
 import { previewRectangle } from "./tools/rectangle/previewRectangle";
 import { previewLine } from "./tools/line/previewLine";
 import { createLine } from "./tools/line/createLine";
-import { createText } from "./tools/text/createText";
 import { previewPencil } from "./tools/pencil/previewPencil";
 import { createPencil } from "./tools/pencil/createPencil";
 import { previewArrow } from "./tools/arrow/previewArrow";
 import { createArrow } from "./tools/arrow/createArrow";
 import { isPointInsideRectangle } from "./tools/rectangle/isPointInsideRectangle";
-
-type ShapeType =
-  | "circle"
-  | "rectangle"
-  | "line"
-  | "pencil"
-  | "none"
-  | "text"
-  | "arrow";
+import { ShapeType } from "./utils/types";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -45,7 +36,6 @@ export async function initDraw(
   }
 
   let existingShapes: Shape[] = await getExistingShapes(roomId);
-  console.log("FETCHED SHAPES", existingShapes);
 
   const state = {
     clicked: false,
@@ -72,8 +62,7 @@ export async function initDraw(
 
   clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
 
-  canvas.addEventListener("mousedown", (e) => {
-    console.log(existingShapes);
+  const mouseDownHandler = (e: MouseEvent) => {
     const pos = getCanvasCoordinates(e, canvas);
     state.startX = pos.x;
     state.startY = pos.y;
@@ -92,117 +81,134 @@ export async function initDraw(
       onTextClick(pos.x, pos.y);
     }
 
-    console.log("SHAPES BEFORE HIT TEST");
-    console.table(existingShapes);
-    for (let i = 0; i < existingShapes.length; i++) {
-      const shape = existingShapes[i];
+    if (shape.current === "pointer") {
+      let clickedOnShape = false;
+      for (let i = existingShapes.length; i >= 0; i--) {
+        const shape = existingShapes[i];
 
-      if (!shape?.id) continue;
+        if (!shape?.id || shape.type !== "rect") continue;
 
-      if (shape.type !== "rect") continue;
+        if (isPointInsideRectangle(pos.x, pos.y, shape)) {
+          state.selectedShapeId = shape.id as number;
+          state.isDraggingShape = true;
 
-      if (isPointInsideRectangle(pos.x, pos.y, shape)) {
-        state.selectedShapeId = shape.id;
-        state.isDraggingShape = true;
-
-        state.dragOffsetX = pos.x - shape.x;
-        state.dragOffsetY = pos.y - shape.y;
-
-        clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
-        break;
+          state.dragOffsetX = pos.x - shape.x;
+          state.dragOffsetY = pos.y - shape.y;
+          clickedOnShape = true;
+          break;
+        }
       }
+      if (!clickedOnShape) {
+        state.selectedShapeId = null;
+      }
+      clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
     }
-  });
+  };
 
-  canvas.addEventListener("mousemove", (e) => {
+  const mouseMoveHandler = (e: MouseEvent) => {
+    const pos = getCanvasCoordinates(e, canvas);
+
+    if (shape.current === "pointer") {
+      if (state.isDraggingShape && state.selectedShapeId) {
+        const selectedShape = existingShapes.find(
+          (shape) => shape.id === state.selectedShapeId,
+        );
+
+        if (selectedShape && selectedShape.type === "rect") {
+          selectedShape.x = pos.x - state.dragOffsetX;
+          selectedShape.y = pos.y - state.dragOffsetY;
+        }
+        clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
+      }
+      return;
+    }
+
     if (!state.clicked) return;
 
     clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
 
-    const pos = getCanvasCoordinates(e, canvas);
+    switch (shape.current) {
+      case "rectangle":
+        previewRectangle(ctx, state.startX, state.startY, pos.x, pos.y);
+        break;
+      case "circle":
+        previewCircle(ctx, state.startX, state.startY, pos.x, pos.y);
+        break;
+      case "line":
+        previewLine(ctx, state.startX, state.startY, pos.x, pos.y);
+        break;
+      case "pencil":
+        state.currentStroke.push({ x: pos.x, y: pos.y });
+        previewPencil(ctx, state.currentStroke);
+        break;
+      case "arrow":
+        previewArrow(ctx, state.startX, state.startY, pos.x, pos.y);
+        break;
+    }
+  };
 
-    if (shape.current === "rectangle") {
-      previewRectangle(ctx, state.startX, state.startY, pos.x, pos.y);
-    }
-    if (shape.current === "circle") {
-      previewCircle(ctx, state.startX, state.startY, pos.x, pos.y);
-    }
-    if (shape.current === "line") {
-      previewLine(ctx, state.startX, state.startY, pos.x, pos.y);
-    }
-    if (shape.current === "pencil") {
-      state.currentStroke.push({
-        x: pos.x,
-        y: pos.y,
-      });
-      previewPencil(ctx, state.currentStroke);
-    }
-    if (shape.current === "arrow") {
-      previewArrow(ctx, state.startX, state.startY, pos.x, pos.y);
-    }
-
-    if (state.isDraggingShape && state.selectedShapeId) {
-      const selectedShape = existingShapes.find(
-        (shape) => shape.id === state.selectedShapeId,
-      );
-
-      if (selectedShape && selectedShape.type === "rect") {
-        selectedShape.x = pos.x - state.dragOffsetX;
-        selectedShape.y = pos.y - state.dragOffsetY;
-      }
-
-      clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
-      return;
-    }
-  });
-
-  canvas.addEventListener("mouseup", (e) => {
-  console.log("MOUSEUP FIRED");
+ const mouseUpHandler = (e: MouseEvent) => {
     handleMouseUp(state);
     const pos = getCanvasCoordinates(e, canvas);
 
-    if (state.isDraggingShape && state.selectedShapeId) {
-      const selectedShape = existingShapes.find(
-        (shape) => shape.id === state.selectedShapeId,
-      );
+    if (shape.current === "pointer") {
+      if (state.isDraggingShape && state.selectedShapeId) {
+        const selectedShape = existingShapes.find(
+          (shape) => shape.id === state.selectedShapeId,
+        );
 
-      if (selectedShape?.id) {
-        updateElementSender(selectedShape.id, socket, selectedShape, roomId);
+        if (selectedShape?.id) {
+          updateElementSender(selectedShape.id, socket, selectedShape, roomId);
+        }
+        state.isDraggingShape = false;
       }
-      state.isDraggingShape = false;
       return;
     }
 
-    if (shape.current === "rectangle") {
-      const rectangle = createRectangle(
-        state.startX,
-        state.startY,
-        pos.x,
-        pos.y,
-      );
+    let newShape: Shape | null = null;
 
-      console.log("CREATED RECT", rectangle);
-      createElementSender(socket, rectangle, roomId);
+    switch (shape.current) {
+      case "rectangle":
+        newShape = createRectangle(state.startX, state.startY, pos.x, pos.y);
+        break;
+      case "circle":
+        newShape = createCircle(state.startX, state.startY, pos.x, pos.y);
+        break;
+      case "line":
+        newShape = createLine(state.startX, state.startY, pos.x, pos.y);
+        break;
+      case "pencil":
+        newShape = createPencil(state.currentStroke);
+        break;
+      case "arrow":
+        newShape = createArrow(state.startX, state.startY, pos.x, pos.y);
+        break;
     }
-    if (shape.current === "circle") {
-      const circle = createCircle(state.startX, state.startY, pos.x, pos.y);
-      existingShapes.push(circle);
-      createElementSender(socket, circle, roomId);
+    
+    if (newShape) {
+   
+      const temporaryClientId = `client-${Date.now()}`;
+      newShape.id = temporaryClientId;
+
+    
+      existingShapes.push(newShape);
+      clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
+
+     
+      const { id, ...cleanShapeData } = newShape;
+
+
+      createElementSender(socket, cleanShapeData, roomId);
     }
-    if (shape.current === "line") {
-      const line = createLine(state.startX, state.startY, pos.x, pos.y);
-      existingShapes.push(line);
-      createElementSender(socket, line, roomId);
-    }
-    if (shape.current === "pencil") {
-      const pencil = createPencil(state.currentStroke);
-      existingShapes.push(pencil);
-      createElementSender(socket, pencil, roomId);
-    }
-    if (shape.current === "arrow") {
-      const arrow = createArrow(state.startX, state.startY, pos.x, pos.y);
-      existingShapes.push(arrow);
-      createElementSender(socket, arrow, roomId);
-    }
-  });
+  };
+
+  canvas.addEventListener("mousedown", mouseDownHandler);
+  canvas.addEventListener("mousemove", mouseMoveHandler);
+  canvas.addEventListener("mouseup", mouseUpHandler);
+
+  return () => {
+    canvas.removeEventListener("mousedown", mouseDownHandler);
+    canvas.removeEventListener("mousemove", mouseMoveHandler);
+    canvas.removeEventListener("mouseup", mouseUpHandler);
+  };
 }

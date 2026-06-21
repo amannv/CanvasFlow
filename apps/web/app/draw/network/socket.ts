@@ -17,8 +17,6 @@ export function socketMessageListener(
     }
 
     if (parsedMessage.type === "update_element") {
-      console.log("UPDATE RECEIVED");
-      console.log(parsedMessage.shape);
       const index = existingShapes.findIndex(
         (shape) => shape.id === parsedMessage.elementId,
       );
@@ -37,6 +35,8 @@ export function createElementSender(
   shape: Shape,
   roomId: string,
 ) {
+  if (socket.readyState !== WebSocket.OPEN) return;
+
   socket.send(
     JSON.stringify({
       type: "create_element",
@@ -49,12 +49,13 @@ export function createElementSender(
 }
 
 export function updateElementSender(
-  id: number,
+  id: number | string,
   socket: WebSocket,
   shape: Shape,
   roomId: string,
 ) {
-  console.log("websocket update sent");
+  if (socket.readyState !== WebSocket.OPEN) return;
+
   socket.send(
     JSON.stringify({
       type: "update_element",

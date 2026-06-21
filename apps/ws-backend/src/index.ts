@@ -122,6 +122,7 @@ wss.on("connection", (socket, request) => {
       const result = createElementSchema.safeParse(parsedMessage);
 
       if (!result.success) {
+        console.error("Zod Validation Failed for create_element:", result.error);
         return;
       }
 

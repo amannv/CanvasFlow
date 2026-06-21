@@ -1,5 +1,5 @@
 export type RectangleShape = {
-  id?: number;
+  id?: number | string;
   type: "rect";
   x: number;
   y: number;
@@ -53,5 +53,15 @@ export type ArrowType = {
   x2: number,
   y2: number,
 }
+
+export type ShapeType =
+  | "circle"
+  | "rectangle"
+  | "line"
+  | "pencil"
+  | "none"
+  | "text"
+  | "arrow"
+  | "pointer";
 
 export type Shape = RectangleShape | CircleShape | LineShape | TextShape | PencilShape | ArrowType;

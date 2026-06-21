@@ -11,15 +11,8 @@ import {
 } from "lucide-react";
 import { createText } from "../draw/tools/text/createText";
 import { createElementSender } from "../draw/network/socket";
+import { ShapeType } from "../draw/utils/types";
 
-type ShapeType =
-  | "circle"
-  | "rectangle"
-  | "line"
-  | "pencil"
-  | "none"
-  | "text"
-  | "arrow";
 
 export function Canvas({
   roomId,
@@ -42,17 +35,20 @@ export function Canvas({
   }, [shape]);
 
   useEffect(() => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
 
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-      initDraw(canvas, roomId, socket, shapeRef, (x, y) => {
-        setTextEditor({ x, y });
-      });
+    const cleanup = initDraw(canvas, roomId, socket, shapeRef, (x, y) => {
+      setTextEditor({ x, y });
+    });
+
+    return () => {
+      cleanup?.then(fn => fn?.());
     }
-  }, [canvasRef]);
+  }, []);
 
   return (
     <div className="relative">
@@ -140,7 +136,7 @@ export function Canvas({
           </div>
           <div
             onClick={() => {
-              setShape("none");
+              setShape("pointer");
             }}
             className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110 "
           >
