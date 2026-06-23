@@ -19,7 +19,7 @@ export function clearCanvas(
       renderRectangle(ctx, shape, selectedShapeId);
     }
     if (shape.type === "circle") {
-      renderCircle(ctx, shape);
+      renderCircle(ctx, shape, selectedShapeId);
     }
     if (shape.type === "line") {
       renderLine(ctx, shape);

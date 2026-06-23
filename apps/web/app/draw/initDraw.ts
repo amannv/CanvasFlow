@@ -21,6 +21,7 @@ import { createArrow } from "./tools/arrow/createArrow";
 import { isPointInsideRectangle } from "./tools/rectangle/isPointInsideRectangle";
 import { ShapeType } from "./utils/types";
 import { RefObject } from "react";
+import { isPointInsideCircle } from "./tools/circle/isPointInsideCircle";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -83,27 +84,31 @@ export async function initDraw(
 
     if (shape.current === "pointer") {
       let clickedOnShape = false;
-      console.log("ALL SHAPES", existingShapes);
       for (let i = existingShapes.length - 1; i >= 0; i--) {
         const shape = existingShapes[i];
 
-        console.log("CHECKING", shape);
+        if (!shape?.id) continue;
 
-        if (!shape?.id || shape.type !== "rect") {
-          console.log("SKIPPED");
-          continue;
-        }
-
-        console.log("HAS ID", shape.id);
-
-        if (isPointInsideRectangle(pos.x, pos.y, shape)) {
-          console.log("SELECTED", shape.id);
+        switch (shape.type) {
+          case "rect":
+          if (isPointInsideRectangle(pos.x, pos.y, shape)) {
           state.selectedShapeId = shape.id as number;
           state.isDraggingShape = true;
 
           state.dragOffsetX = pos.x - shape.x;
           state.dragOffsetY = pos.y - shape.y;
           clickedOnShape = true;
+          }
+          break;
+          case "circle":
+          if (isPointInsideCircle(pos.x, pos.y, shape)) {
+          state.selectedShapeId = shape.id as number;
+          state.isDraggingShape = true;
+
+          state.dragOffsetX = pos.x - shape.centreX;
+          state.dragOffsetY = pos.y - shape.centreY;
+          clickedOnShape = true;
+          }
           break;
         }
       }
@@ -126,6 +131,11 @@ export async function initDraw(
         if (selectedShape && selectedShape.type === "rect") {
           selectedShape.x = pos.x - state.dragOffsetX;
           selectedShape.y = pos.y - state.dragOffsetY;
+        }
+
+        if (selectedShape && selectedShape.type === "circle") {
+          selectedShape.centreX = pos.x - state.dragOffsetX;
+          selectedShape.centreY = pos.y - state.dragOffsetY;
         }
         clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
       }
@@ -157,7 +167,6 @@ export async function initDraw(
   };
 
   const mouseUpHandler = (e: MouseEvent) => {
-    console.log("MOUSE UP");
     handleMouseUp(state);
     const pos = getCanvasCoordinates(e, canvas);
 
@@ -203,7 +212,6 @@ export async function initDraw(
     }
 
     if (newShape) {
-      console.log("NEW SHAPE", newShape);
       createElementSender(socket, newShape, roomId);
       console.log(existingShapes);
     }
