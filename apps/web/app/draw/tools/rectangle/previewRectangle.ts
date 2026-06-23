@@ -8,6 +8,7 @@ export function previewRectangle(
   const width = currentX - startX;
   const height = currentY - startY;
 
+  ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
   ctx.strokeRect(startX, startY, width, height);
 }

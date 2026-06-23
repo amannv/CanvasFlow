@@ -8,6 +8,7 @@ export function previewLine(
   ctx.beginPath();
   ctx.moveTo(startX, startY);
   ctx.lineTo(currentX, currentY);
+  ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
   ctx.stroke();
 }

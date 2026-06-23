@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -24,4 +26,9 @@
   .imgDark {
     display: unset;
   }
+}
+
+@font-face {
+  font-family: "Sniglet";
+  src: url("/fonts/Sniglet-Regular.ttf") format("truetype");
 }

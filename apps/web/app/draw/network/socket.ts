@@ -9,7 +9,10 @@ export function socketMessageListener(
   selectedShapeId: number | null,
 ) {
   socket.onmessage = (event) => {
+    if (socket.readyState !== WebSocket.OPEN) return;
+
     const parsedMessage = JSON.parse(event.data);
+
 
     if (parsedMessage.type === "create_element") {
       existingShapes.push(parsedMessage.shape);
@@ -37,6 +40,7 @@ export function createElementSender(
 ) {
   if (socket.readyState !== WebSocket.OPEN) return;
 
+  console.log("SENDING SHAPE");
   socket.send(
     JSON.stringify({
       type: "create_element",

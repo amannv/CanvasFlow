@@ -7,10 +7,8 @@ export function renderRectangle(
 ) {
 
   ctx.save();
-
+  ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
-  ctx.lineWidth = 1;
-  ctx.setLineDash([]);
 
   ctx.strokeRect(
     shape.x,
@@ -21,15 +19,14 @@ export function renderRectangle(
 
   if (shape.id === selectedShapeId) {
 
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = "blue";
     ctx.setLineDash([5, 5]);
 
     ctx.strokeRect(
-      shape.x - 10,
-      shape.y - 10,
-      shape.width + 20,
-      shape.height + 20
+      shape.x - 5,
+      shape.y - 5,
+      shape.width + 10,
+      shape.height + 10
     );
   }
 

@@ -46,6 +46,7 @@ export function Canvas({
     });
 
     return () => {
+      console.log("cleanup");
       cleanup?.then(fn => fn?.());
     }
   }, []);
@@ -75,9 +76,7 @@ export function Canvas({
                 textEditor.y,
                 textValue,
               );
-
               createElementSender(socket, textShape, roomId);
-
               setTextEditor(null);
               setTextValue("");
             }

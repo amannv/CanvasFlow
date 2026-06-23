@@ -55,13 +55,13 @@ export type ArrowType = {
 }
 
 export type ShapeType =
-  | "circle"
   | "rectangle"
   | "line"
   | "pencil"
-  | "none"
   | "text"
   | "arrow"
-  | "pointer";
+  | "pointer"
+  | "circle"
+  | "none";
 
 export type Shape = RectangleShape | CircleShape | LineShape | TextShape | PencilShape | ArrowType;

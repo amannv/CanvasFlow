@@ -18,6 +18,7 @@ export function previewPencil(
     ctx.lineTo(point.x, point.y);
   }
 
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "black";
   ctx.stroke();
 }

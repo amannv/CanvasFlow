@@ -118,11 +118,13 @@ wss.on("connection", (socket, request) => {
     }
 
     if (parsedMessage.type === "create_element") {
-      console.log("WS CREATE RECEIVED", parsedMessage.shape);
       const result = createElementSchema.safeParse(parsedMessage);
 
       if (!result.success) {
-        console.error("Zod Validation Failed for create_element:", result.error);
+        console.error(
+          "Zod Validation Failed for create_element:",
+          result.error,
+        );
         return;
       }
 
@@ -161,7 +163,10 @@ wss.on("connection", (socket, request) => {
         elementId: shapeCreated.id,
         type: "create_element",
         userId: shapeCreated.userId,
-        shape: shapeCreated.data,
+        shape: {
+          ...(shapeCreated.data as object),
+          id: shapeCreated.id,
+        },
         roomId: shapeCreated.roomId,
       };
 
@@ -216,9 +221,12 @@ wss.on("connection", (socket, request) => {
         messageId: crypto.randomUUID(),
         elementId: updateElement.id,
         type: "update_element",
-        shape: updateElement.data,
         roomId: updateElement.roomId,
         userId: updateElement.userId,
+        shape: {
+          ...(updateElement.data as object),
+          id: updateElement.id,
+        },
       };
 
       sockets.forEach((socket) => {

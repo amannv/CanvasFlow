@@ -20,15 +20,15 @@ import { previewArrow } from "./tools/arrow/previewArrow";
 import { createArrow } from "./tools/arrow/createArrow";
 import { isPointInsideRectangle } from "./tools/rectangle/isPointInsideRectangle";
 import { ShapeType } from "./utils/types";
+import { RefObject } from "react";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
   roomId: string,
   socket: WebSocket,
-  shape: React.RefObject<ShapeType>,
+  shape: RefObject<ShapeType>,
   onTextClick: (x: number, y: number) => void,
 ) {
-  console.log("INIT DRAW");
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
   if (!ctx) {
@@ -83,12 +83,21 @@ export async function initDraw(
 
     if (shape.current === "pointer") {
       let clickedOnShape = false;
-      for (let i = existingShapes.length; i >= 0; i--) {
+      console.log("ALL SHAPES", existingShapes);
+      for (let i = existingShapes.length - 1; i >= 0; i--) {
         const shape = existingShapes[i];
 
-        if (!shape?.id || shape.type !== "rect") continue;
+        console.log("CHECKING", shape);
+
+        if (!shape?.id || shape.type !== "rect") {
+          console.log("SKIPPED");
+          continue;
+        }
+
+        console.log("HAS ID", shape.id);
 
         if (isPointInsideRectangle(pos.x, pos.y, shape)) {
+          console.log("SELECTED", shape.id);
           state.selectedShapeId = shape.id as number;
           state.isDraggingShape = true;
 
@@ -147,7 +156,8 @@ export async function initDraw(
     }
   };
 
- const mouseUpHandler = (e: MouseEvent) => {
+  const mouseUpHandler = (e: MouseEvent) => {
+    console.log("MOUSE UP");
     handleMouseUp(state);
     const pos = getCanvasCoordinates(e, canvas);
 
@@ -162,6 +172,13 @@ export async function initDraw(
         }
         state.isDraggingShape = false;
       }
+      return;
+    }
+
+    const isClick =
+      Math.abs(pos.x - state.startX) < 2 && Math.abs(pos.y - state.startY) < 2;
+
+    if (isClick) {
       return;
     }
 
@@ -184,21 +201,11 @@ export async function initDraw(
         newShape = createArrow(state.startX, state.startY, pos.x, pos.y);
         break;
     }
-    
+
     if (newShape) {
-   
-      const temporaryClientId = `client-${Date.now()}`;
-      newShape.id = temporaryClientId;
-
-    
-      existingShapes.push(newShape);
-      clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
-
-     
-      const { id, ...cleanShapeData } = newShape;
-
-
-      createElementSender(socket, cleanShapeData, roomId);
+      console.log("NEW SHAPE", newShape);
+      createElementSender(socket, newShape, roomId);
+      console.log(existingShapes);
     }
   };
 

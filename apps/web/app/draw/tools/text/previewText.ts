@@ -4,7 +4,7 @@ export function previewText(
   y: number,
   text: string,
 ) {
-  ctx.font = "24px Arial";
+  ctx.font = "24px Sniglet";
   ctx.textBaseline = "top";
   ctx.fillStyle = "black";
   ctx.fillText(text, x, y);
