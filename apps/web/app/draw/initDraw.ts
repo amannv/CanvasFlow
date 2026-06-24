@@ -25,6 +25,7 @@ import { isPointInsideCircle } from "./tools/circle/isPointInsideCircle";
 import { isPointInsideLine } from "./tools/line/isPointOnLine";
 import { isPointOnArrow } from "./tools/arrow/isPointOnArrow";
 import { isPointOnPencil } from "./tools/pencil/isPointOnPencil";
+import { isPointOnText } from "./tools/text/isPointOnText";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -157,6 +158,14 @@ export async function initDraw(
             clickedOnShape = true;
           }
           break;
+          case "text":
+          if (isPointOnText(ctx, pos.x, pos.y, shape)) {
+            state.dragOffsetX = pos.x - shape.x;
+            state.dragOffsetY = pos.y - shape.y;
+            state.selectedShapeId = shape.id;
+            state.isDraggingShape = true;
+            clickedOnShape = true;
+          }
         }
       }
       if (!clickedOnShape) {
@@ -215,6 +224,10 @@ export async function initDraw(
 
           state.dragOffsetX = pos.x;
           state.dragOffsetY = pos.y;
+        }
+        if (selectedShape && selectedShape.type === "text") {
+          selectedShape.x = pos.x - state.dragOffsetX;
+          selectedShape.y = pos.y - state.dragOffsetY;
         }
         clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
       }

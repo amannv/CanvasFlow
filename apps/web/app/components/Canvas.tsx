@@ -58,13 +58,15 @@ export function Canvas({
         <textarea
           autoFocus
           value={textValue}
-          onChange={(e) => setTextValue(e.target.value)}
+          onChange={(e) => {
+            setTextValue(e.target.value);
+          }}
           className="absolute z-50 bg-transparent outline-none resize-none"
           style={{
             left: textEditor.x,
             top: textEditor.y,
             fontSize: 24,
-            fontFamily: "Arial",
+            fontFamily: "Sniglet",
             color: "#000",
           }}
           onKeyDown={(e) => {
