@@ -1,6 +1,13 @@
 import { ArrowType } from "../../utils/types";
 
-export function renderArrow(ctx: CanvasRenderingContext2D, shape: ArrowType) {
+export function renderArrow(
+  ctx: CanvasRenderingContext2D, 
+  shape: ArrowType,
+  selectedShapeId: number | null
+) {
+
+  ctx.save();
+
   const headlen = 16;
 
   const dx = shape.x2 - shape.x1;
@@ -28,4 +35,17 @@ export function renderArrow(ctx: CanvasRenderingContext2D, shape: ArrowType) {
   ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
   ctx.stroke();
+
+  if (selectedShapeId === shape.id) {
+    ctx.beginPath();
+    ctx.arc(shape.x1, shape.y1, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "blue";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(shape.x2, shape.y2, 5, 0, Math.PI * 2); 
+    ctx.fill();
+  }
+
+  ctx.restore();
 }

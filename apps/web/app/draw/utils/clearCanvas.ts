@@ -22,7 +22,7 @@ export function clearCanvas(
       renderCircle(ctx, shape, selectedShapeId);
     }
     if (shape.type === "line") {
-      renderLine(ctx, shape);
+      renderLine(ctx, shape, selectedShapeId);
     }
     if (shape.type === "text") {
       renderText(ctx, shape);
@@ -31,7 +31,7 @@ export function clearCanvas(
       renderPencil(ctx, shape);
     }
     if (shape.type === "arrow") {
-      renderArrow(ctx, shape);
+      renderArrow(ctx, shape, selectedShapeId);
     }
   });
 }

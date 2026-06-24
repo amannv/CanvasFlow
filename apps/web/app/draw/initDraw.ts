@@ -22,6 +22,9 @@ import { isPointInsideRectangle } from "./tools/rectangle/isPointInsideRectangle
 import { ShapeType } from "./utils/types";
 import { RefObject } from "react";
 import { isPointInsideCircle } from "./tools/circle/isPointInsideCircle";
+import { isPointInsideLine } from "./tools/line/isPointOnLine";
+import { isPointOnArrow } from "./tools/arrow/isPointOnArrow";
+import { stat } from "fs";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -110,6 +113,40 @@ export async function initDraw(
           clickedOnShape = true;
           }
           break;
+          case "line":
+          if (isPointInsideLine(
+            ctx,
+            pos.x,
+            pos.y,
+            shape.startX,
+            shape.startY,
+            shape.endX,
+            shape.endY,
+          )) {
+            state.dragOffsetX = pos.x - shape.startX;
+            state.dragOffsetY = pos.y - shape.startY;
+            state.selectedShapeId =  shape.id;
+            state.isDraggingShape = true;
+            clickedOnShape = true;
+          }
+          break;
+          case "arrow":
+          if (isPointOnArrow(
+            ctx,
+            pos.x,
+            pos.y,
+            shape.x1,
+            shape.y1,
+            shape.x2,
+            shape.y2,
+          )) {
+            state.dragOffsetX = pos.x - shape.x1;
+            state.dragOffsetY = pos.y - shape.y1;
+            state.selectedShapeId = shape.id;
+            state.isDraggingShape = true;
+            clickedOnShape = true;
+          }
+          break;
         }
       }
       if (!clickedOnShape) {
@@ -136,6 +173,26 @@ export async function initDraw(
         if (selectedShape && selectedShape.type === "circle") {
           selectedShape.centreX = pos.x - state.dragOffsetX;
           selectedShape.centreY = pos.y - state.dragOffsetY;
+        }
+        if (selectedShape && selectedShape.type === "line") {
+          const linedx = selectedShape.endX - selectedShape.startX;
+          const linedy = selectedShape.endY - selectedShape.startY;
+
+          selectedShape.startX = pos.x - state.dragOffsetX;
+          selectedShape.startY = pos.y - state.dragOffsetY;
+
+          selectedShape.endX = selectedShape.startX + linedx;
+          selectedShape.endY = selectedShape.startY + linedy;
+        }
+        if (selectedShape && selectedShape.type === "arrow") {
+          const linedx = selectedShape.x2 - selectedShape.x1;
+          const linedy = selectedShape.y2 - selectedShape.y1;
+
+          selectedShape.x1 = pos.x - state.dragOffsetX;
+          selectedShape.y1 = pos.y - state.dragOffsetY;
+
+          selectedShape.x2 = linedx + selectedShape.x1;
+          selectedShape.y2 = linedy + selectedShape.y1;
         }
         clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
       }
