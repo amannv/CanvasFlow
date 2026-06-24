@@ -24,7 +24,7 @@ import { RefObject } from "react";
 import { isPointInsideCircle } from "./tools/circle/isPointInsideCircle";
 import { isPointInsideLine } from "./tools/line/isPointOnLine";
 import { isPointOnArrow } from "./tools/arrow/isPointOnArrow";
-import { stat } from "fs";
+import { isPointOnPencil } from "./tools/pencil/isPointOnPencil";
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -147,6 +147,16 @@ export async function initDraw(
             clickedOnShape = true;
           }
           break;
+          case "pencil":
+          if (isPointOnPencil(ctx, pos.x, pos.y, shape)) {
+            state.dragOffsetX = pos.x;
+            state.dragOffsetY = pos.y;
+
+            state.selectedShapeId = shape.id;
+            state.isDraggingShape = true;
+            clickedOnShape = true;
+          }
+          break;
         }
       }
       if (!clickedOnShape) {
@@ -193,6 +203,18 @@ export async function initDraw(
 
           selectedShape.x2 = linedx + selectedShape.x1;
           selectedShape.y2 = linedy + selectedShape.y1;
+        }
+        if (selectedShape && selectedShape.type === "pencil") {
+          const dx = pos.x - state.dragOffsetX;
+          const dy = pos.y - state.dragOffsetY;
+
+          for (const point of selectedShape.points) {
+            point.x += dx;
+            point.y += dy;
+          }
+
+          state.dragOffsetX = pos.x;
+          state.dragOffsetY = pos.y;
         }
         clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
       }

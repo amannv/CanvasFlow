@@ -28,7 +28,7 @@ export function clearCanvas(
       renderText(ctx, shape);
     }
     if (shape.type === "pencil") {
-      renderPencil(ctx, shape);
+      renderPencil(ctx, shape, selectedShapeId);
     }
     if (shape.type === "arrow") {
       renderArrow(ctx, shape, selectedShapeId);
