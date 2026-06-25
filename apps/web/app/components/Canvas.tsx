@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { initDraw } from "../draw/initDraw";
+import { DrawEngine } from "../draw/DrawEngine";
 import {
   RectangleHorizontal,
   Circle,
@@ -9,7 +10,8 @@ import {
   Type,
   ArrowUpRight,
 } from "lucide-react";
-import { createText } from "../draw/tools/text/createText";
+
+import { createText } from "../draw/tools/text/textTool";
 import { createElementSender } from "../draw/network/socket";
 import { ShapeType } from "../draw/utils/types";
 
@@ -24,6 +26,7 @@ export function Canvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [shape, setShape] = useState<ShapeType>("none");
   const shapeRef = useRef<ShapeType>("none");
+  const engineRef = useRef<DrawEngine | null>(null);
   const [textEditor, setTextEditor] = useState<{
     x: number;
     y: number;
@@ -35,21 +38,29 @@ export function Canvas({
   }, [shape]);
 
   useEffect(() => {
+     console.log("Canvas mounted");
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const cleanup = initDraw(canvas, roomId, socket, shapeRef, (x, y) => {
-      setTextEditor({ x, y });
-    });
+    engineRef.current = new DrawEngine(
+      canvas,
+      roomId,
+      socket,
+      shapeRef,
+      (x, y) => {
+        setTextEditor({ x, y });
+      }
+    );
 
     return () => {
-      console.log("cleanup");
-      cleanup?.then(fn => fn?.());
+          console.log("Canvas unmounted");
+      console.log("cleanup engine listeners");
+      engineRef.current?.destroy();
     }
-  }, []);
+  }, [roomId, socket]);
 
   return (
     <div className="relative">
@@ -78,6 +89,7 @@ export function Canvas({
                 textEditor.y,
                 textValue,
               );
+
               createElementSender(socket, textShape, roomId);
               setTextEditor(null);
               setTextValue("");

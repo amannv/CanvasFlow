@@ -1,10 +1,10 @@
 import { Shape } from "./types";
-import { renderCircle } from "../tools/circle/renderCircle";
-import { renderLine } from "../tools/line/renderLine";
-import { renderPencil } from "../tools/pencil/renderPencil";
-import { renderRectangle } from "../tools/rectangle/renderRectangle";
-import { renderText } from "../tools/text/renderText";
-import { renderArrow } from "../tools/arrow/renderArrow";
+import { renderRectangle } from "../tools/rectangle/rectangleTool";
+import { renderCircle } from "../tools/circle/circleTool";
+import { renderLine } from "../tools/line/lineTool";
+import { renderArrow } from "../tools/arrow/ArrowTool";
+import { renderPencil } from "../tools/pencil/pencilTool";
+import { renderText } from "../tools/text/textTool";
 
 export function clearCanvas(
   existingShapes: Shape[],
