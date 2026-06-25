@@ -1,6 +1,7 @@
 import { getExistingShapes } from "./network/api";
 import {
   createElementSender,
+  deleteElementSender,
   socketMessageListener,
   updateElementSender,
 } from "./network/socket";
@@ -95,77 +96,81 @@ export async function initDraw(
 
         switch (shape.type) {
           case "rect":
-          if (isPointInsideRectangle(pos.x, pos.y, shape)) {
-          state.selectedShapeId = shape.id as number;
-          state.isDraggingShape = true;
+            if (isPointInsideRectangle(pos.x, pos.y, shape)) {
+              state.selectedShapeId = shape.id as number;
+              state.isDraggingShape = true;
 
-          state.dragOffsetX = pos.x - shape.x;
-          state.dragOffsetY = pos.y - shape.y;
-          clickedOnShape = true;
-          }
-          break;
+              state.dragOffsetX = pos.x - shape.x;
+              state.dragOffsetY = pos.y - shape.y;
+              clickedOnShape = true;
+            }
+            break;
           case "circle":
-          if (isPointInsideCircle(pos.x, pos.y, shape)) {
-          state.selectedShapeId = shape.id as number;
-          state.isDraggingShape = true;
+            if (isPointInsideCircle(pos.x, pos.y, shape)) {
+              state.selectedShapeId = shape.id as number;
+              state.isDraggingShape = true;
 
-          state.dragOffsetX = pos.x - shape.centreX;
-          state.dragOffsetY = pos.y - shape.centreY;
-          clickedOnShape = true;
-          }
-          break;
+              state.dragOffsetX = pos.x - shape.centreX;
+              state.dragOffsetY = pos.y - shape.centreY;
+              clickedOnShape = true;
+            }
+            break;
           case "line":
-          if (isPointInsideLine(
-            ctx,
-            pos.x,
-            pos.y,
-            shape.startX,
-            shape.startY,
-            shape.endX,
-            shape.endY,
-          )) {
-            state.dragOffsetX = pos.x - shape.startX;
-            state.dragOffsetY = pos.y - shape.startY;
-            state.selectedShapeId =  shape.id;
-            state.isDraggingShape = true;
-            clickedOnShape = true;
-          }
-          break;
+            if (
+              isPointInsideLine(
+                ctx,
+                pos.x,
+                pos.y,
+                shape.startX,
+                shape.startY,
+                shape.endX,
+                shape.endY,
+              )
+            ) {
+              state.dragOffsetX = pos.x - shape.startX;
+              state.dragOffsetY = pos.y - shape.startY;
+              state.selectedShapeId = shape.id;
+              state.isDraggingShape = true;
+              clickedOnShape = true;
+            }
+            break;
           case "arrow":
-          if (isPointOnArrow(
-            ctx,
-            pos.x,
-            pos.y,
-            shape.x1,
-            shape.y1,
-            shape.x2,
-            shape.y2,
-          )) {
-            state.dragOffsetX = pos.x - shape.x1;
-            state.dragOffsetY = pos.y - shape.y1;
-            state.selectedShapeId = shape.id;
-            state.isDraggingShape = true;
-            clickedOnShape = true;
-          }
-          break;
+            if (
+              isPointOnArrow(
+                ctx,
+                pos.x,
+                pos.y,
+                shape.x1,
+                shape.y1,
+                shape.x2,
+                shape.y2,
+              )
+            ) {
+              state.dragOffsetX = pos.x - shape.x1;
+              state.dragOffsetY = pos.y - shape.y1;
+              state.selectedShapeId = shape.id;
+              state.isDraggingShape = true;
+              clickedOnShape = true;
+            }
+            break;
           case "pencil":
-          if (isPointOnPencil(ctx, pos.x, pos.y, shape)) {
-            state.dragOffsetX = pos.x;
-            state.dragOffsetY = pos.y;
+            if (isPointOnPencil(ctx, pos.x, pos.y, shape)) {
+              state.dragOffsetX = pos.x;
+              state.dragOffsetY = pos.y;
 
-            state.selectedShapeId = shape.id;
-            state.isDraggingShape = true;
-            clickedOnShape = true;
-          }
-          break;
+              state.selectedShapeId = shape.id;
+              state.isDraggingShape = true;
+              clickedOnShape = true;
+            }
+            break;
           case "text":
-          if (isPointOnText(ctx, pos.x, pos.y, shape)) {
-            state.dragOffsetX = pos.x - shape.x;
-            state.dragOffsetY = pos.y - shape.y;
-            state.selectedShapeId = shape.id;
-            state.isDraggingShape = true;
-            clickedOnShape = true;
-          }
+            if (isPointOnText(ctx, pos.x, pos.y, shape)) {
+              state.dragOffsetX = pos.x - shape.x;
+              state.dragOffsetY = pos.y - shape.y;
+              state.selectedShapeId = shape.id;
+              state.isDraggingShape = true;
+              clickedOnShape = true;
+            }
         }
       }
       if (!clickedOnShape) {
@@ -309,13 +314,43 @@ export async function initDraw(
     }
   };
 
+  const keyDownHandler = (e: KeyboardEvent) => {
+    console.log("Pressed:", e.key);
+    console.log("Deleting", state.selectedShapeId);
+    const target = e.target as HTMLElement;
+
+    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+      return;
+    }
+
+    if (e.key === "Delete" || e.key === "Backspace") {
+      deleteSelectedShape();
+    }
+  };
+
+  function deleteSelectedShape() {
+    if (!state.selectedShapeId) return;
+
+    deleteElementSender(state.selectedShapeId, socket, roomId);
+
+    existingShapes = existingShapes.filter(
+      (shape) => shape.id !== state.selectedShapeId,
+    );
+
+    state.selectedShapeId = null;
+
+    clearCanvas(existingShapes, canvas, ctx, state.selectedShapeId);
+  }
+
   canvas.addEventListener("mousedown", mouseDownHandler);
   canvas.addEventListener("mousemove", mouseMoveHandler);
   canvas.addEventListener("mouseup", mouseUpHandler);
+  window.addEventListener("keydown", keyDownHandler);
 
   return () => {
     canvas.removeEventListener("mousedown", mouseDownHandler);
     canvas.removeEventListener("mousemove", mouseMoveHandler);
     canvas.removeEventListener("mouseup", mouseUpHandler);
+    window.removeEventListener("keydown", keyDownHandler);
   };
 }

@@ -13,7 +13,6 @@ export function socketMessageListener(
 
     const parsedMessage = JSON.parse(event.data);
 
-
     if (parsedMessage.type === "create_element") {
       existingShapes.push(parsedMessage.shape);
       clearCanvas(existingShapes, canvas, ctx, selectedShapeId);
@@ -29,6 +28,14 @@ export function socketMessageListener(
       }
 
       clearCanvas(existingShapes, canvas, ctx, null);
+    }
+
+    if (parsedMessage.type === "delete_element") {
+      existingShapes = existingShapes.filter(
+        (shape) => shape.id !== parsedMessage.elementId,
+      );
+
+      clearCanvas(existingShapes, canvas, ctx, selectedShapeId);
     }
   };
 }
@@ -66,6 +73,24 @@ export function updateElementSender(
       payload: {
         elementId: id,
         data: shape,
+        roomId: roomId,
+      },
+    }),
+  );
+}
+
+export function deleteElementSender(
+  id: number | null,
+  socket: WebSocket,
+  roomId: string,
+) {
+  if (socket.readyState !== WebSocket.OPEN) return;
+
+  socket.send(
+    JSON.stringify({
+      type: "delete_element",
+      payload: {
+        elementId: id,
         roomId: roomId,
       },
     }),

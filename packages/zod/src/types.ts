@@ -1,4 +1,4 @@
-import z, { string } from "zod";
+import z from "zod";
 
 //http--backend schemas
 export const createUserSchema = z.object({
