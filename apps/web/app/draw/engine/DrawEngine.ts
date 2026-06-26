@@ -1,43 +1,42 @@
-import { getExistingShapes } from "./network/api";
+import { getExistingShapes } from "../network/api";
 import {
   createElementSender,
   deleteElementSender,
   socketMessageListener,
   updateElementSender,
-} from "./network/socket";
-import { clearCanvas } from "./utils/clearCanvas";
-import { Shape } from "./utils/types";
-import { getCanvasCoordinates } from "./utils/getCanvasCoordinates";
-import { handleMouseDown, handleMouseUp } from "./tools/mouse";
+} from "../network/socket";
+import { clearCanvas } from "../utils/clearCanvas";
+import { getCanvasCoordinates } from "../utils/getCanvasCoordinates";
+import { handleMouseDown, handleMouseUp } from "../tools/mouse";
 import {
   createArrow,
   previewArrow,
   isPointOnArrow,
-} from "./tools/arrow/ArrowTool";
+} from "../tools/arrow/ArrowTool";
 import {
   createCircle,
   previewCircle,
   isPointInsideCircle,
-} from "./tools/circle/circleTool";
+} from "../tools/circle/circleTool";
 import {
   createLine,
   previewLine,
   isPointInsideLine,
-} from "./tools/line/lineTool";
+} from "../tools/line/lineTool";
 import {
   createPencil,
   previewPencil,
   isPointOnPencil,
-} from "./tools/pencil/pencilTool";
+} from "../tools/pencil/pencilTool";
 import {
   createRectangle,
   previewRectangle,
   isPointInsideRectangle,
-} from "./tools/rectangle/rectangleTool";
-import { isPointOnText } from "./tools/text/textTool";
-import { ShapeType } from "./utils/types";
+} from "../tools/rectangle/rectangleTool";
+import { isPointOnText } from "../tools/text/textTool";
+import { ShapeType } from "../utils/types";
 import { RefObject } from "react";
-
+import { Shape } from "../utils/types";
 export class DrawEngine {
   public canvas: HTMLCanvasElement;
   public ctx: CanvasRenderingContext2D;
@@ -51,6 +50,11 @@ export class DrawEngine {
 
   private destroyed = false;
   private attachedEvents = false;
+
+  private History: any[] = [];
+  private redoStack: any[] = [];
+
+  private initialDraggedShapeProps: Shape | null = null;
 
   public state = {
     clicked: false,
@@ -113,7 +117,14 @@ export class DrawEngine {
   private deleteSelectedShape() {
     if (!this.state.selectedShapeId) return;
 
+    const deletedShape = this.existingShapes.find(
+      (s) => s.id === this.state.selectedShapeId,
+    );
+
     deleteElementSender(this.state.selectedShapeId, this.socket, this.roomId);
+
+    this.History.push({ type: "DELETE", shape: structuredClone(deletedShape) });
+    this.redoStack = [];
 
     this.existingShapes = this.existingShapes.filter(
       (shape) => shape.id !== this.state.selectedShapeId,
@@ -156,6 +167,8 @@ export class DrawEngine {
               this.state.selectedShapeId = shape.id as number;
               this.state.isDraggingShape = true;
 
+              this.initialDraggedShapeProps = structuredClone(shape);
+
               this.state.dragOffsetX = pos.x - shape.x;
               this.state.dragOffsetY = pos.y - shape.y;
               clickedOnShape = true;
@@ -165,6 +178,8 @@ export class DrawEngine {
             if (isPointInsideCircle(pos.x, pos.y, shape)) {
               this.state.selectedShapeId = shape.id as number;
               this.state.isDraggingShape = true;
+
+              this.initialDraggedShapeProps = structuredClone(shape);
 
               this.state.dragOffsetX = pos.x - shape.centreX;
               this.state.dragOffsetY = pos.y - shape.centreY;
@@ -185,6 +200,9 @@ export class DrawEngine {
             ) {
               this.state.dragOffsetX = pos.x - shape.startX;
               this.state.dragOffsetY = pos.y - shape.startY;
+
+              this.initialDraggedShapeProps = structuredClone(shape);
+
               this.state.selectedShapeId = shape.id;
               this.state.isDraggingShape = true;
               clickedOnShape = true;
@@ -204,6 +222,9 @@ export class DrawEngine {
             ) {
               this.state.dragOffsetX = pos.x - shape.x1;
               this.state.dragOffsetY = pos.y - shape.y1;
+
+              this.initialDraggedShapeProps = structuredClone(shape);
+
               this.state.selectedShapeId = shape.id;
               this.state.isDraggingShape = true;
               clickedOnShape = true;
@@ -214,6 +235,8 @@ export class DrawEngine {
               this.state.dragOffsetX = pos.x;
               this.state.dragOffsetY = pos.y;
 
+              this.initialDraggedShapeProps = structuredClone(shape);
+
               this.state.selectedShapeId = shape.id;
               this.state.isDraggingShape = true;
               clickedOnShape = true;
@@ -223,6 +246,9 @@ export class DrawEngine {
             if (isPointOnText(this.ctx, pos.x, pos.y, shape)) {
               this.state.dragOffsetX = pos.x - shape.x;
               this.state.dragOffsetY = pos.y - shape.y;
+
+              this.initialDraggedShapeProps = structuredClone(shape);
+
               this.state.selectedShapeId = shape.id;
               this.state.isDraggingShape = true;
               clickedOnShape = true;
@@ -353,13 +379,22 @@ export class DrawEngine {
           (shape) => shape.id === this.state.selectedShapeId,
         );
 
-        if (selectedShape?.id) {
+        if (selectedShape?.id && this.initialDraggedShapeProps) {
           updateElementSender(
             selectedShape.id,
             this.socket,
             selectedShape,
             this.roomId,
           );
+
+          this.History.push({
+            type: "MOVE",
+            shapeId: selectedShape.id as number,
+            oldProps: this.initialDraggedShapeProps,
+            newProps: structuredClone(selectedShape),
+          });
+
+          this.redoStack = [];
         }
         this.state.isDraggingShape = false;
       }
@@ -416,6 +451,10 @@ export class DrawEngine {
 
     if (newShape) {
       createElementSender(this.socket, newShape, this.roomId);
+
+      this.History.push({ type: "CREATE", shape: structuredClone(newShape) });
+      this.redoStack = [];
+
       console.log(this.existingShapes);
     }
   };
@@ -429,10 +468,97 @@ export class DrawEngine {
       return;
     }
 
+    const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+    const modifier = isMac ? e.metaKey : e.ctrlKey;
+
+    if (modifier && e.key.toLowerCase() === "z") {
+      e.preventDefault();
+      if (e.shiftKey) {
+        this.redo();
+      } else this.undo();
+    }
+
+    if (modifier && e.key.toLowerCase() === "y") {
+      e.preventDefault();
+      this.redo();
+    }
+
     if (e.key === "Delete" || e.key === "Backspace") {
       this.deleteSelectedShape();
     }
   };
+
+  public undo() {
+    const action = this.History.pop();
+    if (!action) return;
+
+    this.redoStack.push(action);
+
+    switch (action.type) {
+      case "CREATE":
+        this.existingShapes = this.existingShapes.filter(
+          s => s.id !== action.shape.id
+        )
+        deleteElementSender(action.shape.id, this.socket, this.roomId);
+        break;
+      case "DELETE":
+        this.existingShapes.push(action.shape);
+        createElementSender(this.socket, action.shape, this.roomId);
+        break;
+      case "MOVE":
+        const shapeToRestore = this.existingShapes.find(
+          (s) => s.id === action.shapeId,
+        );
+        if (shapeToRestore) {
+          Object.assign(shapeToRestore, action.oldProps);
+          updateElementSender(
+            shapeToRestore.id as number,
+            this.socket,
+            shapeToRestore,
+            this.roomId,
+          );
+        }
+        break;
+    }
+    this.render();
+  }
+
+  public redo() {
+    const action = this.redoStack.pop();
+    if (!action) return;
+
+    this.History.push(action);
+
+    switch (action.type) {
+      case "CREATE":
+        this.existingShapes.push(action.shape);
+        createElementSender(this.socket, action.shape, this.roomId);
+        break;
+      case "DELETE":
+        {
+          this.existingShapes = this.existingShapes.filter(
+            s => s.id !== action.shape.id
+          )
+          deleteElementSender(action.shape.id, this.socket, this.roomId);
+        }
+        break;
+      case "MOVE":
+        const shapeToRestore = this.existingShapes.find(
+          (s) => s.id === action.shapeId,
+        );
+        if (shapeToRestore) {
+          Object.assign(shapeToRestore, action.newProps);
+          updateElementSender(
+            shapeToRestore.id as number,
+            this.socket,
+            shapeToRestore,
+            this.roomId,
+          );
+        }
+        break;
+    }
+    this.render();
+  }
 
   private attachEvents() {
     if (this.attachedEvents) return;

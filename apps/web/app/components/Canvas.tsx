@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { initDraw } from "../draw/initDraw";
-import { DrawEngine } from "../draw/DrawEngine";
+import { DrawEngine } from "../draw/engine/DrawEngine";
 import {
   RectangleHorizontal,
   Circle,
