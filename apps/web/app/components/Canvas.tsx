@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { initDraw } from "../draw/initDraw";
 import { DrawEngine } from "../draw/engine/DrawEngine";
 import {
   RectangleHorizontal,
@@ -9,6 +8,7 @@ import {
   MousePointer,
   Type,
   ArrowUpRight,
+  Hand,
 } from "lucide-react";
 
 import { createText } from "../draw/tools/text/textTool";
@@ -154,6 +154,14 @@ export function Canvas({
             className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110 "
           >
             <MousePointer />
+          </div>
+          <div
+            onClick={() => {
+              setShape("move");
+            }}
+            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110 "
+          >
+            <Hand />
           </div>
         </div>
       </div>

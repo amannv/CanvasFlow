@@ -6,7 +6,7 @@ export function socketMessageListener(
   existingShapes: Shape[],
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
-  selectedShapeId: number | null,
+  getSelectedShapeId: () => string | null,
 ) {
   socket.onmessage = (event) => {
     if (socket.readyState !== WebSocket.OPEN) return;
@@ -15,12 +15,12 @@ export function socketMessageListener(
 
     if (parsedMessage.type === "create_element") {
       existingShapes.push(parsedMessage.shape);
-      clearCanvas(existingShapes, canvas, ctx, selectedShapeId);
+      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId());
     }
 
     if (parsedMessage.type === "update_element") {
       const index = existingShapes.findIndex(
-        (shape) => shape.id === parsedMessage.elementId,
+        (shape) => shape.id === parsedMessage.shapeId,
       );
 
       if (index !== -1) {
@@ -31,11 +31,14 @@ export function socketMessageListener(
     }
 
     if (parsedMessage.type === "delete_element") {
-      existingShapes = existingShapes.filter(
-        (shape) => shape.id !== parsedMessage.elementId,
+      const index = existingShapes.findIndex(
+        (s) => s.id === parsedMessage.shapeId,
       );
 
-      clearCanvas(existingShapes, canvas, ctx, selectedShapeId);
+      if (index !== -1) {
+        existingShapes.splice(index, 1);
+      }
+      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId());
     }
   };
 }
@@ -47,7 +50,6 @@ export function createElementSender(
 ) {
   if (socket.readyState !== WebSocket.OPEN) return;
 
-  console.log("SENDING SHAPE");
   socket.send(
     JSON.stringify({
       type: "create_element",
@@ -60,7 +62,7 @@ export function createElementSender(
 }
 
 export function updateElementSender(
-  id: number | string,
+  id: string | null,
   socket: WebSocket,
   shape: Shape,
   roomId: string,
@@ -80,10 +82,11 @@ export function updateElementSender(
 }
 
 export function deleteElementSender(
-  id: number | null,
+  id: string | null,
   socket: WebSocket,
   roomId: string,
 ) {
+
   if (socket.readyState !== WebSocket.OPEN) return;
 
   socket.send(

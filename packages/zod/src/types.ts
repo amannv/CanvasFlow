@@ -43,7 +43,7 @@ export const createElementSchema = z.object({
 export const updateElementSchema = z.object({
   type: z.literal("update_element"),
   payload: z.object({
-    elementId: z.number(),
+    elementId: z.string(),
     data: z.any(),
     roomId: z.number(),
   }),
@@ -52,7 +52,7 @@ export const updateElementSchema = z.object({
 export const deleteElementSchema = z.object({
   type: z.literal("delete_element"),
   payload: z.object({
-    elementId: z.number(),
+    elementId: z.string(),
     roomId: z.number(),
   }),
 });

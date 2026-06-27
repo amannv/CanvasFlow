@@ -37,12 +37,14 @@ model Element {
 
   data Json
 
+  shapeId String @unique
+
   roomId Int
   room   Room @relation(fields: [roomId], references: [id])
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

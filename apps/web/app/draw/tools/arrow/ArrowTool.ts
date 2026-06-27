@@ -1,21 +1,21 @@
 import { ArrowType } from "../../utils/types";
 
 export function createArrow(
-    startX: number,
-    startY: number,
-    endX: number,
-    endY: number,
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
 ): ArrowType {
-    const shape: ArrowType = {
-        type: "arrow",
-        x1: startX,
-        y1: startY,
-        x2: endX,
-        y2: endY,
-    }
-    return shape;
+  const shape: ArrowType = {
+    id: crypto.randomUUID(),
+    type: "arrow",
+    x1: startX,
+    y1: startY,
+    x2: endX,
+    y2: endY,
+  };
+  return shape;
 }
-
 
 export function previewArrow(
   ctx: CanvasRenderingContext2D,
@@ -53,13 +53,11 @@ export function previewArrow(
   ctx.stroke();
 }
 
-
 export function renderArrow(
-  ctx: CanvasRenderingContext2D, 
+  ctx: CanvasRenderingContext2D,
   shape: ArrowType,
-  selectedShapeId: number | null
+  selectedShapeId: string | null,
 ) {
-
   ctx.save();
 
   const headlen = 16;
@@ -97,38 +95,36 @@ export function renderArrow(
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(shape.x2, shape.y2, 5, 0, Math.PI * 2); 
+    ctx.arc(shape.x2, shape.y2, 5, 0, Math.PI * 2);
     ctx.fill();
   }
 
   ctx.restore();
 }
 
-
-
 export function isPointOnArrow(
-    ctx: CanvasRenderingContext2D,
-    mouseX: number,
-    mouseY: number,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    selectionArea = 10,
+  ctx: CanvasRenderingContext2D,
+  mouseX: number,
+  mouseY: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  selectionArea = 10,
 ) {
-    ctx.save();
+  ctx.save();
 
-    ctx.beginPath();
-    
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+  ctx.beginPath();
 
-    ctx.lineCap = "round";
-    ctx.lineWidth = selectionArea;
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
 
-    const touch = ctx.isPointInStroke(mouseX, mouseY);
+  ctx.lineCap = "round";
+  ctx.lineWidth = selectionArea;
 
-    ctx.restore();
+  const touch = ctx.isPointInStroke(mouseX, mouseY);
 
-    return touch;
+  ctx.restore();
+
+  return touch;
 }

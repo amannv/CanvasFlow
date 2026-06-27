@@ -131,6 +131,8 @@ wss.on("connection", (socket, request) => {
       const shape = result.data.payload.shape;
       const roomId = result.data.payload.roomId;
 
+      console.log("Sending shape:", shape);
+
       const roomExist = await prisma.room.findUnique({
         where: {
           id: roomId,
@@ -152,6 +154,7 @@ wss.on("connection", (socket, request) => {
 
       const shapeCreated = await prisma.element.create({
         data: {
+          shapeId: shape.id,
           roomId: roomId,
           userId: userId,
           data: shape,
@@ -160,13 +163,10 @@ wss.on("connection", (socket, request) => {
 
       const sentMessage = {
         messageId: crypto.randomUUID(),
-        elementId: shapeCreated.id,
+        shapeId: shapeCreated.shapeId,
         type: "create_element",
         userId: shapeCreated.userId,
-        shape: {
-          ...(shapeCreated.data as object),
-          id: shapeCreated.id,
-        },
+        shape: shapeCreated.data,
         roomId: shapeCreated.roomId,
       };
 
@@ -194,7 +194,7 @@ wss.on("connection", (socket, request) => {
 
       const elementExist = await prisma.element.findUnique({
         where: {
-          id: elementId,
+          shapeId: elementId,
         },
       });
 
@@ -205,7 +205,7 @@ wss.on("connection", (socket, request) => {
 
       const updateElement = await prisma.element.update({
         where: {
-          id: elementId,
+          shapeId: elementId,
         },
         data: {
           data: data,
@@ -219,14 +219,11 @@ wss.on("connection", (socket, request) => {
 
       const sentMessage = {
         messageId: crypto.randomUUID(),
-        elementId: updateElement.id,
+        shapeId: updateElement.shapeId,
         type: "update_element",
         roomId: updateElement.roomId,
         userId: updateElement.userId,
-        shape: {
-          ...(updateElement.data as object),
-          id: updateElement.id,
-        },
+        shape: updateElement.data,
       };
 
       sockets.forEach((socket) => {
@@ -252,7 +249,7 @@ wss.on("connection", (socket, request) => {
 
       const elementExist = await prisma.element.findUnique({
         where: {
-          id: elementId,
+          shapeId: elementId,
         },
       });
 
@@ -263,7 +260,7 @@ wss.on("connection", (socket, request) => {
 
       const deleteElement = await prisma.element.delete({
         where: {
-          id: elementId,
+          shapeId: elementId,
         },
       });
 
@@ -274,7 +271,7 @@ wss.on("connection", (socket, request) => {
 
       const sentMessage = {
         messageId: crypto.randomUUID(),
-        elementId: deleteElement.id,
+        shapeId: deleteElement.shapeId,
         type: "delete_element",
         message: "Element successfully deleted",
       };

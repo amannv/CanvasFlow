@@ -37,6 +37,8 @@ import { isPointOnText } from "../tools/text/textTool";
 import { ShapeType } from "../utils/types";
 import { RefObject } from "react";
 import { Shape } from "../utils/types";
+import { HistoryAction } from "../utils/types";
+
 export class DrawEngine {
   public canvas: HTMLCanvasElement;
   public ctx: CanvasRenderingContext2D;
@@ -51,20 +53,28 @@ export class DrawEngine {
   private destroyed = false;
   private attachedEvents = false;
 
-  private History: any[] = [];
-  private redoStack: any[] = [];
+  private History: HistoryAction[] = [];
+  private redoStack: HistoryAction[] = [];
 
   private initialDraggedShapeProps: Shape | null = null;
+
+  private camera = {
+    x: 0,
+    y: 0,
+  }
 
   public state = {
     clicked: false,
     startX: 0,
     startY: 0,
     currentStroke: [] as { x: number; y: number }[],
-    selectedShapeId: null as number | null,
+    selectedShapeId: null as string | null,
     isDraggingShape: false,
     dragOffsetX: 0,
     dragOffsetY: 0,
+    isMovingCamera: false,
+    lastMouseX: 0,
+    lastMouseY: 0,
   };
 
   constructor(
@@ -98,7 +108,7 @@ export class DrawEngine {
       this.existingShapes,
       this.canvas,
       this.ctx,
-      this.state.selectedShapeId,
+      () => this.state.selectedShapeId,
     );
 
     this.render();
@@ -121,19 +131,18 @@ export class DrawEngine {
       (s) => s.id === this.state.selectedShapeId,
     );
 
+    if (!deletedShape) return;
+
     deleteElementSender(this.state.selectedShapeId, this.socket, this.roomId);
 
     this.History.push({ type: "DELETE", shape: structuredClone(deletedShape) });
     this.redoStack = [];
 
-    this.existingShapes = this.existingShapes.filter(
-      (shape) => shape.id !== this.state.selectedShapeId,
-    );
-
     this.state.selectedShapeId = null;
 
     this.render();
   }
+
 
   private mouseDownHandler = (e: MouseEvent) => {
     const pos = getCanvasCoordinates(e, this.canvas);
@@ -154,6 +163,12 @@ export class DrawEngine {
       this.onTextClick(pos.x, pos.y);
     }
 
+    if (this.shape.current === "move") {
+      this.state.lastMouseX = pos.x,
+      this.state.lastMouseY = pos.y,
+      this.state.isMovingCamera = true
+    }
+
     if (this.shape.current === "pointer") {
       let clickedOnShape = false;
       for (let i = this.existingShapes.length - 1; i >= 0; i--) {
@@ -164,7 +179,7 @@ export class DrawEngine {
         switch (shape.type) {
           case "rect":
             if (isPointInsideRectangle(pos.x, pos.y, shape)) {
-              this.state.selectedShapeId = shape.id as number;
+              this.state.selectedShapeId = shape.id;
               this.state.isDraggingShape = true;
 
               this.initialDraggedShapeProps = structuredClone(shape);
@@ -176,7 +191,7 @@ export class DrawEngine {
             break;
           case "circle":
             if (isPointInsideCircle(pos.x, pos.y, shape)) {
-              this.state.selectedShapeId = shape.id as number;
+              this.state.selectedShapeId = shape.id;
               this.state.isDraggingShape = true;
 
               this.initialDraggedShapeProps = structuredClone(shape);
@@ -321,6 +336,18 @@ export class DrawEngine {
       return;
     }
 
+    if (this.shape.current === "move" && this.state.isMovingCamera) {
+      const dx = pos.x - this.state.lastMouseX;
+      const dy = pos.y - this.state.lastMouseY;
+
+      this.camera.x += dx;
+      this.camera.y += dy;
+
+      this.state.lastMouseX = pos.x;
+      this.state.lastMouseY = pos.y;
+    }
+
+
     if (!this.state.clicked) return;
 
     this.render();
@@ -389,7 +416,7 @@ export class DrawEngine {
 
           this.History.push({
             type: "MOVE",
-            shapeId: selectedShape.id as number,
+            shapeId: selectedShape.id,
             oldProps: this.initialDraggedShapeProps,
             newProps: structuredClone(selectedShape),
           });
@@ -399,6 +426,10 @@ export class DrawEngine {
         this.state.isDraggingShape = false;
       }
       return;
+    }
+
+    if (this.shape.current === "move" && this.state.isMovingCamera) {
+      this.state.isMovingCamera = false;
     }
 
     const isClick =
@@ -451,17 +482,12 @@ export class DrawEngine {
 
     if (newShape) {
       createElementSender(this.socket, newShape, this.roomId);
-
       this.History.push({ type: "CREATE", shape: structuredClone(newShape) });
       this.redoStack = [];
-
-      console.log(this.existingShapes);
     }
   };
 
   private keyDownHandler = (e: KeyboardEvent) => {
-    console.log("Pressed:", e.key);
-    console.log("Deleting", this.state.selectedShapeId);
     const target = e.target as HTMLElement;
 
     if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
@@ -475,7 +501,9 @@ export class DrawEngine {
       e.preventDefault();
       if (e.shiftKey) {
         this.redo();
-      } else this.undo();
+      } else {
+        this.undo();
+      }
     }
 
     if (modifier && e.key.toLowerCase() === "y") {
@@ -496,13 +524,9 @@ export class DrawEngine {
 
     switch (action.type) {
       case "CREATE":
-        this.existingShapes = this.existingShapes.filter(
-          s => s.id !== action.shape.id
-        )
         deleteElementSender(action.shape.id, this.socket, this.roomId);
         break;
       case "DELETE":
-        this.existingShapes.push(action.shape);
         createElementSender(this.socket, action.shape, this.roomId);
         break;
       case "MOVE":
@@ -512,7 +536,7 @@ export class DrawEngine {
         if (shapeToRestore) {
           Object.assign(shapeToRestore, action.oldProps);
           updateElementSender(
-            shapeToRestore.id as number,
+            shapeToRestore.id,
             this.socket,
             shapeToRestore,
             this.roomId,
@@ -531,16 +555,10 @@ export class DrawEngine {
 
     switch (action.type) {
       case "CREATE":
-        this.existingShapes.push(action.shape);
         createElementSender(this.socket, action.shape, this.roomId);
         break;
       case "DELETE":
-        {
-          this.existingShapes = this.existingShapes.filter(
-            s => s.id !== action.shape.id
-          )
           deleteElementSender(action.shape.id, this.socket, this.roomId);
-        }
         break;
       case "MOVE":
         const shapeToRestore = this.existingShapes.find(
@@ -549,7 +567,7 @@ export class DrawEngine {
         if (shapeToRestore) {
           Object.assign(shapeToRestore, action.newProps);
           updateElementSender(
-            shapeToRestore.id as number,
+            shapeToRestore.id,
             this.socket,
             shapeToRestore,
             this.roomId,

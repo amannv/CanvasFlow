@@ -7,6 +7,7 @@ export function createLine(
   endY: number,
 ): LineShape {
   const shape: LineShape = {
+    id: crypto.randomUUID(),
     type: "line",
     startX: startX,
     startY: startY,
@@ -39,7 +40,7 @@ export function previewLine(
 export function renderLine(
   ctx: CanvasRenderingContext2D, 
   shape: LineShape,
-  selectedShapeId: number | null,
+  selectedShapeId: string | null,
 ) {
 
   ctx.save();

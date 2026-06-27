@@ -2,6 +2,7 @@ import { TextShape } from "../../utils/types";
 
 export function createText(x: number, y: number, text: string): TextShape {
   const shape: TextShape = {
+    id: crypto.randomUUID(),
     type: "text",
     x: x,
     y: y,
@@ -29,7 +30,7 @@ export function previewText(
 export function renderText(
   ctx: CanvasRenderingContext2D, 
   shape: TextShape,
-  selectedShapeId: number | null
+  selectedShapeId: string | null
 ) {
   ctx.save();
 

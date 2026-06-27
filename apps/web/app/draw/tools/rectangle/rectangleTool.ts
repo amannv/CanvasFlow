@@ -7,6 +7,7 @@ export function createRectangle(
   endY: number,
 ): RectangleShape {
   const shape: RectangleShape = {
+    id: crypto.randomUUID(),
     type: "rect",
     x: startX,
     y: startY,
@@ -38,7 +39,7 @@ export function previewRectangle(
 export function renderRectangle(
   ctx: CanvasRenderingContext2D,
   shape: RectangleShape,
-  selectedShapeId: number | null,
+  selectedShapeId: string | null,
 ) {
 
   ctx.save();

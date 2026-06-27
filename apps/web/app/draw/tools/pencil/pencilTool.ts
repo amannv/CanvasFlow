@@ -7,6 +7,7 @@ export function createPencil(
     }[],
 ): PencilShape {
     const shape: PencilShape = {
+        id: crypto.randomUUID(),
         type: "pencil",
         points: [...points],
     } 
@@ -44,7 +45,7 @@ export function previewPencil(
 export function renderPencil(
   ctx: CanvasRenderingContext2D,
   shape: PencilShape,
-  selectedShapeId: number | null,
+  selectedShapeId: string | null,
 ) {
   const startingPoint = shape.points[0];
 

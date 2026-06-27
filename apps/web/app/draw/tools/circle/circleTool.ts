@@ -10,6 +10,7 @@ export function createCircle(
   const deltaY = endY - startY;
 
   const shape: CircleShape = {
+    id: crypto.randomUUID(),
     type: "circle",
     centreX: startX,
     centreY: startY,
@@ -43,7 +44,7 @@ export function previewCircle(
 export function renderCircle(
   ctx: CanvasRenderingContext2D,
   shape: CircleShape,
-  selectedShapeId: number | null,
+  selectedShapeId: string | null,
 ) {
   ctx.save();
 

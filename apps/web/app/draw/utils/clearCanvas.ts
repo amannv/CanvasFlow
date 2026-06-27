@@ -10,7 +10,7 @@ export function clearCanvas(
   existingShapes: Shape[],
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
-  selectedShapeId: number | null,
+  selectedShapeId: string | null,
 ) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
