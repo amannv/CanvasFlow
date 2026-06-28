@@ -1,4 +1,4 @@
-import { RectangleShape } from "../../utils/types";
+import { RectangleShape, WorldToScreen } from "../../utils/types";
 
 export function createRectangle(
   startX: number,
@@ -25,13 +25,17 @@ export function previewRectangle(
   startY: number,
   currentX: number,
   currentY: number,
+  worldToScreen: WorldToScreen
 ) {
-  const width = currentX - startX;
-  const height = currentY - startY;
+  const start = worldToScreen(startX, startY);
+  const current = worldToScreen(currentX, currentY);
+
+  const width = current.screenX - start.screenX;
+  const height = current.screenY - start.screenY;
 
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
-  ctx.strokeRect(startX, startY, width, height);
+  ctx.strokeRect(start.screenX, start.screenY, width, height);
 }
 
 
@@ -40,15 +44,17 @@ export function renderRectangle(
   ctx: CanvasRenderingContext2D,
   shape: RectangleShape,
   selectedShapeId: string | null,
+  worldToScreen: WorldToScreen
 ) {
+  const screen = worldToScreen(shape.x, shape.y);
 
   ctx.save();
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
 
   ctx.strokeRect(
-    shape.x,
-    shape.y,
+    screen.screenX,
+    screen.screenY,
     shape.width,
     shape.height
   );
@@ -59,8 +65,8 @@ export function renderRectangle(
     ctx.setLineDash([5, 5]);
 
     ctx.strokeRect(
-      shape.x - 5,
-      shape.y - 5,
+      screen.screenX - 5,
+      screen.screenY - 5,
       shape.width + 10,
       shape.height + 10
     );

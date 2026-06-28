@@ -1,4 +1,4 @@
-import { Shape } from "../utils/types";
+import { Shape, WorldToScreen } from "../utils/types";
 import { clearCanvas } from "../utils/clearCanvas";
 
 export function socketMessageListener(
@@ -7,6 +7,7 @@ export function socketMessageListener(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   getSelectedShapeId: () => string | null,
+  worldToScreen: WorldToScreen
 ) {
   socket.onmessage = (event) => {
     if (socket.readyState !== WebSocket.OPEN) return;
@@ -15,7 +16,7 @@ export function socketMessageListener(
 
     if (parsedMessage.type === "create_element") {
       existingShapes.push(parsedMessage.shape);
-      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId());
+      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId(), worldToScreen);
     }
 
     if (parsedMessage.type === "update_element") {
@@ -27,7 +28,7 @@ export function socketMessageListener(
         existingShapes[index] = parsedMessage.shape;
       }
 
-      clearCanvas(existingShapes, canvas, ctx, null);
+      clearCanvas(existingShapes, canvas, ctx, null, worldToScreen);
     }
 
     if (parsedMessage.type === "delete_element") {
@@ -38,7 +39,7 @@ export function socketMessageListener(
       if (index !== -1) {
         existingShapes.splice(index, 1);
       }
-      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId());
+      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId(), worldToScreen);
     }
   };
 }

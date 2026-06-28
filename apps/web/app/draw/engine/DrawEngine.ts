@@ -61,7 +61,7 @@ export class DrawEngine {
   private camera = {
     x: 0,
     y: 0,
-  }
+  };
 
   public state = {
     clicked: false,
@@ -109,6 +109,7 @@ export class DrawEngine {
       this.canvas,
       this.ctx,
       () => this.state.selectedShapeId,
+      this.worldToScreen.bind(this)
     );
 
     this.render();
@@ -121,6 +122,7 @@ export class DrawEngine {
       this.canvas,
       this.ctx,
       this.state.selectedShapeId,
+      this.worldToScreen.bind(this),
     );
   }
 
@@ -143,30 +145,48 @@ export class DrawEngine {
     this.render();
   }
 
+  private worldToScreen = (worldX: number, worldY: number) => {
+    const screenX = worldX - this.camera.x;
+    const screenY = worldY - this.camera.y;
+    return {
+      screenX,
+      screenY,
+    };
+  }
+
+  private screenToWorld(screenX: number, screenY: number) {
+    const worldX = screenX + this.camera.x;
+    const worldY = screenY + this.camera.y;
+    return {
+      worldX,
+      worldY,
+    };
+  }
 
   private mouseDownHandler = (e: MouseEvent) => {
     const pos = getCanvasCoordinates(e, this.canvas);
-    this.state.startX = pos.x;
-    this.state.startY = pos.y;
+    const worldCoord = this.screenToWorld(pos.x, pos.y);
+    this.state.startX = worldCoord.worldX;
+    this.state.startY = worldCoord.worldY;
     handleMouseDown(this.state);
 
     if (this.shape.current === "pencil") {
       this.state.currentStroke = [];
 
       this.state.currentStroke.push({
-        x: pos.x,
-        y: pos.y,
+        x: worldCoord.worldX,
+        y: worldCoord.worldY,
       });
     }
 
     if (this.shape.current === "text") {
-      this.onTextClick(pos.x, pos.y);
+      this.onTextClick(worldCoord.worldX, worldCoord.worldY);
     }
 
     if (this.shape.current === "move") {
-      this.state.lastMouseX = pos.x,
-      this.state.lastMouseY = pos.y,
-      this.state.isMovingCamera = true
+      ((this.state.lastMouseX = pos.x),
+        (this.state.lastMouseY = pos.y),
+        (this.state.isMovingCamera = true));
     }
 
     if (this.shape.current === "pointer") {
@@ -178,26 +198,34 @@ export class DrawEngine {
 
         switch (shape.type) {
           case "rect":
-            if (isPointInsideRectangle(pos.x, pos.y, shape)) {
+            if (
+              isPointInsideRectangle(
+                worldCoord.worldX,
+                worldCoord.worldY,
+                shape,
+              )
+            ) {
               this.state.selectedShapeId = shape.id;
               this.state.isDraggingShape = true;
 
               this.initialDraggedShapeProps = structuredClone(shape);
 
-              this.state.dragOffsetX = pos.x - shape.x;
-              this.state.dragOffsetY = pos.y - shape.y;
+              this.state.dragOffsetX = worldCoord.worldX - shape.x;
+              this.state.dragOffsetY = worldCoord.worldY - shape.y;
               clickedOnShape = true;
             }
             break;
           case "circle":
-            if (isPointInsideCircle(pos.x, pos.y, shape)) {
+            if (
+              isPointInsideCircle(worldCoord.worldX, worldCoord.worldY, shape)
+            ) {
               this.state.selectedShapeId = shape.id;
               this.state.isDraggingShape = true;
 
               this.initialDraggedShapeProps = structuredClone(shape);
 
-              this.state.dragOffsetX = pos.x - shape.centreX;
-              this.state.dragOffsetY = pos.y - shape.centreY;
+              this.state.dragOffsetX = worldCoord.worldX - shape.centreX;
+              this.state.dragOffsetY = worldCoord.worldY - shape.centreY;
               clickedOnShape = true;
             }
             break;
@@ -205,16 +233,16 @@ export class DrawEngine {
             if (
               isPointInsideLine(
                 this.ctx,
-                pos.x,
-                pos.y,
+                worldCoord.worldX,
+                worldCoord.worldY,
                 shape.startX,
                 shape.startY,
                 shape.endX,
                 shape.endY,
               )
             ) {
-              this.state.dragOffsetX = pos.x - shape.startX;
-              this.state.dragOffsetY = pos.y - shape.startY;
+              this.state.dragOffsetX = worldCoord.worldX - shape.startX;
+              this.state.dragOffsetY = worldCoord.worldY - shape.startY;
 
               this.initialDraggedShapeProps = structuredClone(shape);
 
@@ -227,16 +255,16 @@ export class DrawEngine {
             if (
               isPointOnArrow(
                 this.ctx,
-                pos.x,
-                pos.y,
+                worldCoord.worldX,
+                worldCoord.worldY,
                 shape.x1,
                 shape.y1,
                 shape.x2,
                 shape.y2,
               )
             ) {
-              this.state.dragOffsetX = pos.x - shape.x1;
-              this.state.dragOffsetY = pos.y - shape.y1;
+              this.state.dragOffsetX = worldCoord.worldX - shape.x1;
+              this.state.dragOffsetY = worldCoord.worldY - shape.y1;
 
               this.initialDraggedShapeProps = structuredClone(shape);
 
@@ -246,9 +274,16 @@ export class DrawEngine {
             }
             break;
           case "pencil":
-            if (isPointOnPencil(this.ctx, pos.x, pos.y, shape)) {
-              this.state.dragOffsetX = pos.x;
-              this.state.dragOffsetY = pos.y;
+            if (
+              isPointOnPencil(
+                this.ctx,
+                worldCoord.worldX,
+                worldCoord.worldY,
+                shape,
+              )
+            ) {
+              this.state.dragOffsetX = worldCoord.worldX;
+              this.state.dragOffsetY = worldCoord.worldY;
 
               this.initialDraggedShapeProps = structuredClone(shape);
 
@@ -258,9 +293,16 @@ export class DrawEngine {
             }
             break;
           case "text":
-            if (isPointOnText(this.ctx, pos.x, pos.y, shape)) {
-              this.state.dragOffsetX = pos.x - shape.x;
-              this.state.dragOffsetY = pos.y - shape.y;
+            if (
+              isPointOnText(
+                this.ctx,
+                worldCoord.worldX,
+                worldCoord.worldY,
+                shape,
+              )
+            ) {
+              this.state.dragOffsetX = worldCoord.worldX - shape.x;
+              this.state.dragOffsetY = worldCoord.worldY - shape.y;
 
               this.initialDraggedShapeProps = structuredClone(shape);
 
@@ -279,6 +321,7 @@ export class DrawEngine {
 
   private mouseMoveHandler = (e: MouseEvent) => {
     const pos = getCanvasCoordinates(e, this.canvas);
+    const world = this.screenToWorld(pos.x, pos.y);
 
     if (this.shape.current === "pointer") {
       if (this.state.isDraggingShape && this.state.selectedShapeId) {
@@ -287,20 +330,20 @@ export class DrawEngine {
         );
 
         if (selectedShape && selectedShape.type === "rect") {
-          selectedShape.x = pos.x - this.state.dragOffsetX;
-          selectedShape.y = pos.y - this.state.dragOffsetY;
+          selectedShape.x = world.worldX - this.state.dragOffsetX;
+          selectedShape.y = world.worldY - this.state.dragOffsetY;
         }
 
         if (selectedShape && selectedShape.type === "circle") {
-          selectedShape.centreX = pos.x - this.state.dragOffsetX;
-          selectedShape.centreY = pos.y - this.state.dragOffsetY;
+          selectedShape.centreX = world.worldX - this.state.dragOffsetX;
+          selectedShape.centreY = world.worldY - this.state.dragOffsetY;
         }
         if (selectedShape && selectedShape.type === "line") {
           const linedx = selectedShape.endX - selectedShape.startX;
           const linedy = selectedShape.endY - selectedShape.startY;
 
-          selectedShape.startX = pos.x - this.state.dragOffsetX;
-          selectedShape.startY = pos.y - this.state.dragOffsetY;
+          selectedShape.startX = world.worldX - this.state.dragOffsetX;
+          selectedShape.startY = world.worldY - this.state.dragOffsetY;
 
           selectedShape.endX = selectedShape.startX + linedx;
           selectedShape.endY = selectedShape.startY + linedy;
@@ -309,27 +352,27 @@ export class DrawEngine {
           const linedx = selectedShape.x2 - selectedShape.x1;
           const linedy = selectedShape.y2 - selectedShape.y1;
 
-          selectedShape.x1 = pos.x - this.state.dragOffsetX;
-          selectedShape.y1 = pos.y - this.state.dragOffsetY;
+          selectedShape.x1 = world.worldX - this.state.dragOffsetX;
+          selectedShape.y1 = world.worldY - this.state.dragOffsetY;
 
           selectedShape.x2 = linedx + selectedShape.x1;
           selectedShape.y2 = linedy + selectedShape.y1;
         }
         if (selectedShape && selectedShape.type === "pencil") {
-          const dx = pos.x - this.state.dragOffsetX;
-          const dy = pos.y - this.state.dragOffsetY;
+          const dx = world.worldX - this.state.dragOffsetX;
+          const dy = world.worldY - this.state.dragOffsetY;
 
           for (const point of selectedShape.points) {
             point.x += dx;
             point.y += dy;
           }
 
-          this.state.dragOffsetX = pos.x;
-          this.state.dragOffsetY = pos.y;
+          this.state.dragOffsetX = world.worldX;
+          this.state.dragOffsetY = world.worldY;
         }
         if (selectedShape && selectedShape.type === "text") {
-          selectedShape.x = pos.x - this.state.dragOffsetX;
-          selectedShape.y = pos.y - this.state.dragOffsetY;
+          selectedShape.x = world.worldX - this.state.dragOffsetX;
+          selectedShape.y = world.worldY - this.state.dragOffsetY;
         }
         this.render();
       }
@@ -340,13 +383,15 @@ export class DrawEngine {
       const dx = pos.x - this.state.lastMouseX;
       const dy = pos.y - this.state.lastMouseY;
 
-      this.camera.x += dx;
-      this.camera.y += dy;
+      this.camera.x -= dx;
+      this.camera.y -= dy;
+
+      this.render();
+      console.log("x: ", this.camera.x, "y; ", this.camera.y);
 
       this.state.lastMouseX = pos.x;
       this.state.lastMouseY = pos.y;
     }
-
 
     if (!this.state.clicked) return;
 
@@ -358,8 +403,9 @@ export class DrawEngine {
           this.ctx,
           this.state.startX,
           this.state.startY,
-          pos.x,
-          pos.y,
+          world.worldX,
+          world.worldY,
+          this.worldToScreen.bind(this),
         );
         break;
       case "circle":
@@ -367,8 +413,9 @@ export class DrawEngine {
           this.ctx,
           this.state.startX,
           this.state.startY,
-          pos.x,
-          pos.y,
+          world.worldX,
+          world.worldY,
+          this.worldToScreen
         );
         break;
       case "line":
@@ -376,12 +423,12 @@ export class DrawEngine {
           this.ctx,
           this.state.startX,
           this.state.startY,
-          pos.x,
-          pos.y,
+          world.worldX,
+          world.worldY,
         );
         break;
       case "pencil":
-        this.state.currentStroke.push({ x: pos.x, y: pos.y });
+        this.state.currentStroke.push({ x: world.worldX, y: world.worldY });
         previewPencil(this.ctx, this.state.currentStroke);
         break;
       case "arrow":
@@ -389,8 +436,8 @@ export class DrawEngine {
           this.ctx,
           this.state.startX,
           this.state.startY,
-          pos.x,
-          pos.y,
+          world.worldX,
+          world.worldY,
         );
         break;
     }
@@ -399,6 +446,7 @@ export class DrawEngine {
   private mouseUpHandler = (e: MouseEvent) => {
     handleMouseUp(this.state);
     const pos = getCanvasCoordinates(e, this.canvas);
+    const world = this.screenToWorld(pos.x, pos.y);
 
     if (this.shape.current === "pointer") {
       if (this.state.isDraggingShape && this.state.selectedShapeId) {
@@ -433,8 +481,8 @@ export class DrawEngine {
     }
 
     const isClick =
-      Math.abs(pos.x - this.state.startX) < 2 &&
-      Math.abs(pos.y - this.state.startY) < 2;
+      Math.abs(world.worldX - this.state.startX) < 2 &&
+      Math.abs(world.worldY - this.state.startY) < 2;
 
     if (isClick) {
       return;
@@ -447,24 +495,24 @@ export class DrawEngine {
         newShape = createRectangle(
           this.state.startX,
           this.state.startY,
-          pos.x,
-          pos.y,
+          world.worldX,
+          world.worldY,
         );
         break;
       case "circle":
         newShape = createCircle(
           this.state.startX,
           this.state.startY,
-          pos.x,
-          pos.y,
+          world.worldX,
+          world.worldY,
         );
         break;
       case "line":
         newShape = createLine(
           this.state.startX,
           this.state.startY,
-          pos.x,
-          pos.y,
+          world.worldX,
+          world.worldY,
         );
         break;
       case "pencil":
@@ -474,8 +522,8 @@ export class DrawEngine {
         newShape = createArrow(
           this.state.startX,
           this.state.startY,
-          pos.x,
-          pos.y,
+          world.worldX,
+          world.worldY,
         );
         break;
     }
@@ -558,7 +606,7 @@ export class DrawEngine {
         createElementSender(this.socket, action.shape, this.roomId);
         break;
       case "DELETE":
-          deleteElementSender(action.shape.id, this.socket, this.roomId);
+        deleteElementSender(action.shape.id, this.socket, this.roomId);
         break;
       case "MOVE":
         const shapeToRestore = this.existingShapes.find(

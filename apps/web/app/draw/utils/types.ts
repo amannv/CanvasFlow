@@ -79,6 +79,14 @@ export type HistoryAction =
       newProps: Shape;
     };
 
+export type WorldToScreen = (
+  worldX: number,
+  worldY: number,
+) => {
+  screenX: number;
+  screenY: number;
+};
+
 export type Shape =
   | RectangleShape
   | CircleShape

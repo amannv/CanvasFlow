@@ -1,4 +1,4 @@
-import { CircleShape } from "../../utils/types";
+import { CircleShape, WorldToScreen } from "../../utils/types";
 
 export function createCircle(
   startX: number,
@@ -26,14 +26,19 @@ export function previewCircle(
   startY: number,
   currentX: number,
   currentY: number,
+  worldToScreen: WorldToScreen
+
 ) {
-  const deltaX = currentX - startX;
-  const deltaY = currentY - startY;
+  const start = worldToScreen(startX, startY);
+  const current = worldToScreen(currentX, currentY);
+
+  const deltaX = current.screenX - start.screenX;
+  const deltaY = current.screenY - start.screenY;
 
   const radius = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
   ctx.beginPath();
-  ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+  ctx.arc(start.screenX, start.screenY, radius, 0, 2 * Math.PI);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
   ctx.stroke();
@@ -45,18 +50,21 @@ export function renderCircle(
   ctx: CanvasRenderingContext2D,
   shape: CircleShape,
   selectedShapeId: string | null,
+  worldToScreen: WorldToScreen
 ) {
+  const screen = worldToScreen(shape.centreX, shape.centreY);
+
   ctx.save();
 
   ctx.beginPath();
-  ctx.arc(shape.centreX, shape.centreY, shape.radius, 0, 2 * Math.PI);
+  ctx.arc(screen.screenX, screen.screenY, shape.radius, 0, 2 * Math.PI);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
   ctx.stroke();
 
   if (shape.id === selectedShapeId) {
     ctx.beginPath();
-    ctx.arc(shape.centreX, shape.centreY, shape.radius + 5, 0, 2 * Math.PI);
+    ctx.arc(screen.screenX, screen.screenY, shape.radius + 5, 0, 2 * Math.PI);
     ctx.lineWidth = 2;
     ctx.strokeStyle = "blue";
     ctx.setLineDash([5, 5]);
