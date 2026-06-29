@@ -61,6 +61,7 @@ export class DrawEngine {
   private camera = {
     x: 0,
     y: 0,
+    scale: 1,
   };
 
   public state = {
@@ -109,7 +110,7 @@ export class DrawEngine {
       this.canvas,
       this.ctx,
       () => this.state.selectedShapeId,
-      this.worldToScreen.bind(this)
+      this.worldToScreen.bind(this),
     );
 
     this.render();
@@ -146,17 +147,18 @@ export class DrawEngine {
   }
 
   private worldToScreen = (worldX: number, worldY: number) => {
-    const screenX = worldX - this.camera.x;
-    const screenY = worldY - this.camera.y;
+    const screenX = (worldX - this.camera.x) * this.camera.scale;
+    const screenY = (worldY - this.camera.y) * this.camera.scale;
     return {
       screenX,
       screenY,
+      scale: this.camera.scale,
     };
-  }
+  };
 
   private screenToWorld(screenX: number, screenY: number) {
-    const worldX = screenX + this.camera.x;
-    const worldY = screenY + this.camera.y;
+    const worldX = screenX / this.camera.scale + this.camera.x;
+    const worldY = screenY / this.camera.scale + this.camera.y;
     return {
       worldX,
       worldY,
@@ -383,8 +385,8 @@ export class DrawEngine {
       const dx = pos.x - this.state.lastMouseX;
       const dy = pos.y - this.state.lastMouseY;
 
-      this.camera.x -= dx;
-      this.camera.y -= dy;
+      this.camera.x -= dx / this.camera.scale;
+      this.camera.y -= dy / this.camera.scale;
 
       this.render();
       console.log("x: ", this.camera.x, "y; ", this.camera.y);
@@ -415,7 +417,7 @@ export class DrawEngine {
           this.state.startY,
           world.worldX,
           world.worldY,
-          this.worldToScreen
+          this.worldToScreen,
         );
         break;
       case "line":
@@ -425,11 +427,16 @@ export class DrawEngine {
           this.state.startY,
           world.worldX,
           world.worldY,
+          this.worldToScreen.bind(this),
         );
         break;
       case "pencil":
         this.state.currentStroke.push({ x: world.worldX, y: world.worldY });
-        previewPencil(this.ctx, this.state.currentStroke);
+        previewPencil(
+          this.ctx,
+          this.state.currentStroke,
+          this.worldToScreen.bind(this),
+        );
         break;
       case "arrow":
         previewArrow(
@@ -438,6 +445,7 @@ export class DrawEngine {
           this.state.startY,
           world.worldX,
           world.worldY,
+          this.worldToScreen.bind(this),
         );
         break;
     }
@@ -564,6 +572,38 @@ export class DrawEngine {
     }
   };
 
+  private wheelMoveEvent = (e: WheelEvent) => {
+    if (!e.ctrlKey) return;
+
+    e.preventDefault();
+
+    const rect = this.canvas.getBoundingClientRect();
+
+    const pos = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+
+    const worldBeforeZoom = this.screenToWorld(pos.x, pos.y);
+
+    const zoomFactor = 1.1;
+    const oldScale = this.camera.scale;
+
+    if (e.deltaY < 0) {
+      this.camera.scale *= zoomFactor;
+    } else {
+      this.camera.scale /= zoomFactor;
+    }
+
+    this.camera.scale = Math.min(Math.max(this.camera.scale, 0.1), 10);
+
+    this.camera.x = worldBeforeZoom.worldX - pos.x / this.camera.scale;
+
+    this.camera.y = worldBeforeZoom.worldY - pos.y / this.camera.scale;
+
+    this.render();
+  };
+
   public undo() {
     const action = this.History.pop();
     if (!action) return;
@@ -634,6 +674,8 @@ export class DrawEngine {
     this.canvas.addEventListener("mousedown", this.mouseDownHandler);
     this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
     this.canvas.addEventListener("mouseup", this.mouseUpHandler);
+    this.canvas.addEventListener("wheel", this.wheelMoveEvent);
+
     window.addEventListener("keydown", this.keyDownHandler);
   }
 
@@ -643,6 +685,8 @@ export class DrawEngine {
     this.canvas.removeEventListener("mousedown", this.mouseDownHandler);
     this.canvas.removeEventListener("mousemove", this.mouseMoveHandler);
     this.canvas.removeEventListener("mouseup", this.mouseUpHandler);
+    this.canvas.removeEventListener("wheel", this.wheelMoveEvent);
+
     window.removeEventListener("keydown", this.keyDownHandler);
   }
 }

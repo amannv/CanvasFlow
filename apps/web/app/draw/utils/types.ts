@@ -85,6 +85,7 @@ export type WorldToScreen = (
 ) => {
   screenX: number;
   screenY: number;
+  scale: number,
 };
 
 export type Shape =

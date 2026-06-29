@@ -23,16 +23,16 @@ export function clearCanvas(
       renderCircle(ctx, shape, selectedShapeId, worldToScreen);
     }
     if (shape.type === "line") {
-      renderLine(ctx, shape, selectedShapeId, );
+      renderLine(ctx, shape, selectedShapeId, worldToScreen);
     }
     if (shape.type === "text") {
-      renderText(ctx, shape, selectedShapeId, );
+      renderText(ctx, shape, selectedShapeId, worldToScreen);
     }
     if (shape.type === "pencil") {
-      renderPencil(ctx, shape, selectedShapeId,);
+      renderPencil(ctx, shape, selectedShapeId, worldToScreen);
     }
     if (shape.type === "arrow") {
-      renderArrow(ctx, shape, selectedShapeId,);
+      renderArrow(ctx, shape, selectedShapeId, worldToScreen);
     }
   });
 }

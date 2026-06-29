@@ -1,4 +1,4 @@
-import { ArrowType } from "../../utils/types";
+import { ArrowType, WorldToScreen } from "../../utils/types";
 
 export function createArrow(
   startX: number,
@@ -23,29 +23,33 @@ export function previewArrow(
   startY: number,
   currentX: number,
   currentY: number,
+  worldToScreen: WorldToScreen
 ) {
+  const start = worldToScreen(startX, startY);
+  const current = worldToScreen(currentX, currentY);
+  
   const headlen = 16;
 
-  const dx = currentX - startX;
-  const dy = currentY - startY;
+  const dx = current.screenX - start.screenX;
+  const dy = current.screenY - start.screenY;
 
   const angle = Math.atan2(dy, dx);
 
   ctx.beginPath();
 
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(currentX, currentY);
+  ctx.moveTo(start.screenX, start.screenY);
+  ctx.lineTo(current.screenX, current.screenY);
 
-  ctx.moveTo(currentX, currentY);
+  ctx.moveTo(current.screenX, current.screenY);
   ctx.lineTo(
-    currentX - headlen * Math.cos(angle - Math.PI / 6),
-    currentY - headlen * Math.sin(angle - Math.PI / 6),
+    current.screenX - headlen * Math.cos(angle - Math.PI / 6),
+    current.screenY - headlen * Math.sin(angle - Math.PI / 6),
   );
 
-  ctx.moveTo(currentX, currentY);
+  ctx.moveTo(current.screenX, current.screenY);
   ctx.lineTo(
-    currentX - headlen * Math.cos(angle + Math.PI / 6),
-    currentY - headlen * Math.sin(angle + Math.PI / 6),
+    current.screenX- headlen * Math.cos(angle + Math.PI / 6),
+    current.screenY - headlen * Math.sin(angle + Math.PI / 6),
   );
 
   ctx.strokeStyle = "black";
@@ -57,31 +61,35 @@ export function renderArrow(
   ctx: CanvasRenderingContext2D,
   shape: ArrowType,
   selectedShapeId: string | null,
+  worldToScreen: WorldToScreen,
 ) {
+  const shapeOne = worldToScreen(shape.x1, shape.y1);
+  const shapeTwo = worldToScreen(shape.x2, shape.y2);
+  
   ctx.save();
 
   const headlen = 16;
 
-  const dx = shape.x2 - shape.x1;
-  const dy = shape.y2 - shape.y1;
+  const dx = shapeTwo.screenX - shapeOne.screenX;
+  const dy = shapeTwo.screenY - shapeOne.screenY;
 
   const angle = Math.atan2(dy, dx);
 
   ctx.beginPath();
 
-  ctx.moveTo(shape.x1, shape.y1);
-  ctx.lineTo(shape.x2, shape.y2);
+  ctx.moveTo(shapeOne.screenX, shapeOne.screenY);
+  ctx.lineTo(shapeTwo.screenX, shapeTwo.screenY);
 
-  ctx.moveTo(shape.x2, shape.y2);
+  ctx.moveTo(shapeTwo.screenX, shapeTwo.screenY);
   ctx.lineTo(
-    shape.x2 - headlen * Math.cos(angle - Math.PI / 6),
-    shape.y2 - headlen * Math.sin(angle - Math.PI / 6),
+    shapeTwo.screenX - headlen * Math.cos(angle - Math.PI / 6),
+    shapeTwo.screenY - headlen * Math.sin(angle - Math.PI / 6),
   );
 
-  ctx.moveTo(shape.x2, shape.y2);
+  ctx.moveTo(shapeTwo.screenX, shapeTwo.screenY);
   ctx.lineTo(
-    shape.x2 - headlen * Math.cos(angle + Math.PI / 6),
-    shape.y2 - headlen * Math.sin(angle + Math.PI / 6),
+    shapeTwo.screenX - headlen * Math.cos(angle + Math.PI / 6),
+    shapeTwo.screenY - headlen * Math.sin(angle + Math.PI / 6),
   );
 
   ctx.strokeStyle = "black";
@@ -90,12 +98,12 @@ export function renderArrow(
 
   if (selectedShapeId === shape.id) {
     ctx.beginPath();
-    ctx.arc(shape.x1, shape.y1, 5, 0, Math.PI * 2);
+    ctx.arc(shapeOne.screenX, shapeOne.screenY, 5, 0, Math.PI * 2);
     ctx.fillStyle = "blue";
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(shape.x2, shape.y2, 5, 0, Math.PI * 2);
+    ctx.arc(shapeTwo.screenX, shapeTwo.screenY, 5, 0, Math.PI * 2);
     ctx.fill();
   }
 

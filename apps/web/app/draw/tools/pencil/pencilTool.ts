@@ -1,4 +1,4 @@
-import { PencilShape } from "../../utils/types";
+import { PencilShape, WorldToScreen } from "../../utils/types";
 
 export function createPencil(
     points: {
@@ -18,21 +18,26 @@ export function createPencil(
 export function previewPencil(
   ctx: CanvasRenderingContext2D,
   points: { x: number; y: number }[],
+  worldToScreen: WorldToScreen
 ) {
-  const firstPoint = points[0];
+  const screenPoints = points.map(point => {
+    return worldToScreen(point.x, point.y);
+  })
+
+  const firstPoint = screenPoints[0];
 
   if (!firstPoint) return;
 
   ctx.beginPath();
 
-  ctx.moveTo(firstPoint.x, firstPoint.y);
+  ctx.moveTo(firstPoint.screenX, firstPoint.screenY);
 
   for (let i = 1; i < points.length; i++) {
-    const point = points[i];
+    const point = screenPoints[i];
 
     if (!point) continue;
 
-    ctx.lineTo(point.x, point.y);
+    ctx.lineTo(point.screenX, point.screenY);
   }
 
   ctx.lineWidth = 2;
@@ -46,8 +51,14 @@ export function renderPencil(
   ctx: CanvasRenderingContext2D,
   shape: PencilShape,
   selectedShapeId: string | null,
+  worldToScreen: WorldToScreen,
 ) {
-  const startingPoint = shape.points[0];
+
+  const screenPoints = shape.points.map(shape => {
+    return worldToScreen(shape.x, shape.y);
+  });
+  
+  const startingPoint = screenPoints[0];
 
   if (!startingPoint) return;
 
@@ -55,14 +66,14 @@ export function renderPencil(
 
   ctx.beginPath();
 
-  ctx.moveTo(startingPoint.x, startingPoint.y);
+  ctx.moveTo(startingPoint.screenX, startingPoint.screenY);
 
   for (let i = 1; i < shape.points.length; i++) {
-    const point = shape.points[i];
+    const point = screenPoints[i];
 
     if (!point) continue;
 
-    ctx.lineTo(point.x, point.y);
+    ctx.lineTo(point.screenX, point.screenY);
   }
 
   ctx.lineWidth = 2;
@@ -70,11 +81,11 @@ export function renderPencil(
   ctx.stroke();
 
   if (selectedShapeId === shape.id) {
-    const minX = Math.min(...shape.points.map((p) => p.x));
-    const minY = Math.min(...shape.points.map((p) => p.y));
+    const minX = Math.min(...screenPoints.map((p) => p.screenX));
+    const minY = Math.min(...screenPoints.map((p) => p.screenY));
 
-    const maxX = Math.max(...shape.points.map((p) => p.x));
-    const maxY = Math.max(...shape.points.map((p) => p.y));
+    const maxX = Math.max(...screenPoints.map((p) => p.screenX));
+    const maxY = Math.max(...screenPoints.map((p) => p.screenY));
 
     const width = maxX - minX;
     const height = maxY - minY;

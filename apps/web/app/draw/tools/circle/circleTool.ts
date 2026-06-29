@@ -52,19 +52,19 @@ export function renderCircle(
   selectedShapeId: string | null,
   worldToScreen: WorldToScreen
 ) {
-  const screen = worldToScreen(shape.centreX, shape.centreY);
+  const { screenX, screenY, scale } = worldToScreen(shape.centreX, shape.centreY);
 
   ctx.save();
 
   ctx.beginPath();
-  ctx.arc(screen.screenX, screen.screenY, shape.radius, 0, 2 * Math.PI);
+  ctx.arc(screenX, screenY, shape.radius * scale, 0, 2 * Math.PI);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
   ctx.stroke();
 
   if (shape.id === selectedShapeId) {
     ctx.beginPath();
-    ctx.arc(screen.screenX, screen.screenY, shape.radius + 5, 0, 2 * Math.PI);
+    ctx.arc(screenX, screenY, (shape.radius * scale) + 5, 0, 2 * Math.PI);
     ctx.lineWidth = 2;
     ctx.strokeStyle = "blue";
     ctx.setLineDash([5, 5]);

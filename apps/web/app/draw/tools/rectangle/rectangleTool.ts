@@ -46,17 +46,17 @@ export function renderRectangle(
   selectedShapeId: string | null,
   worldToScreen: WorldToScreen
 ) {
-  const screen = worldToScreen(shape.x, shape.y);
+  const { screenX, screenY, scale }  = worldToScreen(shape.x, shape.y);
 
   ctx.save();
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
 
   ctx.strokeRect(
-    screen.screenX,
-    screen.screenY,
-    shape.width,
-    shape.height
+    screenX,
+    screenY,
+    shape.width * scale,
+    shape.height * scale,
   );
 
   if (shape.id === selectedShapeId) {
@@ -65,10 +65,10 @@ export function renderRectangle(
     ctx.setLineDash([5, 5]);
 
     ctx.strokeRect(
-      screen.screenX - 5,
-      screen.screenY - 5,
-      shape.width + 10,
-      shape.height + 10
+      screenX - 5,
+      screenY - 5,
+      (shape.width * scale) + 10,
+      (shape.height * scale) + 10
     );
   }
 

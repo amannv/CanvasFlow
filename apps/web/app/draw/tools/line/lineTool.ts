@@ -1,4 +1,4 @@
-import { LineShape } from "../../utils/types";
+import { LineShape, WorldToScreen } from "../../utils/types";
 
 export function createLine(
   startX: number,
@@ -25,10 +25,14 @@ export function previewLine(
   startY: number,
   currentX: number,
   currentY: number,
+  worldToScreen: WorldToScreen,
 ) {
+  const start = worldToScreen(startX, startY);
+  const current = worldToScreen(currentX, currentY);
+
   ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(currentX, currentY);
+  ctx.moveTo(start.screenX, start.screenY);
+  ctx.lineTo(current.screenX, current.screenY);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
   ctx.stroke();
@@ -41,25 +45,29 @@ export function renderLine(
   ctx: CanvasRenderingContext2D, 
   shape: LineShape,
   selectedShapeId: string | null,
+  worldToScreen: WorldToScreen,
 ) {
+
+  const start = worldToScreen(shape.startX, shape.startY);
+  const end = worldToScreen(shape.endX, shape.endY);
 
   ctx.save();
 
   ctx.beginPath();
-  ctx.moveTo(shape.startX, shape.startY);
-  ctx.lineTo(shape.endX, shape.endY);
+  ctx.moveTo(start.screenX, start.screenY);
+  ctx.lineTo(end.screenX, end.screenY);
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
   ctx.stroke();
 
   if (selectedShapeId === shape.id) {
   ctx.beginPath();
-  ctx.arc(shape.startX, shape.startY, 5, 0, Math.PI * 2);
+  ctx.arc(start.screenX, start.screenY, 5, 0, Math.PI * 2);
   ctx.fillStyle = "blue";
   ctx.fill();
 
   ctx.beginPath();
-  ctx.arc(shape.endX, shape.endY, 5, 0, Math.PI * 2);
+  ctx.arc(end.screenX, end.screenY, 5, 0, Math.PI * 2);
   ctx.fill();
 }
 
