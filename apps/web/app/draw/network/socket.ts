@@ -28,7 +28,7 @@ export function socketMessageListener(
         existingShapes[index] = parsedMessage.shape;
       }
 
-      clearCanvas(existingShapes, canvas, ctx, null, worldToScreen);
+      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId(), worldToScreen);
     }
 
     if (parsedMessage.type === "delete_element") {

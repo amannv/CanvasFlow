@@ -105,6 +105,29 @@ export function renderArrow(
     ctx.beginPath();
     ctx.arc(shapeTwo.screenX, shapeTwo.screenY, 5, 0, Math.PI * 2);
     ctx.fill();
+
+    const midX = (shapeOne.screenX + shapeTwo.screenX) / 2;
+    const midY = (shapeOne.screenY + shapeTwo.screenY) / 2;
+    const len = Math.hypot(dx, dy);
+    
+    const nx = len === 0 ? 0 : -dy / len;
+    const ny = len === 0 ? -1 : dx / len;
+    
+    const rotLength = 25;
+    const rotX = midX + nx * rotLength;
+    const rotY = midY + ny * rotLength;
+    
+    ctx.beginPath();
+    ctx.moveTo(midX, midY);
+    ctx.lineTo(rotX, rotY);
+    ctx.strokeStyle = "blue";
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.arc(rotX, rotY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.stroke();
   }
 
   ctx.restore();
@@ -121,18 +144,48 @@ export function isPointOnArrow(
   selectionArea = 10,
 ) {
   ctx.save();
-
   ctx.beginPath();
-
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
-
   ctx.lineCap = "round";
   ctx.lineWidth = selectionArea;
-
   const touch = ctx.isPointInStroke(mouseX, mouseY);
-
   ctx.restore();
-
   return touch;
+}
+
+export function getArrowHandleAtPoint(
+  mouseX: number,
+  mouseY: number,
+  shape: ArrowType,
+  scale: number
+): string | null {
+  const hs = 10 / scale;
+  
+  if (Math.hypot(mouseX - shape.x1, mouseY - shape.y1) <= hs) {
+    return "start";
+  }
+  
+  if (Math.hypot(mouseX - shape.x2, mouseY - shape.y2) <= hs) {
+    return "end";
+  }
+  
+  const midX = (shape.x1 + shape.x2) / 2;
+  const midY = (shape.y1 + shape.y2) / 2;
+  const dx = shape.x2 - shape.x1;
+  const dy = shape.y2 - shape.y1;
+  const len = Math.hypot(dx, dy);
+  
+  const nx = len === 0 ? 0 : -dy / len;
+  const ny = len === 0 ? -1 : dx / len;
+  
+  const rotLength = 25 / scale;
+  const rotX = midX + nx * rotLength;
+  const rotY = midY + ny * rotLength;
+  
+  if (Math.hypot(mouseX - rotX, mouseY - rotY) <= hs) {
+    return "rotate";
+  }
+  
+  return null;
 }

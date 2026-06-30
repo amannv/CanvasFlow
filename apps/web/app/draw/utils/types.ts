@@ -8,13 +8,16 @@ export type RectangleShape = BaseShape & {
   y: number;
   width: number;
   height: number;
+  angle?: number;
 };
 
 export type CircleShape = BaseShape & {
   type: "circle";
   centreX: number;
   centreY: number;
-  radius: number;
+  radiusX: number;
+  radiusY: number;
+  angle?: number;
 };
 
 export type LineShape = BaseShape & {
@@ -30,6 +33,9 @@ export type TextShape = BaseShape & {
   x: number;
   y: number;
   text: string;
+  width?: number;
+  height?: number;
+  angle?: number;
 };
 
 export type DrawState = {
@@ -42,6 +48,7 @@ export type PencilShape = BaseShape & {
     x: number;
     y: number;
   }[];
+  angle?: number;
 };
 
 export type ArrowType = BaseShape & {

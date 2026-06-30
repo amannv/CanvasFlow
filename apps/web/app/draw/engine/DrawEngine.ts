@@ -12,28 +12,34 @@ import {
   createArrow,
   previewArrow,
   isPointOnArrow,
+  getArrowHandleAtPoint,
 } from "../tools/arrow/ArrowTool";
 import {
   createCircle,
   previewCircle,
   isPointInsideCircle,
+  getCircleHandleAtPoint,
 } from "../tools/circle/circleTool";
 import {
   createLine,
   previewLine,
   isPointInsideLine,
+  getLineHandleAtPoint,
 } from "../tools/line/lineTool";
 import {
   createPencil,
   previewPencil,
   isPointOnPencil,
+  getPencilHandleAtPoint,
 } from "../tools/pencil/pencilTool";
 import {
   createRectangle,
   previewRectangle,
   isPointInsideRectangle,
+  getRectangleHandleAtPoint,
+  rotatePoint,
 } from "../tools/rectangle/rectangleTool";
-import { isPointOnText } from "../tools/text/textTool";
+import { isPointOnText, getTextHandleAtPoint } from "../tools/text/textTool";
 import { ShapeType } from "../utils/types";
 import { RefObject } from "react";
 import { Shape } from "../utils/types";
@@ -71,6 +77,9 @@ export class DrawEngine {
     currentStroke: [] as { x: number; y: number }[],
     selectedShapeId: null as string | null,
     isDraggingShape: false,
+    isResizingShape: false,
+    isRotatingShape: false,
+    activeHandle: null as string | null,
     dragOffsetX: 0,
     dragOffsetY: 0,
     isMovingCamera: false,
@@ -172,6 +181,10 @@ export class DrawEngine {
     this.state.startY = worldCoord.worldY;
     handleMouseDown(this.state);
 
+    if (this.shape.current !== "pointer") {
+      this.state.selectedShapeId = null;
+    }
+
     if (this.shape.current === "pencil") {
       this.state.currentStroke = [];
 
@@ -193,10 +206,74 @@ export class DrawEngine {
 
     if (this.shape.current === "pointer") {
       let clickedOnShape = false;
-      for (let i = this.existingShapes.length - 1; i >= 0; i--) {
-        const shape = this.existingShapes[i];
 
-        if (!shape?.id) continue;
+      if (this.state.selectedShapeId) {
+        const selectedShape = this.existingShapes.find(s => s.id === this.state.selectedShapeId);
+        if (selectedShape) {
+          let handle = null;
+          if (selectedShape.type === "rect") {
+            handle = getRectangleHandleAtPoint(
+              worldCoord.worldX,
+              worldCoord.worldY,
+              selectedShape,
+              this.camera.scale
+            );
+          } else if (selectedShape.type === "circle") {
+            handle = getCircleHandleAtPoint(
+              worldCoord.worldX,
+              worldCoord.worldY,
+              selectedShape,
+              this.camera.scale
+            );
+          } else if (selectedShape.type === "line") {
+            handle = getLineHandleAtPoint(
+              worldCoord.worldX,
+              worldCoord.worldY,
+              selectedShape,
+              this.camera.scale
+            );
+          } else if (selectedShape.type === "arrow") {
+            handle = getArrowHandleAtPoint(
+              worldCoord.worldX,
+              worldCoord.worldY,
+              selectedShape,
+              this.camera.scale
+            );
+          } else if (selectedShape.type === "pencil") {
+            handle = getPencilHandleAtPoint(
+              worldCoord.worldX,
+              worldCoord.worldY,
+              selectedShape,
+              this.camera.scale
+            );
+          } else if (selectedShape.type === "text") {
+            handle = getTextHandleAtPoint(
+              worldCoord.worldX,
+              worldCoord.worldY,
+              selectedShape,
+              this.camera.scale,
+              this.ctx
+            );
+          }
+
+          if (handle) {
+            if (handle === "rotate") {
+              this.state.isRotatingShape = true;
+            } else {
+              this.state.isResizingShape = true;
+              this.state.activeHandle = handle;
+            }
+            this.initialDraggedShapeProps = structuredClone(selectedShape);
+            clickedOnShape = true;
+          }
+        }
+      }
+
+      if (!clickedOnShape) {
+        for (let i = this.existingShapes.length - 1; i >= 0; i--) {
+          const shape = this.existingShapes[i];
+
+          if (!shape?.id) continue;
 
         switch (shape.type) {
           case "rect":
@@ -314,6 +391,8 @@ export class DrawEngine {
             }
         }
       }
+      } // close if (!clickedOnShape) around the for loop
+
       if (!clickedOnShape) {
         this.state.selectedShapeId = null;
       }
@@ -326,6 +405,252 @@ export class DrawEngine {
     const world = this.screenToWorld(pos.x, pos.y);
 
     if (this.shape.current === "pointer") {
+      if (this.state.isRotatingShape && this.state.selectedShapeId) {
+        const selectedShape = this.existingShapes.find(
+          (shape) => shape.id === this.state.selectedShapeId,
+        );
+        if (selectedShape) {
+          if (selectedShape.type === "rect") {
+            const cx = selectedShape.x + selectedShape.width / 2;
+            const cy = selectedShape.y + selectedShape.height / 2;
+            selectedShape.angle = Math.atan2(world.worldY - cy, world.worldX - cx) + Math.PI / 2;
+            this.render();
+          } else if (selectedShape.type === "circle") {
+            const cx = selectedShape.centreX;
+            const cy = selectedShape.centreY;
+            selectedShape.angle = Math.atan2(world.worldY - cy, world.worldX - cx) + Math.PI / 2;
+            this.render();
+          } else if (selectedShape.type === "line") {
+            const cx = (selectedShape.startX + selectedShape.endX) / 2;
+            const cy = (selectedShape.startY + selectedShape.endY) / 2;
+            const length = Math.hypot(selectedShape.endX - selectedShape.startX, selectedShape.endY - selectedShape.startY);
+            const angle = Math.atan2(world.worldY - cy, world.worldX - cx) - Math.PI / 2;
+            selectedShape.startX = cx - Math.cos(angle) * (length / 2);
+            selectedShape.startY = cy - Math.sin(angle) * (length / 2);
+            selectedShape.endX = cx + Math.cos(angle) * (length / 2);
+            selectedShape.endY = cy + Math.sin(angle) * (length / 2);
+            this.render();
+          } else if (selectedShape.type === "arrow") {
+            const cx = (selectedShape.x1 + selectedShape.x2) / 2;
+            const cy = (selectedShape.y1 + selectedShape.y2) / 2;
+            const length = Math.hypot(selectedShape.x2 - selectedShape.x1, selectedShape.y2 - selectedShape.y1);
+            const angle = Math.atan2(world.worldY - cy, world.worldX - cx) - Math.PI / 2;
+            selectedShape.x1 = cx - Math.cos(angle) * (length / 2);
+            selectedShape.y1 = cy - Math.sin(angle) * (length / 2);
+            selectedShape.x2 = cx + Math.cos(angle) * (length / 2);
+            selectedShape.y2 = cy + Math.sin(angle) * (length / 2);
+            this.render();
+          } else if (selectedShape.type === "pencil") {
+            const minX = Math.min(...selectedShape.points.map(p => p.x));
+            const minY = Math.min(...selectedShape.points.map(p => p.y));
+            const maxX = Math.max(...selectedShape.points.map(p => p.x));
+            const maxY = Math.max(...selectedShape.points.map(p => p.y));
+            const cx = minX + (maxX - minX) / 2;
+            const cy = minY + (maxY - minY) / 2;
+            selectedShape.angle = Math.atan2(world.worldY - cy, world.worldX - cx) + Math.PI / 2;
+            this.render();
+          } else if (selectedShape.type === "text") {
+            this.ctx.save();
+            this.ctx.font = "24px Sniglet";
+            const baseWidth = this.ctx.measureText(selectedShape.text).width;
+            this.ctx.restore();
+            const width = selectedShape.width ?? baseWidth;
+            const height = selectedShape.height ?? 24;
+            const cx = selectedShape.x + width / 2;
+            const cy = selectedShape.y + height / 2;
+            selectedShape.angle = Math.atan2(world.worldY - cy, world.worldX - cx) + Math.PI / 2;
+            this.render();
+          }
+        }
+        return;
+      }
+
+      if (this.state.isResizingShape && this.state.selectedShapeId && this.initialDraggedShapeProps) {
+        const selectedShape = this.existingShapes.find(
+          (shape) => shape.id === this.state.selectedShapeId,
+        );
+        const initial = this.initialDraggedShapeProps;
+
+        if (selectedShape && selectedShape.type === "line" && initial.type === "line") {
+          if (this.state.activeHandle === "start") {
+            selectedShape.startX = world.worldX;
+            selectedShape.startY = world.worldY;
+          } else if (this.state.activeHandle === "end") {
+            selectedShape.endX = world.worldX;
+            selectedShape.endY = world.worldY;
+          }
+          this.render();
+          return;
+        }
+
+        if (selectedShape && selectedShape.type === "arrow" && initial.type === "arrow") {
+          if (this.state.activeHandle === "start") {
+            selectedShape.x1 = world.worldX;
+            selectedShape.y1 = world.worldY;
+          } else if (this.state.activeHandle === "end") {
+            selectedShape.x2 = world.worldX;
+            selectedShape.y2 = world.worldY;
+          }
+          this.render();
+          return;
+        }
+
+        if (selectedShape && selectedShape.type === "pencil" && initial.type === "pencil") {
+          const initialMinX = Math.min(...initial.points.map(p => p.x));
+          const initialMinY = Math.min(...initial.points.map(p => p.y));
+          const initialMaxX = Math.max(...initial.points.map(p => p.x));
+          const initialMaxY = Math.max(...initial.points.map(p => p.y));
+          const initialWidth = initialMaxX - initialMinX;
+          const initialHeight = initialMaxY - initialMinY;
+          const angle = initial.angle || 0;
+          const cx = initialMinX + initialWidth / 2;
+          const cy = initialMinY + initialHeight / 2;
+          
+          const unrotatedMouse = rotatePoint(world.worldX, world.worldY, cx, cy, -angle);
+          
+          let newMinX = initialMinX;
+          let newMinY = initialMinY;
+          let newWidth = initialWidth;
+          let newHeight = initialHeight;
+          
+          if (this.state.activeHandle === "se") {
+            newWidth = unrotatedMouse.x - initialMinX;
+            newHeight = unrotatedMouse.y - initialMinY;
+          } else if (this.state.activeHandle === "nw") {
+            newWidth = initialMaxX - unrotatedMouse.x;
+            newHeight = initialMaxY - unrotatedMouse.y;
+            newMinX = unrotatedMouse.x;
+            newMinY = unrotatedMouse.y;
+          } else if (this.state.activeHandle === "ne") {
+            newWidth = unrotatedMouse.x - initialMinX;
+            newHeight = initialMaxY - unrotatedMouse.y;
+            newMinY = unrotatedMouse.y;
+          } else if (this.state.activeHandle === "sw") {
+            newWidth = initialMaxX - unrotatedMouse.x;
+            newHeight = unrotatedMouse.y - initialMinY;
+            newMinX = unrotatedMouse.x;
+          }
+
+          const scaleX = newWidth / (initialWidth || 1);
+          const scaleY = newHeight / (initialHeight || 1);
+
+          selectedShape.points = initial.points.map(p => ({
+            x: newMinX + (p.x - initialMinX) * scaleX,
+            y: newMinY + (p.y - initialMinY) * scaleY,
+          }));
+
+          this.render();
+          return;
+        }
+
+        if (selectedShape && (selectedShape.type === "rect" || selectedShape.type === "circle" || selectedShape.type === "text") && (initial.type === "rect" || initial.type === "circle" || initial.type === "text")) {
+          const getInitialWidth = () => {
+             if (initial.type === "rect") return initial.width;
+             if (initial.type === "circle") return initial.radiusX * 2;
+             this.ctx.save();
+             this.ctx.font = "24px Sniglet";
+             const baseWidth = this.ctx.measureText(initial.text).width;
+             this.ctx.restore();
+             return initial.width ?? baseWidth;
+          }
+          const getInitialHeight = () => {
+             if (initial.type === "rect") return initial.height;
+             if (initial.type === "circle") return initial.radiusY * 2;
+             return initial.height ?? 24;
+          }
+
+          const initialX = initial.type === "rect" || initial.type === "text" ? initial.x : initial.centreX - initial.radiusX;
+          const initialY = initial.type === "rect" || initial.type === "text" ? initial.y : initial.centreY - initial.radiusY;
+          const initialWidth = getInitialWidth();
+          const initialHeight = getInitialHeight();
+          const angle = initial.angle || 0;
+          
+          const cx = initialX + initialWidth / 2;
+          const cy = initialY + initialHeight / 2;
+          
+          const unrotatedMouse = rotatePoint(world.worldX, world.worldY, cx, cy, -angle);
+          
+          let newX = initialX;
+          let newY = initialY;
+          let newWidth = initialWidth;
+          let newHeight = initialHeight;
+          
+          if (this.state.activeHandle === "se") {
+            newWidth = unrotatedMouse.x - initialX;
+            newHeight = unrotatedMouse.y - initialY;
+          } else if (this.state.activeHandle === "nw") {
+            newWidth = (initialX + initialWidth) - unrotatedMouse.x;
+            newHeight = (initialY + initialHeight) - unrotatedMouse.y;
+            newX = unrotatedMouse.x;
+            newY = unrotatedMouse.y;
+          } else if (this.state.activeHandle === "ne") {
+            newWidth = unrotatedMouse.x - initialX;
+            newHeight = (initialY + initialHeight) - unrotatedMouse.y;
+            newY = unrotatedMouse.y;
+          } else if (this.state.activeHandle === "sw") {
+            newWidth = (initialX + initialWidth) - unrotatedMouse.x;
+            newHeight = unrotatedMouse.y - initialY;
+            newX = unrotatedMouse.x;
+          }
+          
+          if (newWidth < 0) {
+            newX += newWidth;
+            newWidth = Math.abs(newWidth);
+          }
+          if (newHeight < 0) {
+            newY += newHeight;
+            newHeight = Math.abs(newHeight);
+          }
+          
+          let fixedCornerX, fixedCornerY;
+          if (this.state.activeHandle === "se") {
+            fixedCornerX = initialX; fixedCornerY = initialY;
+          } else if (this.state.activeHandle === "nw") {
+            fixedCornerX = initialX + initialWidth; fixedCornerY = initialY + initialHeight;
+          } else if (this.state.activeHandle === "ne") {
+            fixedCornerX = initialX; fixedCornerY = initialY + initialHeight;
+          } else {
+            fixedCornerX = initialX + initialWidth; fixedCornerY = initialY;
+          }
+          
+          const fixedWorld = rotatePoint(fixedCornerX, fixedCornerY, cx, cy, angle);
+          
+          const newCx = newX + newWidth / 2;
+          const newCy = newY + newHeight / 2;
+          
+          let newFixedCornerX, newFixedCornerY;
+          if (this.state.activeHandle === "se") {
+            newFixedCornerX = newX; newFixedCornerY = newY;
+          } else if (this.state.activeHandle === "nw") {
+            newFixedCornerX = newX + newWidth; newFixedCornerY = newY + newHeight;
+          } else if (this.state.activeHandle === "ne") {
+            newFixedCornerX = newX; newFixedCornerY = newY + newHeight;
+          } else {
+            newFixedCornerX = newX + newWidth; newFixedCornerY = newY;
+          }
+          
+          const newFixedWorld = rotatePoint(newFixedCornerX, newFixedCornerY, newCx, newCy, angle);
+          
+          const dx = fixedWorld.x - newFixedWorld.x;
+          const dy = fixedWorld.y - newFixedWorld.y;
+          
+          if (selectedShape.type === "rect" || selectedShape.type === "text") {
+            selectedShape.x = newX + dx;
+            selectedShape.y = newY + dy;
+            selectedShape.width = newWidth;
+            selectedShape.height = newHeight;
+          } else {
+            selectedShape.centreX = newX + dx + newWidth / 2;
+            selectedShape.centreY = newY + dy + newHeight / 2;
+            selectedShape.radiusX = newWidth / 2;
+            selectedShape.radiusY = newHeight / 2;
+          }
+          
+          this.render();
+        }
+        return;
+      }
+
       if (this.state.isDraggingShape && this.state.selectedShapeId) {
         const selectedShape = this.existingShapes.find(
           (shape) => shape.id === this.state.selectedShapeId,
@@ -457,7 +782,7 @@ export class DrawEngine {
     const world = this.screenToWorld(pos.x, pos.y);
 
     if (this.shape.current === "pointer") {
-      if (this.state.isDraggingShape && this.state.selectedShapeId) {
+      if ((this.state.isDraggingShape || this.state.isResizingShape || this.state.isRotatingShape) && this.state.selectedShapeId) {
         const selectedShape = this.existingShapes.find(
           (shape) => shape.id === this.state.selectedShapeId,
         );
@@ -480,6 +805,9 @@ export class DrawEngine {
           this.redoStack = [];
         }
         this.state.isDraggingShape = false;
+        this.state.isResizingShape = false;
+        this.state.isRotatingShape = false;
+        this.state.activeHandle = null;
       }
       return;
     }
@@ -540,6 +868,7 @@ export class DrawEngine {
       createElementSender(this.socket, newShape, this.roomId);
       this.History.push({ type: "CREATE", shape: structuredClone(newShape) });
       this.redoStack = [];
+      this.state.selectedShapeId = newShape.id;
     }
   };
 
@@ -690,3 +1019,4 @@ export class DrawEngine {
     window.removeEventListener("keydown", this.keyDownHandler);
   }
 }
+
