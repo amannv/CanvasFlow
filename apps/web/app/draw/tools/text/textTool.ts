@@ -29,6 +29,26 @@ export function previewText(
   ctx.restore();
 }
 
+export function getTextDimensions(ctx: CanvasRenderingContext2D, shape: TextShape) {
+  ctx.save();
+  ctx.font = "24px Sniglet";
+  const lines = shape.text.split("\n");
+  let maxLineWidth = 1;
+  if (lines.length > 0) {
+    maxLineWidth = Math.max(1, ...lines.map(line => ctx.measureText(line).width));
+  }
+  ctx.restore();
+  
+  const baseWidth = maxLineWidth;
+  const baseHeight = Math.max(1, lines.length) * 24;
+  
+  const width = shape.width ?? baseWidth;
+  const uniformScale = width / baseWidth;
+  const height = baseHeight * uniformScale;
+
+  return { baseWidth, baseHeight, width, height, uniformScale, lines };
+}
+
 export function renderText(
   ctx: CanvasRenderingContext2D, 
   shape: TextShape,
@@ -36,21 +56,15 @@ export function renderText(
   worldToScreen: WorldToScreen
 ) {
   const { screenX, screenY, scale } = worldToScreen(shape.x, shape.y);
-
-  ctx.save();
-  ctx.font = `24px Sniglet`; // Use base font to measure
-  const baseWidth = ctx.measureText(shape.text).width;
-  const baseHeight = 24;
-
-  const width = (shape.width ?? baseWidth) * scale;
-  const height = (shape.height ?? baseHeight) * scale;
+  const { width: rawWidth, height: rawHeight, uniformScale, lines } = getTextDimensions(ctx, shape);
   
-  const scaleX = width / (baseWidth * scale);
-  const scaleY = height / (baseHeight * scale);
+  const width = rawWidth * scale;
+  const height = rawHeight * scale;
 
   const cx = screenX + width / 2;
   const cy = screenY + height / 2;
 
+  ctx.save();
   ctx.translate(cx, cy);
   if (shape.angle) {
     ctx.rotate(shape.angle);
@@ -60,11 +74,13 @@ export function renderText(
   // Draw text
   ctx.save();
   ctx.translate(screenX, screenY);
-  ctx.scale(scaleX, scaleY);
-  ctx.font = `${24 * scale}px Sniglet`; // scale applies natively
+  ctx.scale(uniformScale * scale, uniformScale * scale);
+  ctx.font = `24px Sniglet`;
   ctx.textBaseline = "top";
   ctx.fillStyle = "black";
-  ctx.fillText(shape.text, 0, 0);
+  lines.forEach((line, index) => {
+    ctx.fillText(line, 0, index * 24);
+  });
   ctx.restore();
 
   if (selectedShapeId === shape.id) {
@@ -119,13 +135,7 @@ export function isPointOnText(
   mouseY: number,
   shape: TextShape,
 ) {
-  ctx.save();
-  ctx.font = "24px Sniglet";
-  const baseWidth = ctx.measureText(shape.text).width;
-  ctx.restore();
-  
-  const width = shape.width ?? baseWidth;
-  const height = shape.height ?? 24;
+  const { width, height } = getTextDimensions(ctx, shape);
 
   let px = mouseX;
   let py = mouseY;
@@ -153,13 +163,7 @@ export function getTextHandleAtPoint(
   scale: number,
   ctx: CanvasRenderingContext2D
 ): string | null {
-  ctx.save();
-  ctx.font = "24px Sniglet";
-  const baseWidth = ctx.measureText(shape.text).width;
-  ctx.restore();
-  
-  const width = shape.width ?? baseWidth;
-  const height = shape.height ?? 24;
+  const { width, height } = getTextDimensions(ctx, shape);
   const cx = shape.x + width / 2;
   const cy = shape.y + height / 2;
 

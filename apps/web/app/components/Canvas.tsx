@@ -15,7 +15,6 @@ import { createText } from "../draw/tools/text/textTool";
 import { createElementSender } from "../draw/network/socket";
 import { ShapeType } from "../draw/utils/types";
 
-
 export function Canvas({
   roomId,
   socket,
@@ -28,17 +27,17 @@ export function Canvas({
   const shapeRef = useRef<ShapeType>("none");
   const engineRef = useRef<DrawEngine | null>(null);
   const [textEditor, setTextEditor] = useState<{
-    x: number;
-    y: number;
+    worldX: number;
+    worldY: number;
   } | null>(null);
   const [textValue, setTextValue] = useState<string>("");
+  const [cameraVersion, setCameraVersion] = useState(0);
 
   useEffect(() => {
     shapeRef.current = shape;
   }, [shape]);
 
   useEffect(() => {
-     console.log("Canvas mounted");
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
 
@@ -50,50 +49,75 @@ export function Canvas({
       roomId,
       socket,
       shapeRef,
-      (x, y) => {
-        setTextEditor({ x, y });
+      (worldX, worldY) => {
+        setTextEditor({ worldX, worldY });
+      },
+      () => {
+        setCameraVersion((v) => v + 1);
       }
     );
 
+    document.fonts.ready.then(() => {
+      engineRef.current?.render();
+    });
+
     return () => {
-          console.log("Canvas unmounted");
-      console.log("cleanup engine listeners");
       engineRef.current?.destroy();
-    }
+    };
   }, [roomId, socket]);
+
+  const screenPosition =
+    textEditor && engineRef.current
+      ? engineRef.current.worldToScreen(textEditor.worldX, textEditor.worldY)
+      : null;
 
   return (
     <div className="relative">
       <canvas ref={canvasRef} className="fixed inset-0 bg-neutral-50" />
       {textEditor && (
         <textarea
+          ref={(el) => {
+            if (el && document.activeElement !== el) {
+              setTimeout(() => el.focus(), 0);
+            }
+          }}
           autoFocus
           value={textValue}
           onChange={(e) => {
             setTextValue(e.target.value);
+            e.target.style.height = "0px";
+            e.target.style.height = `${e.target.scrollHeight}px`;
+            e.target.style.width = "0px";
+            e.target.style.width = `${e.target.scrollWidth}px`;
           }}
-          className="absolute z-50 bg-transparent outline-none resize-none"
-          style={{
-            left: textEditor.x,
-            top: textEditor.y,
-            fontSize: 24,
-            fontFamily: "Sniglet",
-            color: "#000",
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-
+          onBlur={() => {
+            if (textValue.trim() !== "") {
               const textShape = createText(
-                textEditor.x,
-                textEditor.y,
+                textEditor.worldX,
+                textEditor.worldY,
                 textValue,
               );
-
+              if (engineRef.current) {
+                engineRef.current.addShape(textShape);
+              }
               createElementSender(socket, textShape, roomId);
-              setTextEditor(null);
-              setTextValue("");
             }
+            setTextEditor(null);
+            setTextValue("");
+          }}
+          className="absolute z-50 bg-transparent outline-none resize-none overflow-hidden whitespace-pre"
+          style={{
+            left: screenPosition?.screenX,
+            top: screenPosition?.screenY,
+            fontSize: `${24 * (screenPosition?.scale ?? 1)}px`,
+            fontFamily: "Sniglet",
+            color: "#000",
+            minHeight: "1.2em",
+            minWidth: "1em",
+            lineHeight: 1.2,
+            padding: 0,
+            margin: 0,
+            border: "none",
           }}
         />
       )}

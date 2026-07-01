@@ -7,16 +7,28 @@ export function socketMessageListener(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
   getSelectedShapeId: () => string | null,
-  worldToScreen: WorldToScreen
+  worldToScreen: WorldToScreen,
+  ignoreUpdate: (id: string) => boolean = () => false
 ) {
   socket.onmessage = (event) => {
     if (socket.readyState !== WebSocket.OPEN) return;
 
     const parsedMessage = JSON.parse(event.data);
+    console.log("received", parsedMessage.type);
 
     if (parsedMessage.type === "create_element") {
-      existingShapes.push(parsedMessage.shape);
-      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId(), worldToScreen);
+      console.log("RECEIVE", parsedMessage.shape.id, parsedMessage.shape.type);
+      const exists = existingShapes.some((s) => s.id === parsedMessage.shape.id);
+      if (!exists) {
+        existingShapes.push(parsedMessage.shape);
+        clearCanvas(
+          existingShapes,
+          canvas,
+          ctx,
+          getSelectedShapeId(),
+          worldToScreen,
+        );
+      }
     }
 
     if (parsedMessage.type === "update_element") {
@@ -25,10 +37,18 @@ export function socketMessageListener(
       );
 
       if (index !== -1) {
-        existingShapes[index] = parsedMessage.shape;
+        if (!ignoreUpdate(parsedMessage.shapeId)) {
+          existingShapes[index] = parsedMessage.shape;
+        }
       }
 
-      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId(), worldToScreen);
+      clearCanvas(
+        existingShapes,
+        canvas,
+        ctx,
+        getSelectedShapeId(),
+        worldToScreen,
+      );
     }
 
     if (parsedMessage.type === "delete_element") {
@@ -39,7 +59,13 @@ export function socketMessageListener(
       if (index !== -1) {
         existingShapes.splice(index, 1);
       }
-      clearCanvas(existingShapes, canvas, ctx, getSelectedShapeId(), worldToScreen);
+      clearCanvas(
+        existingShapes,
+        canvas,
+        ctx,
+        getSelectedShapeId(),
+        worldToScreen,
+      );
     }
   };
 }
@@ -87,7 +113,6 @@ export function deleteElementSender(
   socket: WebSocket,
   roomId: string,
 ) {
-
   if (socket.readyState !== WebSocket.OPEN) return;
 
   socket.send(
