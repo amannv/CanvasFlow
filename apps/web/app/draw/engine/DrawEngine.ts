@@ -39,7 +39,7 @@ import {
   getRectangleHandleAtPoint,
   rotatePoint,
 } from "../tools/rectangle/rectangleTool";
-import { isPointOnText, getTextHandleAtPoint } from "../tools/text/textTool";
+import { isPointOnText, getTextHandleAtPoint, getTextDimensions } from "../tools/text/textTool";
 import { ShapeType } from "../utils/types";
 import { RefObject } from "react";
 import { Shape } from "../utils/types";
@@ -488,12 +488,7 @@ export class DrawEngine {
               Math.atan2(world.worldY - cy, world.worldX - cx) + Math.PI / 2;
             this.render();
           } else if (selectedShape.type === "text") {
-            this.ctx.save();
-            this.ctx.font = "24px Sniglet";
-            const baseWidth = this.ctx.measureText(selectedShape.text).width;
-            this.ctx.restore();
-            const width = selectedShape.width ?? baseWidth;
-            const height = selectedShape.height ?? 24;
+            const { width, height } = getTextDimensions(this.ctx, selectedShape);
             const cx = selectedShape.x + width / 2;
             const cy = selectedShape.y + height / 2;
             selectedShape.angle =
@@ -616,16 +611,14 @@ export class DrawEngine {
           const getInitialWidth = () => {
             if (initial.type === "rect") return initial.width;
             if (initial.type === "circle") return initial.radiusX * 2;
-            this.ctx.save();
-            this.ctx.font = "24px Sniglet";
-            const baseWidth = this.ctx.measureText(initial.text).width;
-            this.ctx.restore();
-            return initial.width ?? baseWidth;
+            if (initial.type === "text") return getTextDimensions(this.ctx, initial).width;
+            return 0;
           };
           const getInitialHeight = () => {
             if (initial.type === "rect") return initial.height;
             if (initial.type === "circle") return initial.radiusY * 2;
-            return initial.height ?? 24;
+            if (initial.type === "text") return getTextDimensions(this.ctx, initial).height;
+            return 0;
           };
 
           const initialX =
@@ -675,9 +668,10 @@ export class DrawEngine {
           }
 
           if (selectedShape.type === "text") {
-            const scale = Math.max(Math.abs(newWidth) / initialWidth, Math.abs(newHeight) / initialHeight);
-            newWidth = initialWidth * scale * Math.sign(newWidth);
-            newHeight = initialHeight * scale * Math.sign(newHeight);
+            const scale = (Math.abs(newWidth) * initialWidth + Math.abs(newHeight) * initialHeight) / 
+                          (initialWidth * initialWidth + initialHeight * initialHeight);
+            newWidth = initialWidth * scale * (Math.sign(newWidth) || 1);
+            newHeight = initialHeight * scale * (Math.sign(newHeight) || 1);
             
             if (this.state.activeHandle === "nw") {
               newX = initialX + initialWidth - newWidth;
