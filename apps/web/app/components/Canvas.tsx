@@ -73,7 +73,7 @@ export function Canvas({
 
   return (
     <div className="relative">
-      <canvas ref={canvasRef} className="fixed inset-0 bg-neutral-50" />
+      <canvas ref={canvasRef} className="fixed inset-0 bg-neutral-950" />
       {textEditor && (
         <textarea
           ref={(el) => {

@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
-
-
+@theme {
+  --font-poppins: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-eb-garamond: var(--font-eb-garamond), serif;
+}
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -33,6 +35,5 @@
   src: url("/fonts/Sniglet-Regular.ttf") format("truetype");
 }
 
-body {
-  font-family: "Sniglet", sans-serif;
-}
+
+

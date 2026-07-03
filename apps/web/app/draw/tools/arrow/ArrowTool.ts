@@ -52,7 +52,7 @@ export function previewArrow(
     current.screenY - headlen * Math.sin(angle + Math.PI / 6),
   );
 
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "white";
   ctx.lineWidth = 2;
   ctx.stroke();
 }
@@ -92,14 +92,14 @@ export function renderArrow(
     shapeTwo.screenY - headlen * Math.sin(angle + Math.PI / 6),
   );
 
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "white";
   ctx.lineWidth = 2;
   ctx.stroke();
 
   if (selectedShapeId === shape.id) {
     ctx.beginPath();
     ctx.arc(shapeOne.screenX, shapeOne.screenY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "blue";
+    ctx.fillStyle = "#7070FE";
     ctx.fill();
 
     ctx.beginPath();
@@ -120,12 +120,12 @@ export function renderArrow(
     ctx.beginPath();
     ctx.moveTo(midX, midY);
     ctx.lineTo(rotX, rotY);
-    ctx.strokeStyle = "blue";
+    ctx.strokeStyle = "#7070FE";
     ctx.stroke();
     
     ctx.beginPath();
     ctx.arc(rotX, rotY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "oklch(14.5% 0 0)";
     ctx.fill();
     ctx.stroke();
   }

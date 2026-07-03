@@ -13,21 +13,21 @@ export function createText(x: number, y: number, text: string): TextShape {
   return shape;
 }
 
-export function previewText(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  text: string,
-  worldToScreen: WorldToScreen
-) {
-  const { screenX, screenY, scale } = worldToScreen(x, y);
-  ctx.save();
-  ctx.font = `${24 * scale}px Sniglet`;
-  ctx.textBaseline = "top";
-  ctx.fillStyle = "black";
-  ctx.fillText(text, screenX, screenY);
-  ctx.restore();
-}
+// export function previewText(
+//   ctx: CanvasRenderingContext2D,
+//   x: number,
+//   y: number,
+//   text: string,
+//   worldToScreen: WorldToScreen
+// ) {
+//   const { screenX, screenY, scale } = worldToScreen(x, y);
+//   ctx.save();
+//   ctx.font = `${24 * scale}px Sniglet`;
+//   ctx.textBaseline = "top";
+//   ctx.fillStyle = "black";
+//   ctx.fillText(text, screenX, screenY);
+//   ctx.restore();
+// }
 
 export function getTextDimensions(ctx: CanvasRenderingContext2D, shape: TextShape) {
   ctx.save();
@@ -77,7 +77,7 @@ export function renderText(
   ctx.scale(uniformScale * scale, uniformScale * scale);
   ctx.font = `24px Sniglet`;
   ctx.textBaseline = "top";
-  ctx.fillStyle = "black";
+  ctx.fillStyle = "white";
   lines.forEach((line, index) => {
     ctx.fillText(line, 0, index * 24);
   });
@@ -85,9 +85,8 @@ export function renderText(
 
   if (selectedShapeId === shape.id) {
     const offset = 5;
-    ctx.strokeStyle = "blue";
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5,5]);
+    ctx.strokeStyle = "#7070FE";
+    ctx.lineWidth = 2;
 
     ctx.strokeRect(
       screenX - offset,
@@ -96,9 +95,8 @@ export function renderText(
       height + offset * 2
     );
 
-    ctx.setLineDash([]);
-    ctx.fillStyle = "white";
-    ctx.strokeStyle = "blue";
+    ctx.fillStyle = "oklch(14.5% 0 0)";
+    ctx.strokeStyle = "#7070FE";
     
     const hs = 10;
     const handles = [

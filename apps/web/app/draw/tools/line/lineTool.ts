@@ -34,7 +34,7 @@ export function previewLine(
   ctx.moveTo(start.screenX, start.screenY);
   ctx.lineTo(current.screenX, current.screenY);
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "white";
   ctx.stroke();
 }
 
@@ -56,13 +56,14 @@ export function renderLine(
   ctx.moveTo(start.screenX, start.screenY);
   ctx.lineTo(end.screenX, end.screenY);
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "white";
   ctx.stroke();
 
   if (selectedShapeId === shape.id) {
     ctx.beginPath();
     ctx.arc(start.screenX, start.screenY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "#7070FE";
     ctx.fill();
 
     ctx.beginPath();
@@ -86,12 +87,12 @@ export function renderLine(
     ctx.beginPath();
     ctx.moveTo(midX, midY);
     ctx.lineTo(rotX, rotY);
-    ctx.strokeStyle = "blue";
+    ctx.strokeStyle = "#7070FE";
     ctx.stroke();
     
     ctx.beginPath();
     ctx.arc(rotX, rotY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "oklch(14.5% 0 0)";
     ctx.fill();
     ctx.stroke();
   }

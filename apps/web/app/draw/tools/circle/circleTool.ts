@@ -42,7 +42,7 @@ export function previewCircle(
   ctx.beginPath();
   ctx.arc(start.screenX, start.screenY, radius, 0, 2 * Math.PI);
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "white";
   ctx.stroke();
 }
 
@@ -67,7 +67,7 @@ export function renderCircle(
   ctx.beginPath();
   ctx.ellipse(0, 0, rx, ry, 0, 0, 2 * Math.PI);
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "white";
   ctx.stroke();
 
   if (shape.id === selectedShapeId) {
@@ -77,13 +77,12 @@ export function renderCircle(
     const bx = -rx - offset;
     const by = -ry - offset;
 
-    ctx.strokeStyle = "blue";
-    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = "#7070FE";
+    ctx.lineWidth = 2;
     ctx.strokeRect(bx, by, boxWidth, boxHeight);
 
-    ctx.setLineDash([]);
-    ctx.fillStyle = "white";
-    ctx.strokeStyle = "blue";
+    ctx.fillStyle = "oklch(14.5% 0 0)";
+    ctx.strokeStyle = "#7070FE";
     
     const hs = 10; // handle size
     const handles = [
