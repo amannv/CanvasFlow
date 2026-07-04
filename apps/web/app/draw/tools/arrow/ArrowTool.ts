@@ -52,7 +52,7 @@ export function previewArrow(
     current.screenY - headlen * Math.sin(angle + Math.PI / 6),
   );
 
-  ctx.strokeStyle = "white";
+  ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
   ctx.stroke();
 }
@@ -92,7 +92,7 @@ export function renderArrow(
     shapeTwo.screenY - headlen * Math.sin(angle + Math.PI / 6),
   );
 
-  ctx.strokeStyle = "white";
+  ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
   ctx.stroke();
 
@@ -125,7 +125,7 @@ export function renderArrow(
     
     ctx.beginPath();
     ctx.arc(rotX, rotY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "oklch(14.5% 0 0)";
+    ctx.fillStyle = "white";
     ctx.fill();
     ctx.stroke();
   }

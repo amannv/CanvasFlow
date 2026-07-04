@@ -77,7 +77,7 @@ export function renderText(
   ctx.scale(uniformScale * scale, uniformScale * scale);
   ctx.font = `24px Sniglet`;
   ctx.textBaseline = "top";
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "black";
   lines.forEach((line, index) => {
     ctx.fillText(line, 0, index * 24);
   });
@@ -95,7 +95,7 @@ export function renderText(
       height + offset * 2
     );
 
-    ctx.fillStyle = "oklch(14.5% 0 0)";
+    ctx.fillStyle = "white";
     ctx.strokeStyle = "#7070FE";
     
     const hs = 10;

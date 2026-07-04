@@ -34,7 +34,7 @@ export function previewRectangle(
   const height = current.screenY - start.screenY;
 
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "white";
+  ctx.strokeStyle = "black";
   ctx.strokeRect(start.screenX, start.screenY, width, height);
 }
 
@@ -60,7 +60,7 @@ export function renderRectangle(
   ctx.translate(-cx, -cy);
 
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "white";
+  ctx.strokeStyle = "black";
 
   ctx.strokeRect(
     screenX,
@@ -81,7 +81,7 @@ export function renderRectangle(
       height + offset * 2
     );
 
-    ctx.fillStyle = "oklch(14.5% 0 0)";
+    ctx.fillStyle = "white";
     ctx.strokeStyle = "#7070FE";
     
     const hs = 10; // handle size
