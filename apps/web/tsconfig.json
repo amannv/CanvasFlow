@@ -9,7 +9,6 @@
     "strictNullChecks": true,
 
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
     "paths": {
       "@/*": ["./*"],
       "@repo/ui/*": ["../../packages/ui/src/*"]

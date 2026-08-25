@@ -182,35 +182,64 @@ export const getElements = async (req: Request, res: Response) => {
 
 export const returnRoomId = async (req: Request, res: Response) => {
   try {
-  const { slug } = req.params;
+    const { slug } = req.params;
 
-if (!slug) {
-  return res.status(400).json({
-    message: "Slug is required",
-  });
-}
+    if (!slug) {
+      return res.status(400).json({
+        message: "Slug is required",
+      });
+    }
 
-  const room = await prisma.room.findUnique({
-    where: {
-      slug: slug as string
-    },
-  })
+    const room = await prisma.room.findUnique({
+      where: {
+        slug: slug as string,
+      },
+    });
 
-  if(!room) {
-    return res.status(404).json({
-      message: "Room not exists",
+    if (!room) {
+      return res.status(404).json({
+        message: "Room not exists",
+      });
+    }
+
+    const roomId = room.id;
+
+    return res.status(200).json({
+      roomId,
+    });
+  } catch (e) {
+    console.error("Error while finding room", e);
+    return res.status(500).json({
+      message: "Internal server error",
     });
   }
+};
 
-  const roomId = room.id;
+export const getRooms = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
 
-  return res.status(200).json({
-    roomId
-  });
-} catch (e) {
-  console.error("Error while finding room", e);
-  return res.status(500).json({
-    message: "Internal server error",
-  });
-}
-}
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthenticated",
+      });
+    }
+
+    const rooms = await prisma.room.findMany({
+      where: {
+        adminId: userId,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Rooms fetched successfully",
+      rooms,
+    });
+  } catch (error: any) {
+    console.error("Error fetching rooms:", error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
