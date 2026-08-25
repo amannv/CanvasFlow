@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "#components/ui/button";
 import {
   Card,
@@ -13,8 +15,31 @@ import {
   FieldLabel,
 } from "#components/field";
 import { Input } from "#components/ui/input";
+import { useState } from "react";
 
-export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+type SignupData = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+export function SignupForm({
+  onSubmit,
+  ...props
+}: Omit<React.ComponentProps<typeof Card>, "onSubmit"> & {
+  onSubmit?: (data: SignupData) => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSubmit) {
+      onSubmit({ name, email, password });
+    }
+  };
+
   return (
     <Card {...props}>
       <CardHeader>
@@ -24,11 +49,20 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="name">Full Name</FieldLabel>
-              <Input id="name" type="text" placeholder="John Doe" required />
+              <Input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                required
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                }}
+              />
             </Field>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -37,11 +71,23 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 type="email"
                 placeholder="m@example.com"
                 required
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
               />
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input id="password" type="password" required />
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+              />
               <FieldDescription>
                 Must be at least 8 characters long.
               </FieldDescription>
