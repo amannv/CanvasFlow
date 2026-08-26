@@ -243,3 +243,50 @@ export const getRooms = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const deleteRoom = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const roomId = req.body.roomId;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    if (!roomId) {
+      return res.status(400).json({
+        message: "Room not found",
+      });
+    }
+
+    const room = await prisma.room.findFirst({
+      where: {
+        id: roomId,
+        adminId: userId,
+      },
+    });
+
+    if (!room) {
+      return res.status(403).json({
+        message: "Room not found",
+      });
+    }
+
+    await prisma.room.delete({
+      where: {
+        id: roomId,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Room deleted successfully",
+    });
+  } catch (error: any) {
+    console.error("Error deleting room:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
