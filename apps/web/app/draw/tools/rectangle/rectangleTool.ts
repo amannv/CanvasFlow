@@ -25,7 +25,7 @@ export function previewRectangle(
   startY: number,
   currentX: number,
   currentY: number,
-  worldToScreen: WorldToScreen
+  worldToScreen: WorldToScreen,
 ) {
   const start = worldToScreen(startX, startY);
   const current = worldToScreen(currentX, currentY);
@@ -42,12 +42,12 @@ export function renderRectangle(
   ctx: CanvasRenderingContext2D,
   shape: RectangleShape,
   selectedShapeId: string | null,
-  worldToScreen: WorldToScreen
+  worldToScreen: WorldToScreen,
 ) {
-  const { screenX, screenY, scale }  = worldToScreen(shape.x, shape.y);
+  const { screenX, screenY, scale } = worldToScreen(shape.x, shape.y);
 
   ctx.save();
-  
+
   const width = shape.width * scale;
   const height = shape.height * scale;
   const cx = screenX + width / 2;
@@ -62,34 +62,32 @@ export function renderRectangle(
   ctx.lineWidth = 2;
   ctx.strokeStyle = "black";
 
-  ctx.strokeRect(
-    screenX,
-    screenY,
-    width,
-    height,
-  );
+  ctx.strokeRect(screenX, screenY, width, height);
 
   if (shape.id === selectedShapeId) {
     ctx.strokeStyle = "#7070FE";
     ctx.lineWidth = 2;
 
     const offset = 8;
-    ctx.strokeRect(
-      screenX - offset,
-      screenY - offset,
-      width + offset * 2,
-      height + offset * 2
-    );
+    const signW = Math.sign(width) || 1;
+    const signH = Math.sign(height) || 1;
+
+    const x1 = screenX - offset * signW;
+    const x2 = screenX + width + offset * signW;
+    const y1 = screenY - offset * signH;
+    const y2 = screenY + height + offset * signH;
+
+    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
     ctx.fillStyle = "white";
     ctx.strokeStyle = "#7070FE";
-    
-    const hs = 10; // handle size
+
+    const hs = 10;
     const handles = [
-      { x: screenX - offset, y: screenY - offset }, // nw
-      { x: screenX + width + offset, y: screenY - offset }, // ne
-      { x: screenX + width + offset, y: screenY + height + offset }, // se
-      { x: screenX - offset, y: screenY + height + offset }, // sw
+      { x: x1, y: y1 }, 
+      { x: x2, y: y1 }, 
+      { x: x2, y: y2 },
+      { x: x1, y: y2 },
     ];
 
     for (const h of handles) {
@@ -97,11 +95,11 @@ export function renderRectangle(
       ctx.strokeRect(h.x - hs / 2, h.y - hs / 2, hs, hs);
     }
 
-    // Rotation handle
     const rx = screenX + width / 2;
-    const ry = screenY - offset - 25;
+    const topY = Math.min(screenY, screenY + height);
+    const ry = topY - offset - 25;
     ctx.beginPath();
-    ctx.moveTo(rx, screenY - offset);
+    ctx.moveTo(rx, topY - offset);
     ctx.lineTo(rx, ry);
     ctx.stroke();
 
@@ -114,70 +112,85 @@ export function renderRectangle(
   ctx.restore();
 }
 
-export function rotatePoint(x: number, y: number, cx: number, cy: number, angle: number) {
+export function rotatePoint(
+  x: number,
+  y: number,
+  cx: number,
+  cy: number,
+  angle: number,
+) {
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
-  const nx = (cos * (x - cx)) - (sin * (y - cy)) + cx;
-  const ny = (sin * (x - cx)) + (cos * (y - cy)) + cy;
+  const nx = cos * (x - cx) - sin * (y - cy) + cx;
+  const ny = sin * (x - cx) + cos * (y - cy) + cy;
   return { x: nx, y: ny };
 }
 
 export function isPointInsideRectangle(
-    mouseX: number,
-    mouseY: number,
-    rect: RectangleShape,
-) {
-    let px = mouseX;
-    let py = mouseY;
-    if (rect.angle) {
-        const cx = rect.x + rect.width / 2;
-        const cy = rect.y + rect.height / 2;
-        const rotated = rotatePoint(px, py, cx, cy, -rect.angle);
-        px = rotated.x;
-        py = rotated.y;
-    }
-
-    return (
-        px >= rect.x &&
-        px <= rect.x + rect.width &&
-        py >= rect.y &&
-        py <= rect.y + rect.height 
-    );
-}
-
-export function getRectangleHandleAtPoint(
-  mouseX: number, // world
-  mouseY: number, // world
+  mouseX: number,
+  mouseY: number,
   rect: RectangleShape,
-  scale: number
-): string | null {
-  const offset = 8 / scale;
-  const hs = 10 / scale; // handle size in world
-  
+) {
   let px = mouseX;
   let py = mouseY;
   if (rect.angle) {
-      const cx = rect.x + rect.width / 2;
-      const cy = rect.y + rect.height / 2;
-      const rotated = rotatePoint(px, py, cx, cy, -rect.angle);
-      px = rotated.x;
-      py = rotated.y;
+    const cx = rect.x + rect.width / 2;
+    const cy = rect.y + rect.height / 2;
+    const rotated = rotatePoint(px, py, cx, cy, -rect.angle);
+    px = rotated.x;
+    py = rotated.y;
   }
 
-  // Check rotation handle
+  const minX = Math.min(rect.x, rect.x + rect.width);
+  const maxX = Math.max(rect.x, rect.x + rect.width);
+  const minY = Math.min(rect.y, rect.y + rect.height);
+  const maxY = Math.max(rect.y, rect.y + rect.height);
+
+  return px >= minX && px <= maxX && py >= minY && py <= maxY;
+}
+
+export function getRectangleHandleAtPoint(
+  mouseX: number,
+  mouseY: number, 
+  rect: RectangleShape,
+  scale: number,
+): string | null {
+  const offset = 8 / scale;
+  const hs = 10 / scale; 
+
+  let px = mouseX;
+  let py = mouseY;
+  if (rect.angle) {
+    const cx = rect.x + rect.width / 2;
+    const cy = rect.y + rect.height / 2;
+    const rotated = rotatePoint(px, py, cx, cy, -rect.angle);
+    px = rotated.x;
+    py = rotated.y;
+  }
+
+
   const rx = rect.x + rect.width / 2;
-  const ry = rect.y - offset - (25 / scale);
+  const topY = Math.min(rect.y, rect.y + rect.height);
+  const ry = topY - offset - (25 / scale);
   const dist = Math.hypot(px - rx, py - ry);
   if (dist <= hs) {
     return "rotate";
   }
 
-  // Check resize handles
+
+  const signW = Math.sign(rect.width) || 1;
+  const signH = Math.sign(rect.height) || 1;
+  
+  const x1 = rect.x - offset * signW;
+  const x2 = rect.x + rect.width + offset * signW;
+  const y1 = rect.y - offset * signH;
+  const y2 = rect.y + rect.height + offset * signH;
+
   const handles = [
-    { id: "nw", x: rect.x - offset, y: rect.y - offset },
-    { id: "ne", x: rect.x + rect.width + offset, y: rect.y - offset },
-    { id: "se", x: rect.x + rect.width + offset, y: rect.y + rect.height + offset },
-    { id: "sw", x: rect.x - offset, y: rect.y + rect.height + offset },
+    { id: "nw", x: x1, y: y1 },
+    { id: "ne", x: x2, y: y1 },
+    { id: "se", x: x2, y: y2 },
+    { id: "sw", x: x1, y: y2 },
   ];
 
   for (const h of handles) {

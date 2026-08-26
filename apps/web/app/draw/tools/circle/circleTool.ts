@@ -56,8 +56,10 @@ export function renderCircle(
 
   ctx.save();
   
-  const rx = shape.radiusX * scale;
-  const ry = shape.radiusY * scale;
+  const sigRx = shape.radiusX * scale;
+  const sigRy = shape.radiusY * scale;
+  const rx = Math.abs(sigRx);
+  const ry = Math.abs(sigRy);
 
   ctx.translate(screenX, screenY);
   if (shape.angle) {
@@ -72,24 +74,24 @@ export function renderCircle(
 
   if (shape.id === selectedShapeId) {
     const offset = 8;
-    const boxWidth = rx * 2 + offset * 2;
-    const boxHeight = ry * 2 + offset * 2;
-    const bx = -rx - offset;
-    const by = -ry - offset;
+    const px1 = -sigRx - offset * (sigRx >= 0 ? 1 : -1);
+    const px2 = sigRx + offset * (sigRx >= 0 ? 1 : -1);
+    const py1 = -sigRy - offset * (sigRy >= 0 ? 1 : -1);
+    const py2 = sigRy + offset * (sigRy >= 0 ? 1 : -1);
 
     ctx.strokeStyle = "#7070FE";
     ctx.lineWidth = 2;
-    ctx.strokeRect(bx, by, boxWidth, boxHeight);
+    ctx.strokeRect(px1, py1, px2 - px1, py2 - py1);
 
     ctx.fillStyle = "white";
     ctx.strokeStyle = "#7070FE";
     
-    const hs = 10; // handle size
+    const hs = 10; 
     const handles = [
-      { x: bx, y: by }, // nw
-      { x: bx + boxWidth, y: by }, // ne
-      { x: bx + boxWidth, y: by + boxHeight }, // se
-      { x: bx, y: by + boxHeight }, // sw
+      { x: px1, y: py1 }, 
+      { x: px2, y: py1 }, 
+      { x: px2, y: py2 },
+      { x: px1, y: py2 },
     ];
 
     for (const h of handles) {
@@ -97,11 +99,11 @@ export function renderCircle(
       ctx.strokeRect(h.x - hs / 2, h.y - hs / 2, hs, hs);
     }
 
-    // Rotation handle
+
     const rtx = 0;
-    const rty = by - 25;
+    const rty = Math.min(py1, py2) - 25;
     ctx.beginPath();
-    ctx.moveTo(rtx, by);
+    ctx.moveTo(rtx, Math.min(py1, py2));
     ctx.lineTo(rtx, rty);
     ctx.stroke();
 
@@ -142,7 +144,7 @@ export function getCircleHandleAtPoint(
   scale: number
 ): string | null {
   const offset = 8 / scale;
-  const hs = 10 / scale; // handle size in world
+  const hs = 10 / scale;
   
   let px = mouseX;
   let py = mouseY;
@@ -152,25 +154,27 @@ export function getCircleHandleAtPoint(
       py = rotated.y;
   }
 
-  const bx = circle.centreX - circle.radiusX - offset;
-  const by = circle.centreY - circle.radiusY - offset;
-  const boxWidth = circle.radiusX * 2 + offset * 2;
-  const boxHeight = circle.radiusY * 2 + offset * 2;
+  const sigRx = circle.radiusX;
+  const sigRy = circle.radiusY;
+  const px1 = circle.centreX - sigRx - offset * (sigRx >= 0 ? 1 : -1);
+  const px2 = circle.centreX + sigRx + offset * (sigRx >= 0 ? 1 : -1);
+  const py1 = circle.centreY - sigRy - offset * (sigRy >= 0 ? 1 : -1);
+  const py2 = circle.centreY + sigRy + offset * (sigRy >= 0 ? 1 : -1);
 
-  // Check rotation handle
+
   const rx = circle.centreX;
-  const ry = by - (25 / scale);
+  const ry = Math.min(py1, py2) - (25 / scale);
   const dist = Math.hypot(px - rx, py - ry);
   if (dist <= hs) {
     return "rotate";
   }
 
-  // Check resize handles
+
   const handles = [
-    { id: "nw", x: bx, y: by },
-    { id: "ne", x: bx + boxWidth, y: by },
-    { id: "se", x: bx + boxWidth, y: by + boxHeight },
-    { id: "sw", x: bx, y: by + boxHeight },
+    { id: "nw", x: px1, y: py1 },
+    { id: "ne", x: px2, y: py1 },
+    { id: "se", x: px2, y: py2 },
+    { id: "sw", x: px1, y: py2 },
   ];
 
   for (const h of handles) {

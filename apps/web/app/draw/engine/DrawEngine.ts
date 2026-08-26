@@ -39,7 +39,11 @@ import {
   getRectangleHandleAtPoint,
   rotatePoint,
 } from "../tools/rectangle/rectangleTool";
-import { isPointOnText, getTextHandleAtPoint, getTextDimensions } from "../tools/text/textTool";
+import {
+  isPointOnText,
+  getTextHandleAtPoint,
+  getTextDimensions,
+} from "../tools/text/textTool";
 import { ShapeType } from "../utils/types";
 import { RefObject } from "react";
 import { Shape } from "../utils/types";
@@ -124,7 +128,7 @@ export class DrawEngine {
       this.ctx,
       () => this.state.selectedShapeId,
       this.worldToScreen.bind(this),
-      (id) => this.state.selectedShapeId === id
+      (id) => this.state.selectedShapeId === id,
     );
 
     this.render();
@@ -140,7 +144,7 @@ export class DrawEngine {
       this.worldToScreen.bind(this),
     );
   }
-  
+
   public addShape(shape: Shape) {
     this.existingShapes.push(shape);
     this.History.push({ type: "CREATE", shape: structuredClone(shape) });
@@ -488,7 +492,10 @@ export class DrawEngine {
               Math.atan2(world.worldY - cy, world.worldX - cx) + Math.PI / 2;
             this.render();
           } else if (selectedShape.type === "text") {
-            const { width, height } = getTextDimensions(this.ctx, selectedShape);
+            const { width, height } = getTextDimensions(
+              this.ctx,
+              selectedShape,
+            );
             const cx = selectedShape.x + width / 2;
             const cy = selectedShape.y + height / 2;
             selectedShape.angle =
@@ -611,13 +618,15 @@ export class DrawEngine {
           const getInitialWidth = () => {
             if (initial.type === "rect") return initial.width;
             if (initial.type === "circle") return initial.radiusX * 2;
-            if (initial.type === "text") return getTextDimensions(this.ctx, initial).width;
+            if (initial.type === "text")
+              return getTextDimensions(this.ctx, initial).width;
             return 0;
           };
           const getInitialHeight = () => {
             if (initial.type === "rect") return initial.height;
             if (initial.type === "circle") return initial.radiusY * 2;
-            if (initial.type === "text") return getTextDimensions(this.ctx, initial).height;
+            if (initial.type === "text")
+              return getTextDimensions(this.ctx, initial).height;
             return 0;
           };
 
@@ -668,11 +677,15 @@ export class DrawEngine {
           }
 
           if (selectedShape.type === "text") {
-            const scale = (Math.abs(newWidth) * initialWidth + Math.abs(newHeight) * initialHeight) / 
-                          (initialWidth * initialWidth + initialHeight * initialHeight);
-            newWidth = initialWidth * scale * (Math.sign(newWidth) || 1);
-            newHeight = initialHeight * scale * (Math.sign(newHeight) || 1);
-            
+            newWidth = Math.max(0, newWidth);
+            newHeight = Math.max(0, newHeight);
+
+            const scale =
+              (newWidth * initialWidth + newHeight * initialHeight) /
+              (initialWidth * initialWidth + initialHeight * initialHeight);
+            newWidth = initialWidth * scale;
+            newHeight = initialHeight * scale;
+
             if (this.state.activeHandle === "nw") {
               newX = initialX + initialWidth - newWidth;
               newY = initialY + initialHeight - newHeight;
@@ -683,14 +696,7 @@ export class DrawEngine {
             }
           }
 
-          if (newWidth < 0) {
-            newX += newWidth;
-            newWidth = Math.abs(newWidth);
-          }
-          if (newHeight < 0) {
-            newY += newHeight;
-            newHeight = Math.abs(newHeight);
-          }
+
 
           let fixedCornerX, fixedCornerY;
           if (this.state.activeHandle === "se") {
@@ -1043,7 +1049,7 @@ export class DrawEngine {
     this.camera.x = worldBeforeZoom.worldX - pos.x / this.camera.scale;
 
     this.camera.y = worldBeforeZoom.worldY - pos.y / this.camera.scale;
-    
+
     this.onCameraChange();
     this.render();
   };
