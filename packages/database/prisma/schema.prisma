@@ -40,7 +40,7 @@ model Element {
   shapeId String @unique
 
   roomId Int
-  room   Room @relation(fields: [roomId], references: [id])
+  room   Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
