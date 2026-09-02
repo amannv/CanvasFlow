@@ -14,7 +14,7 @@ export default function Home() {
       setRoomId(e.target.value);
     }} type="text" placeholder="roomId"></input>
     <button className="bg-neutral-600 p-2 border border-neutral-50" onClick={() => {
-      router.push(`/room/${roomId}`)
+      router.push(`/canvas/${roomId}`)
     }}>Join Room</button>
     </div>
   );

@@ -247,7 +247,7 @@ export const getRooms = async (req: Request, res: Response) => {
 export const deleteRoom = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    const roomId = req.body.roomId;
+    const roomId = Number(req.body.roomId);
 
     if (!userId) {
       return res.status(401).json({
@@ -255,7 +255,7 @@ export const deleteRoom = async (req: Request, res: Response) => {
       });
     }
 
-    if (!roomId) {
+    if (!Number.isInteger(roomId) || roomId < 1) {
       return res.status(400).json({
         message: "Room not found",
       });
