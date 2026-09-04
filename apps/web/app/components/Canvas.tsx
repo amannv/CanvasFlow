@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { DrawEngine } from "../draw/engine/DrawEngine";
 import {
   RectangleHorizontal,
@@ -9,7 +10,9 @@ import {
   Type,
   ArrowUpRight,
   Hand,
+  LogOut,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { createText } from "../draw/tools/text/textTool";
 import { createElementSender } from "../draw/network/socket";
@@ -22,6 +25,7 @@ export function Canvas({
   roomId: string;
   socket: WebSocket;
 }) {
+  const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [shape, setShape] = useState<ShapeType>("none");
   const shapeRef = useRef<ShapeType>("none");
@@ -54,7 +58,7 @@ export function Canvas({
       },
       () => {
         setCameraVersion((v) => v + 1);
-      }
+      },
     );
 
     document.fonts.ready.then(() => {
@@ -70,6 +74,16 @@ export function Canvas({
     textEditor && engineRef.current
       ? engineRef.current.worldToScreen(textEditor.worldX, textEditor.worldY)
       : null;
+  const tools: [ShapeType, LucideIcon, string][] = [
+    ["pointer", MousePointer, "Select"],
+    ["move", Hand, "Pan"],
+    ["pencil", PencilLine, "Pencil"],
+    ["line", Minus, "Line"],
+    ["rectangle", RectangleHorizontal, "Rectangle"],
+    ["circle", Circle, "Circle"],
+    ["arrow", ArrowUpRight, "Arrow"],
+    ["text", Type, "Text"],
+  ];
 
   return (
     <div className="relative">
@@ -121,71 +135,39 @@ export function Canvas({
           }}
         />
       )}
-      <div className="w-screen h-screen flex justify-center items-center">
-        <div className="absolute bottom-5 flex gap-2 bg-neutral-200 p-2 rounded">
-          <div
-            onClick={() => {
-              setShape("rectangle");
-            }}
-            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110"
-          >
-            <RectangleHorizontal />
+      <div className="pointer-events-none fixed inset-0">
+        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2">
+          <div className="rounded-lg border border-black/10 bg-white p-1.5">
+            <div
+              className="flex items-center gap-1"
+              role="toolbar"
+              aria-label="Drawing tools"
+            >
+              {tools.map(([tool, Icon, label]) => (
+                <button
+                  key={tool as string}
+                  type="button"
+                  onClick={() => setShape(tool as ShapeType)}
+                  className={`grid size-10 place-items-center rounded-md transition ${shape === tool ? "bg-sky-400 text-black" : "text-neutral-500 hover:bg-neutral-100 hover:text-black"}`}
+                  title={label as string}
+                  aria-label={label as string}
+                  aria-pressed={shape === tool}
+                >
+                  <Icon size={18} strokeWidth={1.8} />
+                </button>
+              ))}
+            </div>
           </div>
-          <div
-            onClick={() => {
-              setShape("circle");
-            }}
-            className="bg-neutral-100 text-black  p-2 rounded cursor-pointer hover:scale-110"
-          >
-            <Circle />
-          </div>
-          <div
-            onClick={() => {
-              setShape("line");
-            }}
-            className="bg-neutral-100 text-black  p-2 rounded cursor-pointer hover:scale-110"
-          >
-            <Minus />
-          </div>
-          <div
-            onClick={() => {
-              setShape("pencil");
-            }}
-            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110"
-          >
-            <PencilLine />
-          </div>
-          <div
-            onClick={() => {
-              setShape("text");
-            }}
-            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110"
-          >
-            <Type />
-          </div>
-          <div
-            onClick={() => {
-              setShape("arrow");
-            }}
-            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110"
-          >
-            <ArrowUpRight />
-          </div>
-          <div
-            onClick={() => {
-              setShape("pointer");
-            }}
-            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110 "
-          >
-            <MousePointer />
-          </div>
-          <div
-            onClick={() => {
-              setShape("move");
-            }}
-            className="bg-neutral-100 text-black p-2 rounded cursor-pointer hover:scale-110 "
-          >
-            <Hand />
+          <div className="rounded-lg border border-black/10 bg-white p-1.5">
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard")}
+              className="flex h-10 items-center gap-2 rounded-md px-3 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500 transition hover:bg-neutral-100 hover:text-sky-500"
+              title="Exit to dashboard"
+            >
+              <LogOut size={16} />
+              <span className="hidden sm:inline">Exit</span>
+            </button>
           </div>
         </div>
       </div>
