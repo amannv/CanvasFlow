@@ -4,6 +4,7 @@ import { LoginForm } from "@repo/ui/components/login-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { BACKEND_URL } from "../config/config";
+import { AuthShell } from "../components/AuthShell";
 
 type SigninData = {
   email: string;
@@ -25,19 +26,23 @@ export default function Page() {
         console.log("Signin successful");
         router.push("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(
         "Error during signin",
-        error.response?.data?.message || error.message,
+        axios.isAxiosError(error) ? error.response?.data?.message || error.message : "Unexpected error",
       );
     }
   };
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
+    <AuthShell
+      eyebrow="Welcome back"
+      title="Pick up where you left off."
+      description="Sign in to open your rooms and keep making space for the work that matters."
+    >
+      <div className="auth-form">
         <LoginForm onSubmit={handleSignin} />
       </div>
-    </div>
+    </AuthShell>
   );
 }

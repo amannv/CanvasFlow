@@ -4,6 +4,7 @@ import { SignupForm } from "@repo/ui/components/signup-form";
 import { useRouter } from "next/navigation";
 import { BACKEND_URL } from "../config/config";
 import axios from "axios";
+import { AuthShell } from "../components/AuthShell";
 
 type SignupData = {
   name: string;
@@ -20,19 +21,23 @@ export default function Page() {
 
       console.log("Signup successful!");
       router.push("/signin");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(
         "Error during signup:",
-        error.response?.data?.message || error.message,
+        axios.isAxiosError(error) ? error.response?.data?.message || error.message : "Unexpected error",
       );
     }
   };
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
+    <AuthShell
+      eyebrow="Start with a blank canvas"
+      title="Your next room starts here."
+      description="Create a simple home for sketches, diagrams, and the ideas you are not ready to lose."
+    >
+      <div className="auth-form">
         <SignupForm onSubmit={handleSignup} />
       </div>
-    </div>
+    </AuthShell>
   );
 }

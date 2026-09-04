@@ -35,5 +35,86 @@
   src: url("/fonts/Sniglet-Regular.ttf") format("truetype");
 }
 
+.auth-page {
+  background: #0a0a0a;
+}
+
+.auth-grid {
+  display: none;
+}
+
+.auth-form [data-slot="card"] {
+  gap: 0;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  background: #111111;
+  padding: 0;
+  box-shadow: none;
+}
+
+.auth-form [data-slot="card-header"] {
+  border-radius: 0;
+  padding: 1.25rem 1.25rem 0;
+}
+
+.auth-form [data-slot="card-footer"] {
+  border-radius: 0;
+}
+
+.auth-form [data-slot="card-title"],
+.auth-form [data-slot="card-description"] {
+  display: none;
+}
+
+.auth-form [data-slot="card-content"] {
+  padding: 1.25rem;
+}
+
+.auth-form [data-slot="input"] {
+  height: 2.75rem;
+  border-radius: 0;
+  border-color: rgba(255, 255, 255, 0.14);
+  background: #0a0a0a;
+  color: #f4f0e6;
+}
+
+.auth-form [data-slot="input"]:focus-visible {
+  border-color: #38bdf8;
+  --tw-ring-color: rgba(56, 189, 248, 0.25);
+}
+
+.auth-form [data-slot="label"] {
+  color: rgba(244, 240, 230, 0.65);
+  font-size: 0.75rem;
+}
+
+.auth-form [data-slot="button"] {
+  height: 2.75rem;
+  width: 100%;
+  border-radius: 0;
+  background: #38bdf8;
+  color: #0a0a0a;
+}
+
+.auth-form [data-slot="button"]:hover {
+  background: #7dd3fc;
+}
+
+.auth-form [data-slot="field-description"] {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+}
+
+.auth-form [data-slot="field-description"] a {
+  color: #38bdf8;
+}
+
+.room-preview {
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.14), transparent 58%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0, rgba(255, 255, 255, 0.045) 1px, transparent 1px, transparent 10px);
+}
+
 
 
