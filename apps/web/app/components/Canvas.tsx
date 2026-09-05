@@ -87,7 +87,7 @@ export function Canvas({
 
   return (
     <div className="relative">
-      <canvas ref={canvasRef} className="fixed inset-0 bg-white" />
+      <canvas ref={canvasRef} className="fixed inset-0 bg-[#0a0a0a]" />
       {textEditor && (
         <textarea
           ref={(el) => {
@@ -125,7 +125,7 @@ export function Canvas({
             top: screenPosition?.screenY,
             fontSize: `${24 * (screenPosition?.scale ?? 1)}px`,
             fontFamily: "Sniglet",
-            color: "#000",
+            color: "#ffffff",
             minHeight: "1.2em",
             minWidth: "1em",
             lineHeight: 1.2,
@@ -137,7 +137,7 @@ export function Canvas({
       )}
       <div className="pointer-events-none fixed inset-0">
         <div className="pointer-events-auto absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2">
-          <div className="rounded-lg border border-black/10 bg-white p-1.5">
+          <div className="rounded-lg border border-white/10 bg-[#111111] p-1.5">
             <div
               className="flex items-center gap-1"
               role="toolbar"
@@ -148,7 +148,7 @@ export function Canvas({
                   key={tool as string}
                   type="button"
                   onClick={() => setShape(tool as ShapeType)}
-                  className={`grid size-10 place-items-center rounded-md transition ${shape === tool ? "bg-sky-400 text-black" : "text-neutral-500 hover:bg-neutral-100 hover:text-black"}`}
+                  className={`grid size-10 place-items-center rounded-md transition ${shape === tool ? "bg-[#38bdf8] text-[#0a0a0a]" : "text-white/55 hover:bg-white/10 hover:text-white"}`}
                   title={label as string}
                   aria-label={label as string}
                   aria-pressed={shape === tool}
@@ -158,11 +158,11 @@ export function Canvas({
               ))}
             </div>
           </div>
-          <div className="rounded-lg border border-black/10 bg-white p-1.5">
+          <div className="rounded-lg border border-white/10 bg-[#111111] p-1.5">
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="flex h-10 items-center gap-2 rounded-md px-3 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500 transition hover:bg-neutral-100 hover:text-sky-500"
+              className="flex h-10 items-center gap-2 rounded-md px-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/55 transition hover:bg-white/10 hover:text-[#38bdf8]"
               title="Exit to dashboard"
             >
               <LogOut size={16} />

@@ -38,7 +38,7 @@ export function previewPencil(
   }
 
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "#ffffff";
   ctx.stroke();
 }
 
@@ -76,17 +76,17 @@ export function renderPencil(
     ctx.lineTo(screenPoints[i]!.screenX, screenPoints[i]!.screenY);
   }
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = "#ffffff";
   ctx.stroke();
 
   if (selectedShapeId === shape.id) {
     const offset = 5;
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#7070FE";
+    ctx.strokeStyle = "#38bdf8";
     ctx.strokeRect(minX - offset, minY - offset, width + offset * 2, height + offset * 2);
 
-    ctx.fillStyle = "white";
-    ctx.strokeStyle = "#7070FE";
+    ctx.fillStyle = "#000000";
+    ctx.strokeStyle = "#38bdf8";
     
     const hs = 10;
     const handles = [

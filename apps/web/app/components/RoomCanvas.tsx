@@ -35,7 +35,7 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
   }, [roomId]);
 
   if (!socket) {
-    return <div>Connecting to Server</div>;
+    return <div className="grid min-h-screen place-items-center bg-[#0a0a0a] text-sm text-white/55">Connecting to server</div>;
   }
 
   return <Canvas roomId={roomId} socket={socket} />;
