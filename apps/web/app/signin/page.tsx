@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BACKEND_URL } from "../config/config";
 import { AuthShell } from "../components/AuthShell";
 import { useState } from "react";
+import { toast } from "@repo/ui/components/ui/sonner";
 
 type SigninData = {
   email: string;
@@ -26,16 +27,20 @@ export default function Page() {
       if (token) {
         localStorage.setItem("token", response.data.token);
 
-        console.log("Signin successful");
+        toast.success("Signed in successfully.");
         router.push("/dashboard");
       } else {
-        setError("Sign-in failed. Please try again.");
+        const message = "Sign-in failed. Please try again.";
+        setError(message);
+        toast.error(message);
       }
     } catch (error: unknown) {
       const message = axios.isAxiosError(error)
         ? error.response?.data?.message
         : undefined;
-      setError(message ?? "Unable to sign in. Check your connection and try again.");
+      const errorMessage = message ?? "Unable to sign in. Check your connection and try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
