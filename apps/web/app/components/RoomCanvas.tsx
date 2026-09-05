@@ -1,22 +1,26 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { WS_URL } from "../config/config";
 import { Canvas } from "./Canvas";
 import { CanvasLoading } from "./CanvasLoading";
 
 export function RoomCanvas({ roomId }: { roomId: string }) {
+  const router = useRouter();
   const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
+      router.replace("/signin");
       return;
     }
 
-    const ws = new WebSocket(
-      `${WS_URL}?token=${encodeURIComponent(token)}`,
-    );
+    setAuthChecked(true);
+
+    const ws = new WebSocket(`${WS_URL}?token=${encodeURIComponent(token)}`);
     ws.onopen = () => {
       ws.send(
         JSON.stringify({
@@ -33,7 +37,11 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
     return () => {
       ws.close();
     };
-  }, [roomId]);
+  }, [roomId, router]);
+
+  if (!authChecked) {
+    return null;
+  }
 
   if (!socket) {
     return <CanvasLoading />;

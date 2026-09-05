@@ -50,6 +50,8 @@ import { Shape } from "../utils/types";
 import { HistoryAction } from "../utils/types";
 
 export class DrawEngine {
+  private static readonly TOOLBAR_SAFE_ZONE = 96;
+
   public canvas: HTMLCanvasElement;
   public ctx: CanvasRenderingContext2D;
   public roomId: string;
@@ -75,6 +77,20 @@ export class DrawEngine {
   };
 
   private onCameraChange: () => void;
+
+  private getCanvasPosition(e: MouseEvent) {
+    const position = getCanvasCoordinates(e, this.canvas);
+    const maxY = Math.max(
+      0,
+      this.canvas.height - DrawEngine.TOOLBAR_SAFE_ZONE,
+    );
+
+    return {
+      x: position.x,
+      y: Math.min(position.y, maxY),
+      inToolbarZone: position.y > maxY,
+    };
+  }
 
   public state = {
     clicked: false,
@@ -198,7 +214,8 @@ export class DrawEngine {
   }
 
   private mouseDownHandler = (e: MouseEvent) => {
-    const pos = getCanvasCoordinates(e, this.canvas);
+    const pos = this.getCanvasPosition(e);
+    if (pos.inToolbarZone) return;
     const worldCoord = this.screenToWorld(pos.x, pos.y);
 
     if (this.shape.current === "text") {
@@ -432,7 +449,7 @@ export class DrawEngine {
   };
 
   private mouseMoveHandler = (e: MouseEvent) => {
-    const pos = getCanvasCoordinates(e, this.canvas);
+    const pos = this.getCanvasPosition(e);
     const world = this.screenToWorld(pos.x, pos.y);
 
     if (this.shape.current === "pointer") {
@@ -895,7 +912,7 @@ export class DrawEngine {
 
   private mouseUpHandler = (e: MouseEvent) => {
     handleMouseUp(this.state);
-    const pos = getCanvasCoordinates(e, this.canvas);
+    const pos = this.getCanvasPosition(e);
     const world = this.screenToWorld(pos.x, pos.y);
 
     if (this.shape.current === "pointer") {

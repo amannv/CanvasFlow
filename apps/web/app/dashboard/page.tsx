@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const loadRooms = useCallback(async () => {
     try {
@@ -48,6 +49,7 @@ export default function DashboardPage() {
       router.replace("/signin");
       return;
     }
+    setAuthChecked(true);
     void loadRooms();
   }, [loadRooms, router]);
 
@@ -109,6 +111,10 @@ export default function DashboardPage() {
     localStorage.removeItem("token");
     router.replace("/signin");
   };
+
+  if (!authChecked) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">

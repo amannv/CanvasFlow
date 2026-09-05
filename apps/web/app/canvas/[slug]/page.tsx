@@ -12,13 +12,18 @@ export default async function CanvasPage({
   const { slug } = await params;
 
   try {
-    const response = await axios.get(`${BACKEND_URL}/room/${encodeURIComponent(slug)}`);
+    const response = await axios.get(
+      `${BACKEND_URL}/room/${encodeURIComponent(slug)}`,
+    );
     return <RoomCanvas roomId={String(response.data.roomId)} />;
   } catch (error: unknown) {
-    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
-    const message = status === 404
-      ? "This room does not exist or is no longer available."
-      : "The room could not be opened. Check that the HTTP backend is running.";
+    const status = axios.isAxiosError(error)
+      ? error.response?.status
+      : undefined;
+    const message =
+      status === 404
+        ? "This room does not exist or is no longer available."
+        : "The room could not be opened. Check that the HTTP backend is running.";
 
     return (
       <main className="grid min-h-screen place-items-center bg-[#0a0a0a] px-6 text-center text-white">
