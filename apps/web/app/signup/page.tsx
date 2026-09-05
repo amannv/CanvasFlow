@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BACKEND_URL } from "../config/config";
 import axios from "axios";
 import { AuthShell } from "../components/AuthShell";
+import { useState } from "react";
 
 type SignupData = {
   name: string;
@@ -14,29 +15,27 @@ type SignupData = {
 
 export default function Page() {
   const router = useRouter();
+  const [error, setError] = useState("");
 
   const handleSignup = async (data: SignupData) => {
+    setError("");
     try {
       await axios.post(`${BACKEND_URL}/signup`, data);
 
       console.log("Signup successful!");
       router.push("/signin");
     } catch (error: unknown) {
-      console.error(
-        "Error during signup:",
-        axios.isAxiosError(error) ? error.response?.data?.message || error.message : "Unexpected error",
-      );
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : undefined;
+      setError(message ?? "Unable to create your account. Check your connection and try again.");
     }
   };
 
   return (
-    <AuthShell
-      eyebrow="Start with a blank canvas"
-      title="Your next room starts here."
-      description="Create a simple home for sketches, diagrams, and the ideas you are not ready to lose."
-    >
+    <AuthShell>
       <div className="auth-form">
-        <SignupForm onSubmit={handleSignup} />
+        <SignupForm onSubmit={handleSignup} error={error} />
       </div>
     </AuthShell>
   );

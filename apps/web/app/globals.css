@@ -64,7 +64,19 @@
 
 .auth-form [data-slot="card-title"],
 .auth-form [data-slot="card-description"] {
-  display: none;
+  display: block;
+}
+
+.auth-form [data-slot="card-title"] {
+  color: #f4f0e6;
+  font-family: var(--font-eb-garamond), serif;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.auth-form [data-slot="card-description"] {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.875rem;
 }
 
 .auth-form [data-slot="card-content"] {

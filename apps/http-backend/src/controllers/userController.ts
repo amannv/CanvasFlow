@@ -76,20 +76,24 @@ export const userSignin = async (req: Request, res: Response) => {
     });
 
     if (!findUser) {
-      return res.status(404).json({
-        message: "User don't exist",
+      return res.status(401).json({
+        message: "Invalid email or password",
       });
     }
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
 
-    if (findUser && passwordMatch) {
-      const token = jwt.sign({ userId: findUser.id }, JWT_SECRET as string);
-      return res.status(200).json({
-        token: token,
-        message: "User signed in successfully",
+    if (!passwordMatch) {
+      return res.status(401).json({
+        message: "Invalid email or password",
       });
     }
+
+    const token = jwt.sign({ userId: findUser.id }, JWT_SECRET as string);
+    return res.status(200).json({
+      token: token,
+      message: "User signed in successfully",
+    });
   } catch (e) {
     console.error("Error while logging in", e);
     return res.status(500).json({
