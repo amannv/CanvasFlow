@@ -29,6 +29,9 @@ export default function DashboardPage() {
   const [creating, setCreating] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState<Room | null>(null);
+  const [activeAction, setActiveAction] = useState<"create" | "join" | null>(
+    null,
+  );
 
   const loadRooms = useCallback(async () => {
     try {
@@ -136,94 +139,125 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white">
-      <div className="mx-auto max-w-6xl px-5 py-8 sm:px-10 lg:py-12">
-        <header className="flex items-center justify-between border-b border-white/10 pb-7">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#38bdf8]">
-              CanvasFlow
-            </p>
-            <h1 className="font-eb-garamond text-4xl font-semibold tracking-normal sm:text-5xl">
-              Your rooms
-            </h1>
-          </div>
+      <header className="mx-5 mt-4 rounded-xl border border-white/10 bg-[#111111]/75 sm:mx-8 lg:mx-10">
+        <div className="flex h-14 items-center justify-between px-4 sm:px-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f4f0e6]">
+            Canvas<span className="text-[#38bdf8]">Flow</span>
+          </p>
           <button
             onClick={signOut}
-            className="flex items-center gap-2 text-sm text-white/60 transition hover:text-white"
+            className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-white/45 transition hover:text-[#38bdf8]"
             title="Sign out"
           >
-            <LogOut size={17} /> Sign out
+            <LogOut size={15} />
+            <span>Sign out</span>
           </button>
-        </header>
+        </div>
+      </header>
 
-        <section className="grid gap-5 py-8 lg:grid-cols-[1.35fr_1fr]">
-          <form
-            onSubmit={createRoom}
-            className="border border-white/10 bg-[#111111] p-6 sm:p-8"
-          >
-            <div className="mb-8 flex items-start justify-between gap-4">
-              <div>
-                <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#38bdf8]">
-                  Start something new
-                </p>
-                <h2 className="font-eb-garamond text-3xl">Create a room</h2>
-                <p className="mt-2 max-w-md text-sm leading-6 text-white/55">
-                  A shared canvas for ideas, diagrams, and unfinished thoughts.
-                </p>
-              </div>
-              <Plus className="mt-1 text-[#38bdf8]" size={24} />
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <input
-                value={slug}
-                onChange={(event) => setSlug(event.target.value)}
-                placeholder="room-name"
-                className="min-w-0 flex-1 border border-white/15 bg-[#0a0a0a] px-4 py-3 text-sm outline-none transition placeholder:text-white/30 focus:border-[#38bdf8]"
-              />
-              <button
-                disabled={creating}
-                className="bg-[#38bdf8] px-5 py-3 text-sm font-semibold text-[#0a0a0a] transition hover:bg-[#7dd3fc] disabled:cursor-wait disabled:opacity-60"
-              >
-                {creating ? "Creating..." : "Create room"}
-              </button>
-            </div>
-          </form>
-
-          <form
-            onSubmit={joinRoom}
-            className="border border-white/10 bg-[#111111] p-6 sm:p-8"
-          >
-            <Users className="mb-6 text-[#38bdf8]" size={24} />
-            <h2 className="font-eb-garamond text-3xl">Join a room</h2>
-            <p className="mt-2 mb-6 text-sm leading-6 text-white/55">
-              Paste a room name or a CanvasFlow share link from a friend.
-            </p>
-            <div className="flex gap-3">
-              <input
-                value={joinSlug}
-                onChange={(event) => setJoinSlug(event.target.value)}
-                placeholder="room-name or link"
-                className="min-w-0 flex-1 border border-white/15 bg-[#0a0a0a] px-4 py-3 text-sm outline-none transition placeholder:text-white/30 focus:border-[#38bdf8]"
-              />
-              <button
-                aria-label="Join room"
-                className="border border-[#38bdf8] px-4 text-[#38bdf8] transition hover:bg-[#38bdf8] hover:text-[#0a0a0a]"
-              >
-                <ArrowRight size={19} />
-              </button>
-            </div>
-          </form>
+      <div className="mx-auto max-w-6xl px-5 py-10 sm:px-10 sm:py-12">
+        <section className="mb-7">
+          <p className="mb-1 text-sm text-white/45">Welcome back</p>
+          <h1 className="font-eb-garamond text-5xl leading-none text-[#f4f0e6]">
+            Your rooms
+          </h1>
         </section>
 
-        <div className="mb-5 flex items-end justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-white/40">
-              Your collection
-            </p>
-            <h2 className="mt-1 font-eb-garamond text-3xl">Recent rooms</h2>
-          </div>
-          <span className="text-sm text-white/40">
-            {rooms.length} {rooms.length === 1 ? "room" : "rooms"}
-          </span>
+        <section className="grid gap-4 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() =>
+              setActiveAction(activeAction === "create" ? null : "create")
+            }
+            className="group flex min-h-32 items-center justify-between rounded-xl border border-[#38bdf8]/30 bg-[#38bdf8]/6 px-6 text-left transition hover:border-[#38bdf8] hover:bg-[#38bdf8]/10"
+          >
+            <span>
+              <span className="mb-4 grid size-10 place-items-center rounded-full border border-[#38bdf8]/40 bg-[#0a0a0a] text-[#38bdf8]">
+                <Plus size={20} />
+              </span>
+              <span className="block text-base font-medium text-[#f4f0e6]">
+                Create a room
+              </span>
+              <span className="mt-1 block text-sm text-white/45">
+                Start a new canvas
+              </span>
+            </span>
+            <ArrowRight
+              className="text-[#38bdf8] transition-transform group-hover:translate-x-1"
+              size={20}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setActiveAction(activeAction === "join" ? null : "join")
+            }
+            className="group flex min-h-32 items-center justify-between rounded-xl border border-white/10 bg-[#111111] px-6 text-left transition hover:border-white/25 hover:bg-white/4"
+          >
+            <span>
+              <span className="mb-4 grid size-10 place-items-center rounded-full border border-white/20 bg-[#0a0a0a] text-white/70">
+                <Users size={19} />
+              </span>
+              <span className="block text-base font-medium text-[#f4f0e6]">
+                Join a room
+              </span>
+              <span className="mt-1 block text-sm text-white/45">
+                Enter a room name or link
+              </span>
+            </span>
+            <ArrowRight
+              className="text-white/70 transition-transform group-hover:translate-x-1"
+              size={20}
+            />
+          </button>
+        </section>
+
+        {activeAction && (
+          <section className="py-5">
+            {activeAction === "create" ? (
+              <form
+                onSubmit={createRoom}
+                className="flex flex-col gap-2 sm:flex-row"
+              >
+                <input
+                  autoFocus
+                  value={slug}
+                  onChange={(event) => setSlug(event.target.value)}
+                  placeholder="Room-name"
+                  className="min-w-0 flex-1 rounded-lg border border-white/15 bg-[#111111] px-4 py-3 text-sm outline-none transition placeholder:text-white/30 focus:border-[#38bdf8]"
+                />
+                <button
+                  disabled={creating}
+                  className="rounded-lg bg-[#38bdf8] px-5 py-3 text-sm font-semibold text-[#0a0a0a] transition hover:bg-[#7dd3fc] disabled:cursor-wait disabled:opacity-60"
+                >
+                  {creating ? "Creating..." : "Create room"}
+                </button>
+              </form>
+            ) : (
+              <form
+                onSubmit={joinRoom}
+                className="flex flex-col gap-2 sm:flex-row"
+              >
+                <input
+                  autoFocus
+                  value={joinSlug}
+                  onChange={(event) => setJoinSlug(event.target.value)}
+                  placeholder="Room-name or share link"
+                  className="min-w-0 flex-1 rounded-lg border border-white/15 bg-[#111111] px-4 py-3 text-sm outline-none transition placeholder:text-white/30 focus:border-[#38bdf8]"
+                />
+                <button
+                  aria-label="Join room"
+                  className="flex items-center justify-center gap-2 rounded-lg border bg-[#38bdf8] px-5 py-3 text-sm font-semibold text-[#0a0a0a] transition  hover:bg-[#7dd3fc]"
+                >
+                  Join <ArrowRight size={17} />
+                </button>
+              </form>
+            )}
+          </section>
+        )}
+
+        <div className="mb-4 mt-9 flex items-center justify-between">
+          <h2 className="text-base font-medium text-[#f4f0e6]">Recent rooms</h2>
         </div>
 
         {loading ? (
@@ -233,7 +267,7 @@ export default function DashboardPage() {
             Your next great idea starts with a room above.
           </div>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {rooms.map((room) => (
               <RoomCard
                 key={room.id}
