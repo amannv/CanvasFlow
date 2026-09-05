@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { WS_URL } from "../config/config";
 import { Canvas } from "./Canvas";
+import { CanvasLoading } from "./CanvasLoading";
 
 export function RoomCanvas({ roomId }: { roomId: string }) {
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -35,7 +36,7 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
   }, [roomId]);
 
   if (!socket) {
-    return <div className="grid min-h-screen place-items-center bg-[#0a0a0a] text-sm text-white/55">Connecting to server</div>;
+    return <CanvasLoading />;
   }
 
   return <Canvas roomId={roomId} socket={socket} />;
