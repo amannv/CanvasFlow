@@ -16,7 +16,6 @@
   }
 }
 
-
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
@@ -104,7 +103,7 @@
 .auth-form [data-slot="button"] {
   height: 2.75rem;
   width: 100%;
-  border-radius: 0;
+  border-radius: 0.5rem;
   background: #38bdf8;
   color: #0a0a0a;
 }
@@ -125,8 +124,11 @@
 .room-preview {
   background:
     linear-gradient(135deg, rgba(56, 189, 248, 0.14), transparent 58%),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0, rgba(255, 255, 255, 0.045) 1px, transparent 1px, transparent 10px);
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.045) 0,
+      rgba(255, 255, 255, 0.045) 1px,
+      transparent 1px,
+      transparent 10px
+    );
 }
-
-
-

@@ -38,7 +38,8 @@ export default function Page() {
       const message = axios.isAxiosError(error)
         ? error.response?.data?.message
         : undefined;
-      const errorMessage = message ?? "Unable to sign in. Check your connection and try again.";
+      const errorMessage =
+        message ?? "Unable to sign in. Check your connection and try again.";
       setError(errorMessage);
       toast.error(errorMessage);
     }
