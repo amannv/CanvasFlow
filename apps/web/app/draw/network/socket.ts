@@ -8,7 +8,13 @@ export function socketMessageListener(
   ctx: CanvasRenderingContext2D,
   getSelectedShapeId: () => string | null,
   worldToScreen: WorldToScreen,
-  ignoreUpdate: (id: string) => boolean = () => false
+  ignoreUpdate: (id: string) => boolean = () => false,
+  onCursorMove: (
+    userId: number,
+    x: number,
+    y: number,
+  ) => void = () => {},
+  onCursorLeave: (userId: number) => void = () => {}
 ) {
   socket.onmessage = (event) => {
     if (socket.readyState !== WebSocket.OPEN) return;
@@ -69,7 +75,15 @@ export function socketMessageListener(
     }
 
     if (parsedMessage.type === "cursor_move") {
-      console.log("RECEIVED:", parsedMessage);
+      onCursorMove(
+        parsedMessage.userId,
+        parsedMessage.x,
+        parsedMessage.y,
+      )
+    }
+
+    if (parsedMessage.type ===  "cursor_leave") {
+      onCursorLeave(parsedMessage.userId);
     }
   };
 }
@@ -86,7 +100,7 @@ export function createElementSender(
       type: "create_element",
       payload: {
         shape: shape,
-        roomId: Number(roomId),
+        roomId: roomId,
       },
     }),
   );
@@ -106,7 +120,7 @@ export function updateElementSender(
       payload: {
         elementId: id,
         data: shape,
-        roomId: Number(roomId),
+        roomId: roomId,
       },
     }),
   );
@@ -124,7 +138,7 @@ export function deleteElementSender(
       type: "delete_element",
       payload: {
         elementId: id,
-        roomId: Number(roomId),
+        roomId: roomId,
       },
     }),
   );

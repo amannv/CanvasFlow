@@ -38,6 +38,8 @@ export function Canvas({
   const [textValue, setTextValue] = useState<string>("");
   const [cameraVersion, setCameraVersion] = useState(0);
 
+  console.log("REMOTE CURSORS:", cursors);
+
   useEffect(() => {
     shapeRef.current = shape;
   }, [shape]);
@@ -59,6 +61,25 @@ export function Canvas({
       },
       () => {
         setCameraVersion((v) => v + 1);
+      },
+      (userId, worldX, worldY) => {
+        setCursors((prev) => ({
+          ...prev,
+          [userId]: {
+            userId,
+            x: worldX,
+            y: worldY,
+            name: `User ${userId}`,
+          },
+        }));
+      },
+
+      (userId) => {
+        setCursors((prev) => {
+          const next = { ...prev };
+          delete next[userId];
+          return next;
+        });
       },
     );
 
@@ -89,6 +110,41 @@ export function Canvas({
   return (
     <div className="relative">
       <canvas ref={canvasRef} className="fixed inset-0 bg-[#0a0a0a]" />
+
+      {Object.values(cursors).map((cursor) => {
+        const screen = engineRef.current?.worldToScreen(cursor.x, cursor.y);
+
+        if (!screen) return null;
+
+        return (
+          <div
+            key={cursor.userId}
+            className="pointer-events-none fixed z-40"
+            style={{
+              left: screen.screenX,
+              top: screen.screenY,
+            }}
+          >
+            <div
+              className="absolute"
+              style={{
+                width: 0,
+                height: 0,
+                borderTop: "10px solid transparent",
+                borderBottom: "10px solid transparent",
+                borderLeft: "16px solid #38bdf8",
+                transform: "rotate(-45deg)",
+                transformOrigin: "0 0",
+              }}
+            />
+
+            <div className="absolute left-4 top-3 whitespace-nowrap rounded-md bg-[#38bdf8] px-2 py-1 text-xs font-medium text-white">
+              {cursor.name}
+            </div>
+          </div>
+        );
+      })}
+
       {textEditor && (
         <textarea
           ref={(el) => {
