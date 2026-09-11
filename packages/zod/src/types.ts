@@ -56,3 +56,12 @@ export const deleteElementSchema = z.object({
     roomId: z.number(),
   }),
 });
+
+export const CursorMoveSchema = z.object({
+  type: z.literal("cursor_move"),
+  payload: z.object({
+    roomId: z.number(),
+    x: z.number(),
+    y: z.number(),
+  }),
+});

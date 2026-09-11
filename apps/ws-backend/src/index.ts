@@ -11,13 +11,18 @@ import {
 } from "@repo/zod/types";
 import { safeParseJson } from "./helpers/safeParseJson";
 
+type SocketUser = {
+  userId: number;
+  name: string;
+};
+
 const wss = new WebSocketServer({ port: 8080 });
 
-const socketToUserId = new Map<WebSocket, number>();
+const socketToUser = new Map<WebSocket, SocketUser>();
 const socketToRoomId = new Map<WebSocket, Set<number>>();
 const roomToSockets = new Map<number, Set<WebSocket>>();
 
-wss.on("connection", (socket, request) => {
+wss.on("connection", async (socket, request) => {
   const url = request.url;
   if (!url) {
     return;
@@ -36,7 +41,25 @@ wss.on("connection", (socket, request) => {
     return;
   }
 
-  socketToUserId.set(socket, userId);
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  if (!user) {
+    socket.close();
+    return;
+  }
+
+  socketToUser.set(socket, {
+    userId: user.id,
+    name: user.name,
+  });
 
   socket.on("message", async (message) => {
     const parsedMessage = safeParseJson(message as unknown as string);
