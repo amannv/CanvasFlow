@@ -102,3 +102,10 @@ export type Shape =
   | TextShape
   | PencilShape
   | ArrowType;
+
+export type RemoteCursor = {
+  userId: number;
+  name: string;
+  x: number;
+  y: number;
+}

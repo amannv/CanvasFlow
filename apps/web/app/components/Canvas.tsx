@@ -16,7 +16,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { createText } from "../draw/tools/text/textTool";
 import { createElementSender } from "../draw/network/socket";
-import { ShapeType } from "../draw/utils/types";
+import { ShapeType, RemoteCursor } from "../draw/utils/types";
 
 export function Canvas({
   roomId,
@@ -28,6 +28,7 @@ export function Canvas({
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [shape, setShape] = useState<ShapeType>("none");
+  const [cursors, setCursors] = useState<Record<number, RemoteCursor>>({});
   const shapeRef = useRef<ShapeType>("none");
   const engineRef = useRef<DrawEngine | null>(null);
   const [textEditor, setTextEditor] = useState<{

@@ -65,6 +65,9 @@ export class DrawEngine {
   private destroyed = false;
   private attachedEvents = false;
 
+  private lastCursorUpdate = 0;
+  private readonly CURSOR_UPDATE_INTERVAL = 30;
+
   private History: HistoryAction[] = [];
   private redoStack: HistoryAction[] = [];
 
@@ -80,10 +83,7 @@ export class DrawEngine {
 
   private getCanvasPosition(e: MouseEvent) {
     const position = getCanvasCoordinates(e, this.canvas);
-    const maxY = Math.max(
-      0,
-      this.canvas.height - DrawEngine.TOOLBAR_SAFE_ZONE,
-    );
+    const maxY = Math.max(0, this.canvas.height - DrawEngine.TOOLBAR_SAFE_ZONE);
 
     return {
       x: position.x,
@@ -439,7 +439,7 @@ export class DrawEngine {
               }
           }
         }
-      } // close if (!clickedOnShape) around the for loop
+      }
 
       if (!clickedOnShape) {
         this.state.selectedShapeId = null;
@@ -448,9 +448,51 @@ export class DrawEngine {
     }
   };
 
+  private sendCursorPosition(worldX: number, worldY: number) {
+    const now = Date.now();
+
+    if (now - this.lastCursorUpdate < this.CURSOR_UPDATE_INTERVAL) {
+      return;
+    }
+
+    this.lastCursorUpdate = now;
+
+    if (this.socket.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    this.socket.send(
+      JSON.stringify({
+        type: "cursor_move",
+        payload: {
+          roomId: Number(this.roomId),
+          x: worldX,
+          y: worldY,
+        },
+      }),
+    );
+  }
+
+  private mouseLeaveHandler = () => {
+    if (this.socket.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    this.socket.send(
+      JSON.stringify({
+        type: "cursor_leave",
+        payload: {
+          roomId: Number(this.roomId),
+        },
+      }),
+    );
+  };
+
   private mouseMoveHandler = (e: MouseEvent) => {
     const pos = this.getCanvasPosition(e);
     const world = this.screenToWorld(pos.x, pos.y);
+
+    this.sendCursorPosition(world.worldX, world.worldY);
 
     if (this.shape.current === "pointer") {
       if (this.state.isRotatingShape && this.state.selectedShapeId) {
@@ -712,8 +754,6 @@ export class DrawEngine {
               newX = initialX + initialWidth - newWidth;
             }
           }
-
-
 
           let fixedCornerX, fixedCornerY;
           if (this.state.activeHandle === "se") {
@@ -1156,6 +1196,7 @@ export class DrawEngine {
     this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
     this.canvas.addEventListener("mouseup", this.mouseUpHandler);
     this.canvas.addEventListener("wheel", this.wheelMoveEvent);
+    this.canvas.addEventListener("mouseleave", this.mouseLeaveHandler);
 
     window.addEventListener("keydown", this.keyDownHandler);
   }
@@ -1167,6 +1208,7 @@ export class DrawEngine {
     this.canvas.removeEventListener("mousemove", this.mouseMoveHandler);
     this.canvas.removeEventListener("mouseup", this.mouseUpHandler);
     this.canvas.removeEventListener("wheel", this.wheelMoveEvent);
+    this.canvas.removeEventListener("mouseleave", this.mouseLeaveHandler);
 
     window.removeEventListener("keydown", this.keyDownHandler);
   }
