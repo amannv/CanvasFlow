@@ -8,6 +8,7 @@ import {
   joinRoomSchema,
   leaveRoomSchema,
   updateElementSchema,
+  CursorMoveSchema
 } from "@repo/zod/types";
 import { safeParseJson } from "./helpers/safeParseJson";
 
@@ -303,6 +304,43 @@ wss.on("connection", async (socket, request) => {
         socket.send(JSON.stringify(sentMessage));
       });
     }
+
+    if (parsedMessage.type === "cursor_move") {
+      const result = CursorMoveSchema.safeParse(parsedMessage);
+
+      if (!result.success) {
+        return;
+      }
+
+      const { roomId, x, y } = result.data.payload;
+
+      const sockets = roomToSockets.get(roomId);
+
+      if (!sockets?.has(socket)) {
+        return;
+      }
+
+      const user = socketToUser.get(socket);
+
+      if (!user) {
+        return;
+      }
+
+      const sentMessage = {
+        type: "cursor_move",
+        userId: user.userId,
+        name: user.name,
+        roomId,
+        x,
+        y,
+      };
+
+      sockets.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(sentMessage));
+        }
+      })
+    }
   });
 
   socket.on("close", () => {
@@ -318,6 +356,6 @@ wss.on("connection", async (socket, request) => {
     });
 
     socketToRoomId.delete(socket);
-    socketToUserId.delete(socket);
+    socketToUser.delete(socket);
   });
 });
