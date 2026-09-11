@@ -25,6 +25,15 @@ const socketToRoomId = new Map<WebSocket, Set<number>>();
 const roomToSockets = new Map<number, Set<WebSocket>>();
 
 wss.on("connection", async (socket, request) => {
+  const pendingMessages: string[] = [];
+  let userReady = false;
+
+  socket.on("message", (message) => {
+    if (!userReady) {
+      pendingMessages.push(message.toString());
+    }
+  });
+
   const url = request.url;
   if (!url) {
     return;
@@ -62,6 +71,7 @@ wss.on("connection", async (socket, request) => {
     userId: user.id,
     name: user.name,
   });
+  userReady = true;
 
   socket.on("message", async (message) => {
     const parsedMessage = safeParseJson(message as unknown as string);
@@ -315,6 +325,13 @@ wss.on("connection", async (socket, request) => {
 
       const { roomId, x, y } = result.data.payload;
 
+      console.log("CURSOR MOVE:", {
+        userId,
+        roomId,
+        x,
+        y,
+      });
+
       const sockets = roomToSockets.get(roomId);
 
       if (!sockets?.has(socket)) {
@@ -377,6 +394,8 @@ wss.on("connection", async (socket, request) => {
       });
     }
   });
+
+  pendingMessages.forEach((message) => socket.emit("message", message));
 
   socket.on("close", () => {
     const rooms = socketToRoomId.get(socket);

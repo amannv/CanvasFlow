@@ -26,7 +26,7 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
         JSON.stringify({
           type: "join_room",
           payload: {
-            roomId: roomId,
+            roomId: Number(roomId),
           },
         }),
       );

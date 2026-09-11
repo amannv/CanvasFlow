@@ -67,6 +67,10 @@ export function socketMessageListener(
         worldToScreen,
       );
     }
+
+    if (parsedMessage.type === "cursor_move") {
+      console.log("RECEIVED:", parsedMessage);
+    }
   };
 }
 
@@ -82,7 +86,7 @@ export function createElementSender(
       type: "create_element",
       payload: {
         shape: shape,
-        roomId: roomId,
+        roomId: Number(roomId),
       },
     }),
   );
@@ -102,7 +106,7 @@ export function updateElementSender(
       payload: {
         elementId: id,
         data: shape,
-        roomId: roomId,
+        roomId: Number(roomId),
       },
     }),
   );
@@ -120,7 +124,7 @@ export function deleteElementSender(
       type: "delete_element",
       payload: {
         elementId: id,
-        roomId: roomId,
+        roomId: Number(roomId),
       },
     }),
   );
