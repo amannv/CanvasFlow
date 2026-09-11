@@ -94,11 +94,14 @@ export class DrawEngine {
 
   private onCursorMove: (
     userId: number,
+    name: string,
     worldX: number,
     worldY: number,
   ) => void;
 
   private onCursorLeave: (userId: number) => void;
+  private onUserJoined: (userId: number, name: string) => void;
+  private onUserLeft: (userId: number, name: string) => void;
 
   public state = {
     clicked: false,
@@ -124,8 +127,15 @@ export class DrawEngine {
     shape: RefObject<ShapeType>,
     onTextClick: (x: number, y: number) => void,
     onCameraChange: () => void,
-    onCursorMove: (userId: number, worldX: number, worldY: number) => void,
+    onCursorMove: (
+      userId: number,
+      name: string,
+      worldX: number,
+      worldY: number,
+    ) => void,
     onCursorLeave: (userId: number) => void,
+    onUserJoined: (userId: number, name: string) => void,
+    onUserLeft: (userId: number, name: string) => void,
   ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -136,18 +146,14 @@ export class DrawEngine {
     this.onCameraChange = onCameraChange;
     this.onCursorMove = onCursorMove;
     this.onCursorLeave = onCursorLeave;
+    this.onUserJoined = onUserJoined;
+    this.onUserLeft = onUserLeft;
 
     this.init();
   }
 
   private async init() {
     if (!this.ctx) return;
-
-    const shapes = await getExistingShapes(this.roomId);
-
-    if (this.destroyed) return;
-
-    this.existingShapes = shapes;
 
     socketMessageListener(
       this.socket,
@@ -157,16 +163,29 @@ export class DrawEngine {
       () => this.state.selectedShapeId,
       this.worldToScreen.bind(this),
       (id) => this.state.selectedShapeId === id,
-      (userId, worldX, worldY) => {
-        this.onCursorMove(userId, worldX, worldY);
+      (userId, name, worldX, worldY) => {
+        this.onCursorMove(userId, name, worldX, worldY);
       },
       (userId) => {
         this.onCursorLeave(userId);
       },
+      (userId, name) => {
+        this.onUserJoined(userId, name);
+      },
+      (userId, name) => {
+        this.onUserLeft(userId, name);
+      },
     );
 
-    this.render();
     this.attachEvents();
+    this.render();
+
+    const shapes = await getExistingShapes(this.roomId);
+
+    if (this.destroyed) return;
+
+    this.existingShapes.push(...shapes);
+    this.render();
   }
 
   public render() {

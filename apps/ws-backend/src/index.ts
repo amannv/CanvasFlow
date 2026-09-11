@@ -69,7 +69,7 @@ wss.on("connection", async (socket, request) => {
 
   socketToUser.set(socket, {
     userId: user.id,
-    name: user.name,
+    name: user.name.trim(),
   });
   userReady = true;
 
@@ -110,10 +110,13 @@ wss.on("connection", async (socket, request) => {
         type: "join_room",
         roomId: roomId,
         userId: userId,
+        name: socketToUser.get(socket)?.name ?? "",
       };
 
-      sockets?.forEach((socket) => {
-        socket.send(JSON.stringify(message));
+      sockets?.forEach((client) => {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(message));
+        }
       });
     }
 
@@ -127,6 +130,7 @@ wss.on("connection", async (socket, request) => {
       const roomId = result.data.payload.roomId;
 
       const ws = roomToSockets.get(roomId);
+      const hadOtherUsers = (ws?.size ?? 0) > 1;
       ws?.delete(socket);
 
       const message = {
@@ -134,13 +138,16 @@ wss.on("connection", async (socket, request) => {
         type: "leave_room",
         userId: userId,
         roomId: roomId,
+        name: socketToUser.get(socket)?.name ?? "",
       };
 
       if (ws?.size === 0) {
         roomToSockets.delete(roomId);
-      } else {
-        ws?.forEach((socket) => {
-          socket.send(JSON.stringify(message));
+      } else if (hadOtherUsers) {
+        ws?.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(message));
+          }
         });
       }
 
@@ -399,13 +406,29 @@ wss.on("connection", async (socket, request) => {
 
   socket.on("close", () => {
     const rooms = socketToRoomId.get(socket);
+    const user = socketToUser.get(socket);
 
     rooms?.forEach((room) => {
       const sockets = roomToSockets.get(room);
+      const hadOtherUsers = (sockets?.size ?? 0) > 1;
       sockets?.delete(socket);
 
       if (sockets?.size === 0) {
         roomToSockets.delete(room);
+      } else if (hadOtherUsers && user) {
+        const message = JSON.stringify({
+          messageId: crypto.randomUUID(),
+          type: "leave_room",
+          userId: user.userId,
+          name: user.name,
+          roomId: room,
+        });
+
+        sockets?.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
       }
     });
 

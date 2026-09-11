@@ -11,10 +11,13 @@ export function socketMessageListener(
   ignoreUpdate: (id: string) => boolean = () => false,
   onCursorMove: (
     userId: number,
+    name: string,
     x: number,
     y: number,
   ) => void = () => {},
-  onCursorLeave: (userId: number) => void = () => {}
+  onCursorLeave: (userId: number) => void = () => {},
+  onUserJoined: (userId: number, name: string) => void = () => {},
+  onUserLeft: (userId: number, name: string) => void = () => {},
 ) {
   socket.onmessage = (event) => {
     if (socket.readyState !== WebSocket.OPEN) return;
@@ -75,15 +78,28 @@ export function socketMessageListener(
     }
 
     if (parsedMessage.type === "cursor_move") {
+      if (typeof parsedMessage.name !== "string") return;
+
       onCursorMove(
         parsedMessage.userId,
+        parsedMessage.name,
         parsedMessage.x,
         parsedMessage.y,
-      )
+      );
     }
 
-    if (parsedMessage.type ===  "cursor_leave") {
+    if (parsedMessage.type === "cursor_leave") {
       onCursorLeave(parsedMessage.userId);
+    }
+
+    if (parsedMessage.type === "join_room") {
+      if (typeof parsedMessage.name !== "string") return;
+      onUserJoined(parsedMessage.userId, parsedMessage.name);
+    }
+
+    if (parsedMessage.type === "leave_room") {
+      if (typeof parsedMessage.name !== "string") return;
+      onUserLeft(parsedMessage.userId, parsedMessage.name);
     }
   };
 }
@@ -100,7 +116,7 @@ export function createElementSender(
       type: "create_element",
       payload: {
         shape: shape,
-        roomId: roomId,
+        roomId: Number(roomId),
       },
     }),
   );
@@ -120,7 +136,7 @@ export function updateElementSender(
       payload: {
         elementId: id,
         data: shape,
-        roomId: roomId,
+        roomId: Number(roomId),
       },
     }),
   );
@@ -138,7 +154,7 @@ export function deleteElementSender(
       type: "delete_element",
       payload: {
         elementId: id,
-        roomId: roomId,
+        roomId: Number(roomId),
       },
     }),
   );

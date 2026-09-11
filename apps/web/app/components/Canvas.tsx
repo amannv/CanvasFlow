@@ -17,6 +17,20 @@ import type { LucideIcon } from "lucide-react";
 import { createText } from "../draw/tools/text/textTool";
 import { createElementSender } from "../draw/network/socket";
 import { ShapeType, RemoteCursor } from "../draw/utils/types";
+import {
+  CursorPresence,
+  PresenceMessage,
+} from "./CursorPresence";
+
+const cursorColors = ["#38bdf8", "#fb7185", "#a3e635", "#fbbf24", "#c084fc"];
+
+function getFirstName(name?: string) {
+  return name?.trim().split(/\s+/)[0] || "Guest";
+}
+
+function getCursorColor(userId: number) {
+  return cursorColors[userId % cursorColors.length] ?? "#38bdf8";
+}
 
 export function Canvas({
   roomId,
@@ -29,6 +43,7 @@ export function Canvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [shape, setShape] = useState<ShapeType>("none");
   const [cursors, setCursors] = useState<Record<number, RemoteCursor>>({});
+  const [presenceMessages, setPresenceMessages] = useState<PresenceMessage[]>([]);
   const shapeRef = useRef<ShapeType>("none");
   const engineRef = useRef<DrawEngine | null>(null);
   const [textEditor, setTextEditor] = useState<{
@@ -37,8 +52,6 @@ export function Canvas({
   } | null>(null);
   const [textValue, setTextValue] = useState<string>("");
   const [cameraVersion, setCameraVersion] = useState(0);
-
-  console.log("REMOTE CURSORS:", cursors);
 
   useEffect(() => {
     shapeRef.current = shape;
@@ -62,14 +75,15 @@ export function Canvas({
       () => {
         setCameraVersion((v) => v + 1);
       },
-      (userId, worldX, worldY) => {
+      (userId, name, worldX, worldY) => {
         setCursors((prev) => ({
           ...prev,
           [userId]: {
             userId,
             x: worldX,
             y: worldY,
-            name: `User ${userId}`,
+            name: getFirstName(name),
+            color: getCursorColor(userId),
           },
         }));
       },
@@ -80,6 +94,36 @@ export function Canvas({
           delete next[userId];
           return next;
         });
+      },
+      (userId, name) => {
+        const message = {
+          id: `${userId}-${Date.now()}`,
+          text: `${getFirstName(name)} joined the canvas`,
+        };
+        setPresenceMessages((previous) => [...previous, message]);
+        window.setTimeout(() => {
+          setPresenceMessages((previous) =>
+            previous.filter((item) => item.id !== message.id),
+          );
+        }, 3000);
+      },
+      (userId, name) => {
+        setCursors((previous) => {
+          const next = { ...previous };
+          delete next[userId];
+          return next;
+        });
+
+        const message = {
+          id: `${userId}-${Date.now()}`,
+          text: `${getFirstName(name)} left the canvas`,
+        };
+        setPresenceMessages((previous) => [...previous, message]);
+        window.setTimeout(() => {
+          setPresenceMessages((previous) =>
+            previous.filter((item) => item.id !== message.id),
+          );
+        }, 3000);
       },
     );
 
@@ -107,43 +151,21 @@ export function Canvas({
     ["text", Type, "Text"],
   ];
 
+  const worldToScreen = (worldX: number, worldY: number) =>
+    engineRef.current?.worldToScreen(worldX, worldY) ?? {
+      screenX: worldX,
+      screenY: worldY,
+      scale: 1,
+    };
+
   return (
     <div className="relative">
       <canvas ref={canvasRef} className="fixed inset-0 bg-[#0a0a0a]" />
-
-      {Object.values(cursors).map((cursor) => {
-        const screen = engineRef.current?.worldToScreen(cursor.x, cursor.y);
-
-        if (!screen) return null;
-
-        return (
-          <div
-            key={cursor.userId}
-            className="pointer-events-none fixed z-40"
-            style={{
-              left: screen.screenX,
-              top: screen.screenY,
-            }}
-          >
-            <div
-              className="absolute"
-              style={{
-                width: 0,
-                height: 0,
-                borderTop: "10px solid transparent",
-                borderBottom: "10px solid transparent",
-                borderLeft: "16px solid #38bdf8",
-                transform: "rotate(-45deg)",
-                transformOrigin: "0 0",
-              }}
-            />
-
-            <div className="absolute left-4 top-3 whitespace-nowrap rounded-md bg-[#38bdf8] px-2 py-1 text-xs font-medium text-white">
-              {cursor.name}
-            </div>
-          </div>
-        );
-      })}
+      <CursorPresence
+        cursors={cursors}
+        worldToScreen={worldToScreen}
+        messages={presenceMessages}
+      />
 
       {textEditor && (
         <textarea

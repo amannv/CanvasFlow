@@ -35,6 +35,16 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
     setSocket(ws);
 
     return () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(
+          JSON.stringify({
+            type: "leave_room",
+            payload: {
+              roomId: Number(roomId),
+            },
+          }),
+        );
+      }
       ws.close();
     };
   }, [roomId, router]);
