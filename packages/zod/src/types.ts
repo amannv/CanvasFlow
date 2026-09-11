@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { number } from "zod";
 
 //http--backend schemas
 export const createUserSchema = z.object({
@@ -13,7 +13,10 @@ export const signinSchema = z.object({
 });
 
 export const roomCreateSchema = z.object({
-  slug: z.string().min(3, "Slug must be atleast of 3 characters").max(20, "Slug must be less than 20 characters"),
+  slug: z
+    .string()
+    .min(3, "Slug must be atleast of 3 characters")
+    .max(20, "Slug must be less than 20 characters"),
 });
 
 //ws-backend-schemas
@@ -63,5 +66,12 @@ export const CursorMoveSchema = z.object({
     roomId: z.number(),
     x: z.number(),
     y: z.number(),
+  }),
+});
+
+export const CursorLeaveSchema = z.object({
+  type: z.literal("cursor_leave"),
+  payload: z.object({
+    roomId: z.number(),
   }),
 });

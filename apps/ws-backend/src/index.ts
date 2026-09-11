@@ -8,7 +8,8 @@ import {
   joinRoomSchema,
   leaveRoomSchema,
   updateElementSchema,
-  CursorMoveSchema
+  CursorMoveSchema,
+  CursorLeaveSchema,
 } from "@repo/zod/types";
 import { safeParseJson } from "./helpers/safeParseJson";
 
@@ -327,6 +328,7 @@ wss.on("connection", async (socket, request) => {
       }
 
       const sentMessage = {
+        messageId: crypto.randomUUID(),
         type: "cursor_move",
         userId: user.userId,
         name: user.name,
@@ -336,10 +338,43 @@ wss.on("connection", async (socket, request) => {
       };
 
       sockets.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
+        if (client !== socket || client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify(sentMessage));
         }
-      })
+      });
+    }
+
+    if (parsedMessage.type === "cursor_leave") {
+      const result = CursorLeaveSchema.safeParse(parsedMessage);
+
+      if (!result.success) {
+        return;
+      }
+
+      const { roomId } = result.data.payload;
+
+      const rooms = socketToRoomId.get(socket);
+
+      if (!rooms?.has(roomId)) {
+        return;
+      }
+
+      const sockets = roomToSockets.get(roomId);
+
+      if (!sockets) return;
+
+      const sentMessage = {
+        messageId: crypto.randomUUID(),
+        type: "cursor_leave",
+        roomId,
+        userId,
+      };
+
+      sockets.forEach((client) => {
+        if (client !== socket || socket.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(sentMessage));
+        }
+      });
     }
   });
 
