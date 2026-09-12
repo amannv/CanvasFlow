@@ -18,9 +18,9 @@ export function clearCanvas(
   const origin = worldToScreen(0, 0);
   const scale = origin.scale;
   
-  ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+  ctx.strokeStyle = "rgba(0, 0, 0, 1)";
   ctx.lineWidth = 1 / (window.devicePixelRatio || 1);
-  const gridSize = 40 * scale;
+  const gridSize = 100 * scale;
   
   const startX = origin.screenX % gridSize;
   const startY = origin.screenY % gridSize;

@@ -32,13 +32,14 @@ export function CursorPresence({
           >
             <MousePointer2
               size={32}
-              strokeWidth={2.25}
+              strokeWidth={2.5}
               fill={cursor.color}
-              color="#111111"
-              className="-rotate-12 drop-shadow-[0_1px_3px_rgba(0,0,0,0.55)]"
+              color="#000000"
+              className="-rotate-12"
+              style={{ filter: "drop-shadow(1px 1px 0px #000000)" }}
             />
             <div
-              className="absolute left-5 top-5 whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium text-black"
+              className="absolute left-6 top-6 whitespace-nowrap rounded-md border-2 border-black px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-black shadow-[2px_2px_0px_0px_#000000]"
               style={{ backgroundColor: cursor.color }}
             >
               {cursor.name}
@@ -47,11 +48,11 @@ export function CursorPresence({
         );
       })}
 
-      <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-52 flex-col gap-2">
+      <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-56 flex-col gap-3">
         {messages.map((message) => (
           <div
             key={message.id}
-            className="rounded-md border border-white/10 bg-[#111111]/95 px-3 py-2 text-xs text-white/80 shadow-lg"
+            className="rounded-md border-2 border-black bg-white px-4 py-3 font-mono text-xs font-bold text-black shadow-[4px_4px_0px_0px_#000000]"
           >
             {message.text}
           </div>
