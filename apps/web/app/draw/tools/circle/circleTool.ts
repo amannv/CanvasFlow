@@ -41,8 +41,8 @@ export function previewCircle(
 
   ctx.beginPath();
   ctx.arc(start.screenX, start.screenY, radius, 0, 2 * Math.PI);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#000000";
   ctx.stroke();
 }
 
@@ -68,8 +68,8 @@ export function renderCircle(
 
   ctx.beginPath();
   ctx.ellipse(0, 0, rx, ry, 0, 0, 2 * Math.PI);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#000000";
   ctx.stroke();
 
   if (shape.id === selectedShapeId) {
@@ -79,12 +79,12 @@ export function renderCircle(
     const py1 = -sigRy - offset * (sigRy >= 0 ? 1 : -1);
     const py2 = sigRy + offset * (sigRy >= 0 ? 1 : -1);
 
-    ctx.strokeStyle = "#38bdf8";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
+    ctx.lineWidth = 2.5;
     ctx.strokeRect(px1, py1, px2 - px1, py2 - py1);
 
-    ctx.fillStyle = "#000000";
-    ctx.strokeStyle = "#38bdf8";
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
     
     const hs = 10; 
     const handles = [

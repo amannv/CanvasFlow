@@ -77,7 +77,7 @@ export function renderText(
   ctx.scale(uniformScale * scale, uniformScale * scale);
   ctx.font = `24px Sniglet`;
   ctx.textBaseline = "top";
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#000000";
   lines.forEach((line, index) => {
     ctx.fillText(line, 0, index * 24);
   });
@@ -85,8 +85,8 @@ export function renderText(
 
   if (selectedShapeId === shape.id) {
     const offset = 5;
-    ctx.strokeStyle = "#38bdf8";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
+    ctx.lineWidth = 2.5;
 
     ctx.strokeRect(
       screenX - offset,
@@ -95,8 +95,8 @@ export function renderText(
       height + offset * 2
     );
 
-    ctx.fillStyle = "#000000";
-    ctx.strokeStyle = "#38bdf8";
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
     
     const hs = 10;
     const handles = [

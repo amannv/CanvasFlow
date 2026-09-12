@@ -13,7 +13,28 @@ export function clearCanvas(
   selectedShapeId: string | null,
   worldToScreen: WorldToScreen,
 ) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+  const origin = worldToScreen(0, 0);
+  const scale = origin.scale;
+  
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+  ctx.lineWidth = 1 / (window.devicePixelRatio || 1);
+  const gridSize = 40 * scale;
+  
+  const startX = origin.screenX % gridSize;
+  const startY = origin.screenY % gridSize;
+
+  ctx.beginPath();
+  for (let x = startX; x < window.innerWidth; x += gridSize) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, window.innerHeight);
+  }
+  for (let y = startY; y < window.innerHeight; y += gridSize) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(window.innerWidth, y);
+  }
+  ctx.stroke();
 
   existingShapes.map((shape) => {
     if (shape.type === "rect") {

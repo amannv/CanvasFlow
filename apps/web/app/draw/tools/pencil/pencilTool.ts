@@ -37,8 +37,8 @@ export function previewPencil(
     ctx.lineTo(point.screenX, point.screenY);
   }
 
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#000000";
   ctx.stroke();
 }
 
@@ -75,18 +75,18 @@ export function renderPencil(
   for (let i = 1; i < screenPoints.length; i++) {
     ctx.lineTo(screenPoints[i]!.screenX, screenPoints[i]!.screenY);
   }
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#000000";
   ctx.stroke();
 
   if (selectedShapeId === shape.id) {
     const offset = 5;
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
     ctx.strokeRect(minX - offset, minY - offset, width + offset * 2, height + offset * 2);
 
-    ctx.fillStyle = "#000000";
-    ctx.strokeStyle = "#38bdf8";
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
     
     const hs = 10;
     const handles = [
@@ -141,6 +141,7 @@ export function isPointOnPencil(
     }
 
     ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.beginPath();
     ctx.moveTo(shape.points[0]!.x, shape.points[0]!.y);
     for (let i = 1; i < shape.points.length; i++) {

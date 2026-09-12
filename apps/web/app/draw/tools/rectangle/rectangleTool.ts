@@ -33,8 +33,8 @@ export function previewRectangle(
   const width = current.screenX - start.screenX;
   const height = current.screenY - start.screenY;
 
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#000000";
   ctx.strokeRect(start.screenX, start.screenY, width, height);
 }
 
@@ -59,14 +59,14 @@ export function renderRectangle(
   }
   ctx.translate(-cx, -cy);
 
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#000000";
 
   ctx.strokeRect(screenX, screenY, width, height);
 
   if (shape.id === selectedShapeId) {
-    ctx.strokeStyle = "#38bdf8";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
+    ctx.lineWidth = 2.5;
 
     const offset = 8;
     const signW = Math.sign(width) || 1;
@@ -79,8 +79,8 @@ export function renderRectangle(
 
     ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
-    ctx.fillStyle = "#000000";
-    ctx.strokeStyle = "#38bdf8";
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
 
     const hs = 10;
     const handles = [

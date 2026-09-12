@@ -33,8 +33,8 @@ export function previewLine(
   ctx.beginPath();
   ctx.moveTo(start.screenX, start.screenY);
   ctx.lineTo(current.screenX, current.screenY);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#000000";
   ctx.stroke();
 }
 
@@ -55,20 +55,23 @@ export function renderLine(
   ctx.beginPath();
   ctx.moveTo(start.screenX, start.screenY);
   ctx.lineTo(end.screenX, end.screenY);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#000000";
   ctx.stroke();
 
   if (selectedShapeId === shape.id) {
     ctx.beginPath();
     ctx.arc(start.screenX, start.screenY, 5, 0, Math.PI * 2);
-    ctx.lineWidth = 2;
-    ctx.fillStyle = "#38bdf8";
+    ctx.lineWidth = 2.5;
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
     ctx.fill();
+    ctx.stroke();
 
     ctx.beginPath();
     ctx.arc(end.screenX, end.screenY, 5, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
 
     // rotation handle
     const midX = (start.screenX + end.screenX) / 2;
@@ -87,12 +90,12 @@ export function renderLine(
     ctx.beginPath();
     ctx.moveTo(midX, midY);
     ctx.lineTo(rotX, rotY);
-    ctx.strokeStyle = "#38bdf8";
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
     ctx.stroke();
     
     ctx.beginPath();
     ctx.arc(rotX, rotY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = "#ffffff";
     ctx.fill();
     ctx.stroke();
   }
@@ -111,6 +114,7 @@ export function isPointInsideLine(
     selectionArea = 10
 ) {
     ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);

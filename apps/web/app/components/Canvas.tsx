@@ -62,8 +62,21 @@ export function Canvas({
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const updateCanvasSize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.scale(dpr, dpr);
+      }
+      engineRef.current?.render();
+    };
+
+    updateCanvasSize();
+    window.addEventListener("resize", updateCanvasSize);
 
     engineRef.current = new DrawEngine(
       canvas,
@@ -133,6 +146,7 @@ export function Canvas({
     });
 
     return () => {
+      window.removeEventListener("resize", updateCanvasSize);
       engineRef.current?.destroy();
     };
   }, [roomId, socket]);
@@ -161,7 +175,7 @@ export function Canvas({
 
   return (
     <div className="relative">
-      <canvas ref={canvasRef} className="fixed inset-0 bg-[#ffffff] bg-grid" />
+      <canvas ref={canvasRef} className="fixed inset-0 bg-[#ffffff]" />
       <CursorPresence
         cursors={cursors}
         worldToScreen={worldToScreen}
@@ -245,11 +259,10 @@ export function Canvas({
               type="button"
               variant="destructive"
               onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-2"
+              size="icon"
               title="Exit to dashboard"
             >
-              <LogOut size={18} strokeWidth={2.2} />
-              <span className="hidden sm:inline font-bold">Exit</span>
+              <LogOut size={20} strokeWidth={2.2} />
             </Button>
           </div>
         </div>

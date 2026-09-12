@@ -52,8 +52,8 @@ export function previewArrow(
     current.screenY - headlen * Math.sin(angle + Math.PI / 6),
   );
 
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 }
 
@@ -92,19 +92,22 @@ export function renderArrow(
     shapeTwo.screenY - headlen * Math.sin(angle + Math.PI / 6),
   );
 
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
   if (selectedShapeId === shape.id) {
     ctx.beginPath();
     ctx.arc(shapeOne.screenX, shapeOne.screenY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "#38bdf8";
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
     ctx.fill();
+    ctx.stroke();
 
     ctx.beginPath();
     ctx.arc(shapeTwo.screenX, shapeTwo.screenY, 5, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
 
     const midX = (shapeOne.screenX + shapeTwo.screenX) / 2;
     const midY = (shapeOne.screenY + shapeTwo.screenY) / 2;
@@ -120,12 +123,12 @@ export function renderArrow(
     ctx.beginPath();
     ctx.moveTo(midX, midY);
     ctx.lineTo(rotX, rotY);
-    ctx.strokeStyle = "#38bdf8";
+    ctx.strokeStyle = "oklch(66.9% 0.18368 248.8066)";
     ctx.stroke();
     
     ctx.beginPath();
     ctx.arc(rotX, rotY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = "#ffffff";
     ctx.fill();
     ctx.stroke();
   }
@@ -144,6 +147,7 @@ export function isPointOnArrow(
   selectionArea = 10,
 ) {
   ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
