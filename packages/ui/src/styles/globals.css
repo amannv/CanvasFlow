@@ -19,11 +19,11 @@
   --ring: oklch(0% 0 0);
   --overlay: oklch(0% 0 0 / 0.8);
   --shadow: 4px 4px 0px 0px var(--border);
-  --chart-1: #0099FF;
-  --chart-2: #FF4D50;
-  --chart-3: #FACC00;
-  --chart-4: #05E17A;
-  --chart-5: #7A83FF;
+  --chart-1: #0099ff;
+  --chart-2: #ff4d50;
+  --chart-3: #facc00;
+  --chart-4: #05e17a;
+  --chart-5: #7a83ff;
   --chart-active-dot: #000;
   --radius: 0.625rem;
 
@@ -62,11 +62,11 @@
   --border: oklch(0% 0 0);
   --ring: oklch(100% 0 0);
   --shadow: 4px 4px 0px 0px var(--border);
-  --chart-1: #008AE5;
-  --chart-2: #FF6669;
-  --chart-3: #E0B700;
-  --chart-4: #04C86D;
-  --chart-5: #7A83FF;
+  --chart-1: #008ae5;
+  --chart-2: #ff6669;
+  --chart-3: #e0b700;
+  --chart-4: #04c86d;
+  --chart-5: #7a83ff;
   --chart-active-dot: #fff;
 
   /* Aliasing shadcn variables for backward compatibility */
@@ -96,6 +96,8 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-poppins);
+  --font-mono: var(--font-space-mono);
   --color-main: var(--main);
   --color-background: var(--background);
   --color-secondary-background: var(--secondary-background);
@@ -104,7 +106,7 @@
   --color-border: var(--border);
   --color-overlay: var(--overlay);
   --color-ring: var(--ring);
-  
+
   --spacing-boxShadowX: 4px;
   --spacing-boxShadowY: 4px;
   --spacing-reverseBoxShadowX: -4px;
@@ -168,7 +170,15 @@
 
 .bg-grid {
   background-image:
-    linear-gradient(to right, color-mix(in oklch, var(--color-border) 10%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklch, var(--color-border) 10%, transparent) 1px, transparent 1px);
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--color-border) 10%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--color-border) 10%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 40px 40px;
 }
