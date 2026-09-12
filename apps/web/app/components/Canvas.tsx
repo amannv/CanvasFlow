@@ -13,6 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Button } from "@repo/ui/components/ui/button";
 
 import { createText } from "../draw/tools/text/textTool";
 import { createElementSender } from "../draw/network/socket";
@@ -160,7 +161,7 @@ export function Canvas({
 
   return (
     <div className="relative">
-      <canvas ref={canvasRef} className="fixed inset-0 bg-[#0a0a0a]" />
+      <canvas ref={canvasRef} className="fixed inset-0 bg-[#ffffff] bg-grid" />
       <CursorPresence
         cursors={cursors}
         worldToScreen={worldToScreen}
@@ -204,7 +205,7 @@ export function Canvas({
             top: screenPosition?.screenY,
             fontSize: `${24 * (screenPosition?.scale ?? 1)}px`,
             fontFamily: "Sniglet",
-            color: "#ffffff",
+            color: "var(--foreground)",
             minHeight: "1.2em",
             minWidth: "1em",
             lineHeight: 1.2,
@@ -215,38 +216,41 @@ export function Canvas({
         />
       )}
       <div className="pointer-events-none fixed inset-0">
-        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2">
-          <div className="rounded-lg border border-white/10 bg-[#111111] p-1.5">
+        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-4">
+          <div className="flex items-center gap-1 rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-2">
             <div
               className="flex items-center gap-1"
               role="toolbar"
               aria-label="Drawing tools"
             >
               {tools.map(([tool, Icon, label]) => (
-                <button
+                <Button
                   key={tool as string}
                   type="button"
                   onClick={() => setShape(tool as ShapeType)}
-                  className={`grid size-10 place-items-center rounded-md transition ${shape === tool ? "bg-[#38bdf8] text-[#0a0a0a]" : "text-white/55 hover:bg-white/10 hover:text-white"}`}
+                  variant="outline"
+                  className={shape === tool ? "bg-main text-white hover:bg-main hover:text-white" : "bg-[#ffffff] text-black hover:bg-[#ffffff]"}
+                  size="icon"
                   title={label as string}
                   aria-label={label as string}
                   aria-pressed={shape === tool}
                 >
-                  <Icon size={18} strokeWidth={1.8} />
-                </button>
+                  <Icon size={20} strokeWidth={2.2} />
+                </Button>
               ))}
             </div>
           </div>
-          <div className="rounded-lg border border-white/10 bg-[#111111] p-1.5">
-            <button
+          <div className="flex items-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-2">
+            <Button
               type="button"
+              variant="destructive"
               onClick={() => router.push("/dashboard")}
-              className="flex h-10 items-center gap-2 rounded-md px-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/55 transition hover:bg-white/10 hover:text-[#38bdf8]"
+              className="flex items-center gap-2"
               title="Exit to dashboard"
             >
-              <LogOut size={16} />
-              <span className="hidden sm:inline">Exit</span>
-            </button>
+              <LogOut size={18} strokeWidth={2.2} />
+              <span className="hidden sm:inline font-bold">Exit</span>
+            </Button>
           </div>
         </div>
       </div>

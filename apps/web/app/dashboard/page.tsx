@@ -8,6 +8,8 @@ import { BACKEND_URL } from "../config/config";
 import { RoomCard } from "../components/RoomCard";
 import { RoomDeleteDialog } from "../components/RoomDeleteDialog";
 import { toast } from "@repo/ui/components/ui/sonner";
+import { Button } from "@repo/ui/components/ui/button";
+import { Input } from "@repo/ui/components/ui/input";
 
 type Room = {
   id: number;
@@ -138,27 +140,29 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white">
-      <header className="mx-5 mt-4 rounded-xl border border-white/10 bg-[#111111]/75 sm:mx-8 lg:mx-10">
+    <main className="min-h-screen bg-background bg-grid text-foreground font-base pb-10">
+      <header className="mx-5 mt-4 rounded-base border-2 border-border bg-[#ffffff] shadow-shadow sm:mx-8 lg:mx-10">
         <div className="flex h-14 items-center justify-between px-4 sm:px-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f4f0e6]">
-            Canvas<span className="text-[#38bdf8]">Flow</span>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-foreground">
+            Canvas<span className="text-primary">Flow</span>
           </p>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={signOut}
-            className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-white/45 transition hover:text-[#38bdf8]"
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground transition hover:text-primary border-transparent shadow-none"
             title="Sign out"
           >
             <LogOut size={15} />
             <span>Sign out</span>
-          </button>
+          </Button>
         </div>
       </header>
 
       <div className="mx-auto max-w-6xl px-5 py-10 sm:px-10 sm:py-12">
         <section className="mb-7">
-          <p className="mb-1 text-sm text-white/45">Welcome back</p>
-          <h1 className="font-eb-garamond text-5xl leading-none text-[#f4f0e6]">
+          <p className="mb-1 text-sm font-medium text-muted-foreground">Welcome back</p>
+          <h1 className="font-heading font-black text-5xl leading-none text-foreground tracking-tight">
             Your rooms
           </h1>
         </section>
@@ -169,22 +173,22 @@ export default function DashboardPage() {
             onClick={() =>
               setActiveAction(activeAction === "create" ? null : "create")
             }
-            className="group flex min-h-32 items-center justify-between rounded-xl border border-[#38bdf8]/30 bg-[#38bdf8]/6 px-6 text-left transition hover:border-[#38bdf8] hover:bg-[#38bdf8]/10"
+            className="group flex min-h-32 items-center justify-between rounded-base border-2 border-border shadow-shadow bg-main px-6 text-left transition-all hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none outline-none focus-visible:ring-3 focus-visible:ring-ring"
           >
             <span>
-              <span className="mb-4 grid size-10 place-items-center rounded-full border border-[#38bdf8]/40 bg-[#0a0a0a] text-[#38bdf8]">
+              <span className="mb-4 grid size-10 place-items-center rounded-base border-2 border-border shadow-[2px_2px_0px_0px_var(--border)] bg-[#ffffff] text-foreground">
                 <Plus size={20} />
               </span>
-              <span className="block text-base font-medium text-[#f4f0e6]">
+              <span className="block text-lg font-bold text-white">
                 Create a room
               </span>
-              <span className="mt-1 block text-sm text-white/45">
+              <span className="mt-1 block text-sm font-medium text-white/90">
                 Start a new canvas
               </span>
             </span>
             <ArrowRight
-              className="text-[#38bdf8] transition-transform group-hover:translate-x-1"
-              size={20}
+              className="text-white transition-transform group-hover:translate-x-1"
+              size={24}
             />
           </button>
           <button
@@ -192,22 +196,22 @@ export default function DashboardPage() {
             onClick={() =>
               setActiveAction(activeAction === "join" ? null : "join")
             }
-            className="group flex min-h-32 items-center justify-between rounded-xl border border-white/10 bg-[#111111] px-6 text-left transition hover:border-white/25 hover:bg-white/4"
+            className="group flex min-h-32 items-center justify-between rounded-base border-2 border-border shadow-shadow bg-[#ffffff] px-6 text-left transition-all hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none outline-none focus-visible:ring-3 focus-visible:ring-ring"
           >
             <span>
-              <span className="mb-4 grid size-10 place-items-center rounded-full border border-white/20 bg-[#0a0a0a] text-white/70">
-                <Users size={19} />
+              <span className="mb-4 grid size-10 place-items-center rounded-base border-2 border-border shadow-[2px_2px_0px_0px_var(--border)] bg-main text-white">
+                <Users size={20} />
               </span>
-              <span className="block text-base font-medium text-[#f4f0e6]">
+              <span className="block text-lg font-bold text-foreground">
                 Join a room
               </span>
-              <span className="mt-1 block text-sm text-white/45">
+              <span className="mt-1 block text-sm font-medium text-muted-foreground">
                 Enter a room name or link
               </span>
             </span>
             <ArrowRight
-              className="text-white/70 transition-transform group-hover:translate-x-1"
-              size={20}
+              className="text-foreground transition-transform group-hover:translate-x-1"
+              size={24}
             />
           </button>
         </section>
@@ -217,53 +221,54 @@ export default function DashboardPage() {
             {activeAction === "create" ? (
               <form
                 onSubmit={createRoom}
-                className="flex flex-col gap-2 sm:flex-row"
+                className="flex flex-col gap-4 sm:flex-row"
               >
-                <input
+                <Input
                   autoFocus
                   value={slug}
                   onChange={(event) => setSlug(event.target.value)}
                   placeholder="Room-name"
-                  className="min-w-0 flex-1 rounded-lg border border-white/15 bg-[#111111] px-4 py-3 text-sm outline-none transition placeholder:text-white/30 focus:border-[#38bdf8]"
+                  className="flex-1"
                 />
-                <button
+                <Button
                   disabled={creating}
-                  className="rounded-lg bg-[#38bdf8] px-5 py-3 text-sm font-semibold text-[#0a0a0a] transition hover:bg-[#7dd3fc] disabled:cursor-wait disabled:opacity-60"
+                  type="submit"
                 >
                   {creating ? "Creating..." : "Create room"}
-                </button>
+                </Button>
               </form>
             ) : (
               <form
                 onSubmit={joinRoom}
-                className="flex flex-col gap-2 sm:flex-row"
+                className="flex flex-col gap-4 sm:flex-row"
               >
-                <input
+                <Input
                   autoFocus
                   value={joinSlug}
                   onChange={(event) => setJoinSlug(event.target.value)}
                   placeholder="Room-name or share link"
-                  className="min-w-0 flex-1 rounded-lg border border-white/15 bg-[#111111] px-4 py-3 text-sm outline-none transition placeholder:text-white/30 focus:border-[#38bdf8]"
+                  className="flex-1"
                 />
-                <button
+                <Button
                   aria-label="Join room"
-                  className="flex items-center justify-center gap-2 rounded-lg border bg-[#38bdf8] px-5 py-3 text-sm font-semibold text-[#0a0a0a] transition  hover:bg-[#7dd3fc]"
+                  type="submit"
+                  className="flex items-center gap-2"
                 >
                   Join <ArrowRight size={17} />
-                </button>
+                </Button>
               </form>
             )}
           </section>
         )}
 
         <div className="mb-4 mt-9 flex items-center justify-between">
-          <h2 className="text-base font-medium text-[#f4f0e6]">Recent rooms</h2>
+          <h2 className="text-xl font-bold text-foreground">Recent rooms</h2>
         </div>
 
         {loading ? (
-          <p className="py-10 text-sm text-white/45">Loading your rooms...</p>
+          <p className="py-10 text-sm font-medium text-muted-foreground">Loading your rooms...</p>
         ) : rooms.length === 0 ? (
-          <div className="border border-dashed border-white/15 py-16 text-center text-sm text-white/45">
+          <div className="rounded-base border-2 border-dashed border-border py-16 text-center text-sm font-medium text-muted-foreground">
             Your next great idea starts with a room above.
           </div>
         ) : (
