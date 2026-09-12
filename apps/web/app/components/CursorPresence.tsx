@@ -17,9 +17,11 @@ export function CursorPresence({
   worldToScreen,
   messages,
 }: CursorPresenceProps) {
+  const remoteCursors = Object.values(cursors);
+
   return (
     <>
-      {Object.values(cursors).map((cursor) => {
+      {remoteCursors.length > 0 && remoteCursors.map((cursor) => {
         const screen = worldToScreen(cursor.x, cursor.y);
 
         return (

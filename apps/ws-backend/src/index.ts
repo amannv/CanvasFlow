@@ -362,7 +362,7 @@ wss.on("connection", async (socket, request) => {
       };
 
       sockets.forEach((client) => {
-        if (client !== socket || client.readyState === WebSocket.OPEN) {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify(sentMessage));
         }
       });
@@ -395,7 +395,7 @@ wss.on("connection", async (socket, request) => {
       };
 
       sockets.forEach((client) => {
-        if (client !== socket || socket.readyState === WebSocket.OPEN) {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify(sentMessage));
         }
       });
