@@ -64,10 +64,10 @@ export function RoomCard({
           <Icon size={20} strokeWidth={3} />
         </div>
         <div className="flex flex-col justify-center overflow-hidden">
-          <h3 className="truncate font-sans font-black uppercase text-lg text-black tracking-tight">
+          <h3 className="truncate font-sans font-black uppercase text-lg text-black tracking-tight px-1">
             {title}
           </h3>
-          <p className="truncate font-mono text-xs font-bold text-black/60">
+          <p className="truncate font-mono text-xs font-bold text-black/60 px-1">
             /{room.slug}
           </p>
         </div>
