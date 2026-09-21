@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   Hand,
   LogOut,
+  Grid3x3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
@@ -44,6 +45,7 @@ export function Canvas({
   const [presenceMessages, setPresenceMessages] = useState<PresenceMessage[]>(
     [],
   );
+  const [showGrid, setShowGrid] = useState(true);
   const shapeRef = useRef<ShapeType>("none");
   const engineRef = useRef<DrawEngine | null>(null);
   const [textEditor, setTextEditor] = useState<{
@@ -56,6 +58,13 @@ export function Canvas({
   useEffect(() => {
     shapeRef.current = shape;
   }, [shape]);
+
+  useEffect(() => {
+    if (engineRef.current) {
+      engineRef.current.showGrid = showGrid;
+      engineRef.current.render();
+    }
+  }, [showGrid]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -255,6 +264,20 @@ export function Canvas({
                   <Icon size={20} strokeWidth={2.2} />
                 </Button>
               ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowGrid(!showGrid)}
+                className={
+                  showGrid
+                    ? "bg-main text-white hover:bg-main hover:text-white"
+                    : "bg-[#ffffff] text-black hover:bg-[#ffffff]"
+                }
+                size="icon"
+                title={showGrid ? "Hide Grid" : "Show Grid"}
+              >
+                <Grid3x3 size={20} strokeWidth={2.2} />
+              </Button>
             </div>
           </div>
           <div className="flex items-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-2">

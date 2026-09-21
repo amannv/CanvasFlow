@@ -13,10 +13,13 @@ export function clearCanvas(
   ctx: CanvasRenderingContext2D,
   selectedShapeId: string | null,
   worldToScreen: WorldToScreen,
+  showGrid: boolean = true,
 ) {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-  drawGrid(ctx, worldToScreen);
+  if (showGrid) {
+    drawGrid(ctx, worldToScreen);
+  }
 
 
   existingShapes.map((shape) => {

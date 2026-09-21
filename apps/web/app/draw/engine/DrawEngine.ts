@@ -188,6 +188,8 @@ export class DrawEngine {
     this.render();
   }
 
+  public showGrid: boolean = true;
+
   public render() {
     clearCanvas(
       this.existingShapes,
@@ -195,6 +197,7 @@ export class DrawEngine {
       this.ctx,
       this.state.selectedShapeId,
       this.worldToScreen.bind(this),
+      this.showGrid,
     );
   }
 
