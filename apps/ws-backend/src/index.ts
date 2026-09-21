@@ -332,12 +332,6 @@ wss.on("connection", async (socket, request) => {
 
       const { roomId, x, y } = result.data.payload;
 
-      console.log("CURSOR MOVE:", {
-        userId,
-        roomId,
-        x,
-        y,
-      });
 
       const sockets = roomToSockets.get(roomId);
 

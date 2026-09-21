@@ -18,10 +18,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { createText } from "../draw/tools/text/textTool";
 import { createElementSender } from "../draw/network/socket";
 import { ShapeType, RemoteCursor } from "../draw/utils/types";
-import {
-  CursorPresence,
-  PresenceMessage,
-} from "./CursorPresence";
+import { CursorPresence, PresenceMessage } from "./CursorPresence";
 
 const cursorColors = ["#38bdf8", "#fb7185", "#a3e635", "#fbbf24", "#c084fc"];
 
@@ -44,7 +41,9 @@ export function Canvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [shape, setShape] = useState<ShapeType>("none");
   const [cursors, setCursors] = useState<Record<number, RemoteCursor>>({});
-  const [presenceMessages, setPresenceMessages] = useState<PresenceMessage[]>([]);
+  const [presenceMessages, setPresenceMessages] = useState<PresenceMessage[]>(
+    [],
+  );
   const shapeRef = useRef<ShapeType>("none");
   const engineRef = useRef<DrawEngine | null>(null);
   const [textEditor, setTextEditor] = useState<{
@@ -243,7 +242,11 @@ export function Canvas({
                   type="button"
                   onClick={() => setShape(tool as ShapeType)}
                   variant="outline"
-                  className={shape === tool ? "bg-main text-white hover:bg-main hover:text-white" : "bg-[#ffffff] text-black hover:bg-[#ffffff]"}
+                  className={
+                    shape === tool
+                      ? "bg-main text-white hover:bg-main hover:text-white"
+                      : "bg-[#ffffff] text-black hover:bg-[#ffffff]"
+                  }
                   size="icon"
                   title={label as string}
                   aria-label={label as string}

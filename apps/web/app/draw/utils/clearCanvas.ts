@@ -1,3 +1,4 @@
+import { drawGrid } from "./drawGrid";
 import { Shape, WorldToScreen } from "./types";
 import { renderRectangle } from "../tools/rectangle/rectangleTool";
 import { renderCircle } from "../tools/circle/circleTool";
@@ -15,26 +16,8 @@ export function clearCanvas(
 ) {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-  const origin = worldToScreen(0, 0);
-  const scale = origin.scale;
-  
-  ctx.strokeStyle = "rgba(0, 0, 0, 1)";
-  ctx.lineWidth = 1 / (window.devicePixelRatio || 1);
-  const gridSize = 100 * scale;
-  
-  const startX = origin.screenX % gridSize;
-  const startY = origin.screenY % gridSize;
+  drawGrid(ctx, worldToScreen);
 
-  ctx.beginPath();
-  for (let x = startX; x < window.innerWidth; x += gridSize) {
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, window.innerHeight);
-  }
-  for (let y = startY; y < window.innerHeight; y += gridSize) {
-    ctx.moveTo(0, y);
-    ctx.lineTo(window.innerWidth, y);
-  }
-  ctx.stroke();
 
   existingShapes.map((shape) => {
     if (shape.type === "rect") {
