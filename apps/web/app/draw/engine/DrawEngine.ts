@@ -1119,34 +1119,43 @@ export class DrawEngine {
   };
 
   private wheelMoveEvent = (e: WheelEvent) => {
-    if (!e.ctrlKey) return;
-
     e.preventDefault();
 
-    const rect = this.canvas.getBoundingClientRect();
+    if (e.ctrlKey || e.metaKey) {
+      const rect = this.canvas.getBoundingClientRect();
+      const pos = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
 
-    const pos = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
+      const worldBeforeZoom = this.screenToWorld(pos.x, pos.y);
+      const zoomFactor = 1.1;
 
-    const worldBeforeZoom = this.screenToWorld(pos.x, pos.y);
+      if (e.deltaY < 0) {
+        this.camera.scale *= zoomFactor;
+      } else {
+        this.camera.scale /= zoomFactor;
+      }
 
-    const zoomFactor = 1.1;
-    const oldScale = this.camera.scale;
+      this.camera.scale = Math.min(Math.max(this.camera.scale, 0.1), 10);
+      this.camera.x = worldBeforeZoom.worldX - pos.x / this.camera.scale;
+      this.camera.y = worldBeforeZoom.worldY - pos.y / this.camera.scale;
 
-    if (e.deltaY < 0) {
-      this.camera.scale *= zoomFactor;
-    } else {
-      this.camera.scale /= zoomFactor;
+      this.onCameraChange();
+      this.render();
+      return;
     }
 
-    this.camera.scale = Math.min(Math.max(this.camera.scale, 0.1), 10);
+    if (e.shiftKey) {
+      const dx = ((e.deltaX || e.deltaY) * 0.5) / this.camera.scale;
+      this.camera.x += dx;
+      this.onCameraChange();
+      this.render();
+      return;
+    }
 
-    this.camera.x = worldBeforeZoom.worldX - pos.x / this.camera.scale;
-
-    this.camera.y = worldBeforeZoom.worldY - pos.y / this.camera.scale;
-
+    this.camera.x += (e.deltaX * 0.5) / this.camera.scale;
+    this.camera.y += (e.deltaY * 0.5) / this.camera.scale;
     this.onCameraChange();
     this.render();
   };

@@ -1,19 +1,4 @@
 import { cn } from "#lib/utils";
-import { Button } from "#components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "#components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "#components/ui/field";
-import { Input } from "#components/ui/input";
 import { useState } from "react";
 
 type SigninType = {
@@ -42,62 +27,73 @@ export function LoginForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <p
-              role="alert"
-              className="mb-4 border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300"
-            >
-              {error}
-            </p>
-          )}
-          <form onSubmit={handleSubmit}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                  }}
-                />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                  }}
-                />
-              </Field>
-              <Field>
-                <Button type="submit">Login</Button>
-                <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="/signup">Sign up</a>
-                </FieldDescription>
-              </Field>
-            </FieldGroup>
-          </form>
-        </CardContent>
-      </Card>
+    <div className={cn("flex flex-col justify-between rounded-3xl border-4 border-black bg-white p-8 shadow-[8px_8px_0px_0px_#000000] transition-transform hover:-translate-y-1 hover:translate-x-1", className)} {...props}>
+      <div className="text-center mb-8">
+        <h3 className="text-4xl font-black uppercase tracking-tight text-black">
+          Welcome Back
+        </h3>
+        <p className="mt-2 font-mono text-sm font-bold text-black/50">
+          LOGIN TO YOUR ACCOUNT
+        </p>
+      </div>
+
+      {error && (
+        <p
+          role="alert"
+          className="mb-6 rounded-xl border-2 border-red-500 bg-red-50 px-4 py-3 font-mono text-sm font-bold text-red-600"
+        >
+          {error}
+        </p>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <label className="font-mono text-sm font-bold text-black" htmlFor="email">
+            EMAIL
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            required
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+            className="w-full rounded-xl border-2 border-black bg-black/5 px-4 py-3 font-mono text-sm font-bold text-black placeholder:text-black/40 outline-none focus:border-[#0099FF] focus:bg-white"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="font-mono text-sm font-bold text-black" htmlFor="password">
+            PASSWORD
+          </label>
+          <input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+            className="w-full rounded-xl border-2 border-black bg-black/5 px-4 py-3 font-mono text-sm font-bold text-black placeholder:text-black/40 outline-none focus:border-[#0099FF] focus:bg-white"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="mt-4 flex w-full items-center justify-center rounded-xl border-2 border-black bg-black px-4 py-4 font-mono text-sm font-bold text-white shadow-[4px_4px_0px_0px_#0099FF] transition-transform hover:-translate-y-1 hover:translate-x-1"
+        >
+          LOGIN
+        </button>
+
+        <p className="mt-4 text-center font-mono text-sm font-bold text-black/60">
+          Don&apos;t have an account?{" "}
+          <a href="/signup" className="text-[#0099FF] hover:underline underline-offset-4">
+            SIGN UP
+          </a>
+        </p>
+      </form>
     </div>
   );
 }
