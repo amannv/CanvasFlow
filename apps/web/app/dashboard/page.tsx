@@ -121,7 +121,7 @@ export default function DashboardPage() {
 
   const signOut = () => {
     localStorage.removeItem("token");
-    router.replace("/signin");
+    router.replace("/dashboard");
   };
 
   if (!authChecked) {
