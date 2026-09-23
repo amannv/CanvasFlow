@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Sparkles, Users, Cloud, Layout } from "lucide-react";
+import { ArrowRight, Sparkles, Users, Cloud, ZoomIn, Maximize, PenTool, Undo2, MousePointerSquareDashed, Grid } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -111,24 +111,52 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Feature Boxes */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-left w-full max-w-5xl mx-auto pb-12">
+        </div>
+      </div>
+
+      {/* Feature Boxes */}
+      <div className="mx-auto w-full max-w-7xl px-6 lg:px-12 mt-20 pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 text-left">
           <FeatureCard 
             icon={<Users size={24} className="text-white" strokeWidth={3} />}
             title="Real-Time Sync"
-            description="Collaborate instantly with your team. See mouse cursors and shape updates in real-time across all devices."
+            description="Collaborate instantly with your team. See mouse cursors and shape updates in real-time."
+          />
+          <FeatureCard 
+            icon={<ZoomIn size={24} className="text-white" strokeWidth={3} />}
+            title="Pan and Zoom"
+            description="Navigate your board with ease. Smooth panning and zooming to focus on the details."
+          />
+          <FeatureCard 
+            icon={<Maximize size={24} className="text-white" strokeWidth={3} />}
+            title="Infinite Canvas"
+            description="Never run out of space. Your whiteboard grows dynamically as your ideas expand."
+          />
+          <FeatureCard 
+            icon={<PenTool size={24} className="text-white" strokeWidth={3} />}
+            title="8 Essential Tools"
+            description="Select, pan, line, pencil, rectangle, circle, text, and arrow tools to bring ideas to life."
           />
           <FeatureCard 
             icon={<Cloud size={24} className="text-white" strokeWidth={3} />}
             title="Auto Save"
-            description="Your boards are automatically persisted to the cloud. Pick up right where you left off, every single time."
+            description="Your boards are automatically persisted to the cloud. Pick up right where you left off."
           />
           <FeatureCard 
-            icon={<Layout size={24} className="text-white" strokeWidth={3} />}
-            title="Intuitive UI"
-            description="A clutter-free, beautiful neo-brutalist interface designed for speed, creativity, and maximum focus."
+            icon={<Undo2 size={24} className="text-white" strokeWidth={3} />}
+            title="Undo / Redo"
+            description="Made a mistake? No problem. Full history tracking lets you undo or redo effortlessly."
           />
-        </div>
+          <FeatureCard 
+            icon={<MousePointerSquareDashed size={24} className="text-white" strokeWidth={3} />}
+            title="Select & Transform"
+            description="Easily group, move, resize, and rotate elements on your canvas with precision controls."
+          />
+          <FeatureCard 
+            icon={<Grid size={24} className="text-white" strokeWidth={3} />}
+            title="Technical Grid"
+            description="Keep everything aligned perfectly. A background grid helps snap elements into place."
+          />
         </div>
       </div>
     </div>
