@@ -13,22 +13,6 @@ export function createText(x: number, y: number, text: string): TextShape {
   return shape;
 }
 
-// export function previewText(
-//   ctx: CanvasRenderingContext2D,
-//   x: number,
-//   y: number,
-//   text: string,
-//   worldToScreen: WorldToScreen
-// ) {
-//   const { screenX, screenY, scale } = worldToScreen(x, y);
-//   ctx.save();
-//   ctx.font = `${24 * scale}px Sniglet`;
-//   ctx.textBaseline = "top";
-//   ctx.fillStyle = "black";
-//   ctx.fillText(text, screenX, screenY);
-//   ctx.restore();
-// }
-
 export function getTextDimensions(ctx: CanvasRenderingContext2D, shape: TextShape) {
   ctx.save();
   ctx.font = "24px Sniglet";
@@ -71,7 +55,7 @@ export function renderText(
   }
   ctx.translate(-cx, -cy);
 
-  // Draw text
+ 
   ctx.save();
   ctx.translate(screenX, screenY);
   ctx.scale(uniformScale * scale, uniformScale * scale);

@@ -73,7 +73,7 @@ export function renderLine(
     ctx.fill();
     ctx.stroke();
 
-    // rotation handle
+   
     const midX = (start.screenX + end.screenX) / 2;
     const midY = (start.screenY + end.screenY) / 2;
     const dx = end.screenX - start.screenX;

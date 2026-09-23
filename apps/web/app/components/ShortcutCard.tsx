@@ -10,27 +10,26 @@ export interface ShortcutCardProps {
 
 export function ShortcutCard({ keys, title, description, bgColor, textColor }: ShortcutCardProps) {
   return (
-    <div className="flex flex-col items-center text-center justify-start gap-3 rounded-xl border-4 border-black bg-white p-4 shadow-[4px_4px_0px_0px_#000000] transition-transform hover:-translate-y-1 hover:translate-x-1 w-full h-full cursor-default">
-      <div className={`inline-flex shrink-0 items-center justify-center rounded-lg border-2 border-black p-2 shadow-[2px_2px_0px_0px_#000000] ${bgColor} w-full`}>
-        <div className="flex flex-wrap justify-center gap-1 items-center">
+    <div className="rounded-2xl border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_#000000] transition-transform hover:-translate-y-2 hover:translate-x-2 h-full flex flex-col cursor-default text-left">
+      <div className={`mb-4 inline-flex self-start items-center justify-center rounded-xl border-2 border-black p-3 shadow-[4px_4px_0px_0px_#000000] ${bgColor}`}>
+        <div className="flex flex-wrap items-center gap-1.5">
           {keys.map((key, index) => (
             <React.Fragment key={index}>
-              <kbd className="flex h-7 px-1.5 items-center justify-center rounded-md border-b-2 border-r-2 border border-black bg-white font-mono font-bold text-black text-[10px] sm:text-xs">
+              <kbd className="flex h-7 min-w-7 px-2 items-center justify-center rounded-md border-b-2 border-r-2 border border-black bg-white font-mono font-bold text-black text-xs">
                 {key}
               </kbd>
               {index < keys.length - 1 && (
-                <span className={`font-black text-xs sm:text-sm ${textColor}`}>+</span>
+                <span className={`font-black text-sm ${textColor}`}>+</span>
               )}
             </React.Fragment>
           ))}
         </div>
       </div>
-      <div className="flex flex-col gap-1.5 w-full flex-1 justify-center mt-2">
-        <h3 className="font-mono text-sm font-black uppercase text-black">{title}</h3>
-        <p className="font-mono text-[11px] sm:text-xs font-bold text-black/60 leading-tight">
-          {description}
-        </p>
-      </div>
+      
+      <h3 className="mb-2 font-mono text-xl font-black uppercase text-black">{title}</h3>
+      <p className="font-mono text-sm font-bold text-black/70 flex-1">
+        {description}
+      </p>
     </div>
   );
 }
