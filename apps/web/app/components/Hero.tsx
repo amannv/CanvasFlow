@@ -116,7 +116,7 @@ export function Hero() {
       </div>
 
       {/* Feature Boxes */}
-      <div className="mx-auto w-full max-w-7xl px-6 lg:px-12 mt-20 pb-12">
+      <div className="mx-auto w-full max-w-7xl px-6 lg:px-12 mt-32">
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-black uppercase tracking-tighter text-black md:text-5xl">
             Everything You Need
@@ -170,7 +170,7 @@ export function Hero() {
       </div>
 
       {/* Shortcut Keys Section */}
-      <div className="mx-auto w-full max-w-7xl px-6 lg:px-12 pb-20">
+      <div className="mx-auto w-full max-w-7xl px-6 lg:px-12 mt-32 pb-32">
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-black uppercase tracking-tighter text-black md:text-5xl">
             Quick Shortcuts
