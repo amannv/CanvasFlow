@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FeatureCard } from "./FeatureCard";
+import { ShortcutCard } from "./ShortcutCard";
 export function Hero() {
   const [roomId, setRoomId] = useState("");
   const router = useRouter();
@@ -116,6 +117,14 @@ export function Hero() {
 
       {/* Feature Boxes */}
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-12 mt-20 pb-12">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-black uppercase tracking-tighter text-black md:text-5xl">
+            Everything You Need
+          </h2>
+          <p className="mt-4 font-mono text-sm font-bold text-black/70 md:text-base">
+            All the features you expect from a premium whiteboarding tool
+          </p>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 text-left">
           <FeatureCard 
             icon={<Users size={24} className="text-white" strokeWidth={3} />}
@@ -156,6 +165,56 @@ export function Hero() {
             icon={<Grid size={24} className="text-white" strokeWidth={3} />}
             title="Technical Grid"
             description="Keep everything aligned perfectly. A background grid helps snap elements into place."
+          />
+        </div>
+      </div>
+
+      {/* Shortcut Keys Section */}
+      <div className="mx-auto w-full max-w-7xl px-6 lg:px-12 pb-20">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-black uppercase tracking-tighter text-black md:text-5xl">
+            Quick Shortcuts
+          </h2>
+          <p className="mt-4 font-mono text-sm font-bold text-black/70 md:text-base">
+            Master the canvas with these essential keyboard shortcuts
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 w-full">
+          <ShortcutCard 
+            keys={["Backspace"]}
+            title="Delete Shape"
+            description="Select any shape on the board and press Backspace to delete it."
+            bgColor="bg-[#0099FF]"
+            textColor="text-white"
+          />
+          <ShortcutCard 
+            keys={["Ctrl", "Scroll"]}
+            title="Zoom Canvas"
+            description="Hold Ctrl and use your mouse wheel to zoom in and out of the canvas."
+            bgColor="bg-[#0099FF]"
+            textColor="text-white"
+          />
+          <ShortcutCard 
+            keys={["Shift", "Scroll"]}
+            title="Pan Canvas"
+            description="Hold Shift and use your mouse wheel to pan vertically or horizontally."
+            bgColor="bg-[#0099FF]"
+            textColor="text-white"
+          />
+          <ShortcutCard 
+            keys={["Ctrl", "Z"]}
+            title="Undo Action"
+            description="Instantly undo your last action on the canvas."
+            bgColor="bg-[#0099FF]"
+            textColor="text-white"
+          />
+          <ShortcutCard 
+            keys={["Ctrl", "Y"]}
+            title="Redo Action"
+            description="Redo the action you just undid with a simple keystroke."
+            bgColor="bg-[#0099FF]"
+            textColor="text-white"
           />
         </div>
       </div>
