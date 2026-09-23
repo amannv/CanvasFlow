@@ -27,12 +27,21 @@ export function CTASection() {
         </div>
 
         <h2 className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl lg:text-6xl">
-          <Rocket className="hidden sm:block text-white fill-white" size={48} strokeWidth={2} />
+          <Rocket
+            className="hidden sm:block text-white fill-white"
+            size={48}
+            strokeWidth={2}
+          />
           Start Whiteboarding Today
-          <Rocket className="hidden sm:block text-white fill-white" size={48} strokeWidth={2} />
+          <Rocket
+            className="hidden sm:block text-white fill-white"
+            size={48}
+            strokeWidth={2}
+          />
         </h2>
         <p className="relative z-10 mt-6 max-w-2xl font-mono text-base font-bold text-white/90 sm:text-lg">
-          Ditch the messy notebooks. Plan, sketch, and collaborate in real-time on an infinite digital canvas.
+          Ditch the messy notebooks. Plan, sketch, and collaborate in real-time
+          on an infinite digital canvas.
         </p>
         <div className="relative mt-10">
           <div className="absolute -right-6 -top-5 z-20 rotate-12 rounded-lg border-2 border-black bg-white px-3 py-1 font-mono text-sm font-black text-black shadow-[2px_2px_0px_0px_#000000] animate-bounce">
