@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Users, Cloud, Layout } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { FeatureCard } from "./FeatureCard";
 export function Hero() {
   const [roomId, setRoomId] = useState("");
   const router = useRouter();
@@ -109,6 +109,25 @@ export function Hero() {
               className="object-cover w-full h-full"
             />
           </div>
+        </div>
+
+        {/* Feature Boxes */}
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-left w-full max-w-5xl mx-auto pb-12">
+          <FeatureCard 
+            icon={<Users size={24} className="text-white" strokeWidth={3} />}
+            title="Real-Time Sync"
+            description="Collaborate instantly with your team. See mouse cursors and shape updates in real-time across all devices."
+          />
+          <FeatureCard 
+            icon={<Cloud size={24} className="text-white" strokeWidth={3} />}
+            title="Auto Save"
+            description="Your boards are automatically persisted to the cloud. Pick up right where you left off, every single time."
+          />
+          <FeatureCard 
+            icon={<Layout size={24} className="text-white" strokeWidth={3} />}
+            title="Intuitive UI"
+            description="A clutter-free, beautiful neo-brutalist interface designed for speed, creativity, and maximum focus."
+          />
         </div>
         </div>
       </div>
