@@ -78,17 +78,18 @@ export function Hero() {
             <span>THE ULTIMATE WHITEBOARDING TOOL</span>
           </div>
 
-          <h2 className="text-5xl font-black uppercase tracking-tighter text-black sm:text-7xl lg:text-8xl">
-            THINK. DRAW. <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#0099FF] to-[#0055FF]">
-              COLLABORATE.
+          <h2 className="text-5xl font-black uppercase tracking-tighter text-black sm:text-7xl lg:text-8xl leading-[0.95] sm:leading-[0.9]">
+            THINK<span className="ml-1">.</span><span className="ml-3 sm:ml-5">DRAW</span>
+            <span className="-ml-2 sm:-ml-3">.</span> <br className="hidden sm:block" />
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#0099FF] to-[#0055FF] inline-block pb-4 pr-4">
+              COLL<span className="ml-0.5 sm:ml-1">A</span>BORATE.
             </span>
           </h2>
 
-          <p className="mx-auto mt-8 max-w-2xl font-mono text-base font-bold leading-relaxed text-black/70 sm:text-lg">
-            CanvasFlow is the open-source whiteboarding tool that lets you
-            sketch your ideas, map out architectures, and collaborate with your
-            team in real-time.
+          <p className="mx-auto mt-4 max-w-2xl font-mono text-base font-bold leading-relaxed text-black/70 sm:text-lg">
+            CanvasFlow is the ultimate digital workspace that empowers you to
+            visualize complex ideas, brainstorm effortlessly, and collaborate
+            with your team in real-time.
           </p>
 
           <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">

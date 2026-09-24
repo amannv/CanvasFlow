@@ -332,7 +332,6 @@ wss.on("connection", async (socket, request) => {
 
       const { roomId, x, y } = result.data.payload;
 
-
       const sockets = roomToSockets.get(roomId);
 
       if (!sockets?.has(socket)) {
