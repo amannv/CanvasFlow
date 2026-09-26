@@ -19,8 +19,10 @@ type SocketUser = {
   name: string;
 };
 
+const PORT = process.env.PORT || 8080;
+
 const allowedOrigins = [
-  "http://localhost:3000",
+  `http://localhost:${PORT}`,
   process.env.FRONTEND_URL as string,
 ].filter(Boolean);
 
@@ -44,8 +46,8 @@ server.on("upgrade", (request, socket, head) => {
   });
 });
 
-server.listen(8080, () => {
-  console.log("WebSocket server started on port 8080");
+server.listen(PORT, () => {
+  console.log(`WebSocket server started on port ${PORT}`);
 });
 
 
