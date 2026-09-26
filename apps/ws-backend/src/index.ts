@@ -1,4 +1,5 @@
 import "dotenv/config";
+import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { verifiedUser } from "./helpers/verifyUser";
 import { prisma } from "@repo/database/prisma";
@@ -18,7 +19,35 @@ type SocketUser = {
   name: string;
 };
 
-const wss = new WebSocketServer({ port: 8080 });
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL as string,
+].filter(Boolean);
+
+const server = http.createServer();
+
+const wss = new WebSocketServer({
+  noServer: true,
+});
+
+server.on("upgrade", (request, socket, head) => {
+  const origin = request.headers.origin;
+
+  if (!origin || !allowedOrigins.includes(origin)) {
+    socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit("connection", ws, request);
+  });
+});
+
+server.listen(8080, () => {
+  console.log("WebSocket server started on port 8080");
+});
+
 
 const socketToUser = new Map<WebSocket, SocketUser>();
 const socketToRoomId = new Map<WebSocket, Set<number>>();
