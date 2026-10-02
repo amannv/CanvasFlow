@@ -1,5 +1,6 @@
 import { cn } from "#lib/utils";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 type SigninType = {
   email: string;
@@ -14,6 +15,7 @@ export function LoginForm({
 }: Omit<React.ComponentProps<"div">, "onSubmit"> & {
   onSubmit?: (data: SigninType) => void;
   error?: string;
+  isLoading?: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,9 +84,17 @@ export function LoginForm({
 
         <button
           type="submit"
-          className="mt-4 flex w-full items-center justify-center rounded-xl border-2 border-black bg-black px-4 py-4 font-mono text-sm font-bold text-white shadow-[4px_4px_0px_0px_#0099FF] transition-transform hover:-translate-y-1 hover:translate-x-1"
+          disabled={isLoading}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-black bg-black px-4 py-4 font-mono text-sm font-bold text-white shadow-[4px_4px_0px_0px_#0099FF] transition-transform hover:-translate-y-1 hover:translate-x-1 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          LOGIN
+          {isLoading ? (
+            <>
+              <Loader2 className="animate-spin" size={16} strokeWidth={3} />
+              LOGGING IN...
+            </>
+          ) : (
+            "LOGIN"
+          )}
         </button>
 
         <p className="mt-4 text-center font-mono text-sm font-bold text-black/60">

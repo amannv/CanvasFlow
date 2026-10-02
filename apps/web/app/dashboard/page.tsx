@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { LogOut, Plus, Users, ArrowRight } from "lucide-react";
+import { LogOut, Plus, Users, ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { BACKEND_URL } from "../config/config";
@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const [joinSlug, setJoinSlug] = useState("");
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [joining, setJoining] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState<RoomCardRoom | null>(null);
 
@@ -116,7 +117,10 @@ export default function DashboardPage() {
       .trim()
       .replace(/^.*\/canvas\//, "")
       .replace(/\/$/, "");
-    if (cleanSlug) router.push(`/canvas/${cleanSlug}`);
+    if (cleanSlug) {
+      setJoining(true);
+      router.push(`/canvas/${cleanSlug}`);
+    }
   };
 
   const signOut = () => {
@@ -196,10 +200,19 @@ export default function DashboardPage() {
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex w-full items-center justify-between rounded-xl border-2 border-black bg-black px-4 py-3 font-mono text-sm font-bold text-white transition-colors hover:bg-black/80"
+                  className="flex w-full items-center justify-between rounded-xl border-2 border-black bg-black px-4 py-3 font-mono text-sm font-bold text-white transition-colors hover:bg-black/80 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  CREATE
-                  <ArrowRight size={16} strokeWidth={3} />
+                  {creating ? (
+                    <>
+                      CREATING...
+                      <Loader2 className="animate-spin" size={16} strokeWidth={3} />
+                    </>
+                  ) : (
+                    <>
+                      CREATE
+                      <ArrowRight size={16} strokeWidth={3} />
+                    </>
+                  )}
                 </button>
               </form>
             </div>
@@ -229,10 +242,20 @@ export default function DashboardPage() {
                 />
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-between rounded-xl border-2 border-black bg-black px-4 py-3 font-mono text-sm font-bold text-white transition-colors hover:bg-black/80"
+                  disabled={joining}
+                  className="flex w-full items-center justify-between rounded-xl border-2 border-black bg-black px-4 py-3 font-mono text-sm font-bold text-white transition-colors hover:bg-black/80 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  JOIN
-                  <ArrowRight size={16} strokeWidth={3} />
+                  {joining ? (
+                    <>
+                      JOINING...
+                      <Loader2 className="animate-spin" size={16} strokeWidth={3} />
+                    </>
+                  ) : (
+                    <>
+                      JOIN
+                      <ArrowRight size={16} strokeWidth={3} />
+                    </>
+                  )}
                 </button>
               </form>
             </div>

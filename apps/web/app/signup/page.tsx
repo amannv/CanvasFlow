@@ -17,9 +17,11 @@ type SignupData = {
 export default function Page() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async (data: SignupData) => {
     setError("");
+    setLoading(true);
     try {
       await axios.post(`${BACKEND_URL}/signup`, data);
 
@@ -34,13 +36,15 @@ export default function Page() {
         "Unable to create your account. Check your connection and try again.";
       setError(errorMessage);
       toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AuthShell>
       <div className="auth-form">
-        <SignupForm onSubmit={handleSignup} error={error} />
+        <SignupForm onSubmit={handleSignup} error={error} isLoading={loading} />
       </div>
     </AuthShell>
   );

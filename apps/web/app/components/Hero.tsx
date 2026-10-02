@@ -79,8 +79,10 @@ export function Hero() {
           </div>
 
           <h2 className="text-5xl font-black uppercase tracking-tighter text-black sm:text-7xl lg:text-8xl leading-[0.95] sm:leading-[0.9]">
-            THINK<span className="ml-1">.</span><span className="ml-3 sm:ml-5">DRAW</span>
-            <span className="-ml-2 sm:-ml-3">.</span> <br className="hidden sm:block" />
+            THINK<span className="ml-1">.</span>
+            <span className="ml-3 sm:ml-5">DRAW</span>
+            <span className="-ml-2 sm:-ml-3">.</span>{" "}
+            <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-[#0099FF] to-[#0055FF] inline-block pb-4 pr-4">
               COLL<span className="ml-0.5 sm:ml-1">A</span>BORATE.
             </span>
@@ -126,7 +128,7 @@ export function Hero() {
           <div className="mt-16 mx-auto max-w-5xl rounded-3xl border-4 border-black bg-white p-2 sm:p-4 shadow-[8px_8px_0px_0px_#000000] overflow-hidden transform transition-transform hover:-translate-y-2 hover:translate-x-2 duration-300">
             <div className="relative w-full aspect-video rounded-xl border-2 border-black overflow-hidden bg-gray-100">
               <img
-                src="/canvas-screenshot.png"
+                src="/bg2.png"
                 alt="CanvasFlow Digital Whiteboard"
                 className="object-cover w-full h-full"
               />

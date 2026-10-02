@@ -16,9 +16,11 @@ type SigninData = {
 export default function Page() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignin = async (data: SigninData) => {
     setError("");
+    setLoading(true);
     try {
       const response = await axios.post(`${BACKEND_URL}/signin`, data);
 
@@ -42,13 +44,15 @@ export default function Page() {
         message ?? "Unable to sign in. Check your connection and try again.";
       setError(errorMessage);
       toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AuthShell>
       <div className="auth-form">
-        <LoginForm onSubmit={handleSignin} error={error} />
+        <LoginForm onSubmit={handleSignin} error={error} isLoading={loading} />
       </div>
     </AuthShell>
   );
