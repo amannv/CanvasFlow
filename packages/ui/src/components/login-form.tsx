@@ -30,9 +30,9 @@ export function LoginForm({
   };
 
   return (
-    <div className={cn("flex flex-col justify-between rounded-3xl border-4 border-black bg-white p-8 shadow-[8px_8px_0px_0px_#000000] transition-transform hover:-translate-y-1 hover:translate-x-1", className)} {...props}>
-      <div className="text-center mb-8">
-        <h3 className="text-4xl font-black uppercase tracking-tight text-black">
+    <div className={cn("flex flex-col justify-between rounded-3xl border-4 border-black bg-white p-6 sm:p-8 shadow-[8px_8px_0px_0px_#000000] transition-transform hover:-translate-y-1 hover:translate-x-1", className)} {...props}>
+      <div className="text-center mb-6 sm:mb-8">
+        <h3 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black">
           Welcome Back
         </h3>
         <p className="mt-2 font-mono text-sm font-bold text-black/50">

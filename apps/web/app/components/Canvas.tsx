@@ -237,11 +237,11 @@ export function Canvas({
           }}
         />
       )}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-4">
-          <div className="flex items-center gap-1 rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-2">
+      <div className="pointer-events-none fixed inset-0 z-50">
+        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex w-[95vw] max-w-100 sm:max-w-none sm:w-auto -translate-x-1/2 flex-wrap items-center justify-center gap-2 sm:gap-4">
+          <div className="flex items-center justify-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-1.5 sm:p-2">
             <div
-              className="flex items-center gap-1"
+              className="flex flex-wrap items-center justify-center gap-1 sm:gap-1"
               role="toolbar"
               aria-label="Drawing tools"
             >
@@ -280,7 +280,7 @@ export function Canvas({
               </Button>
             </div>
           </div>
-          <div className="flex items-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-2">
+          <div className="flex shrink-0 items-center justify-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-1.5 sm:p-2">
             <Button
               type="button"
               variant="destructive"

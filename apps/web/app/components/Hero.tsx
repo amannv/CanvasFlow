@@ -50,21 +50,21 @@ export function Hero() {
   return (
     <div className="flex min-h-screen flex-col bg-white bg-grid font-sans selection:bg-[#0099FF] selection:text-white">
       {/* Floating Top Navbar / Header area for the landing page */}
-      <div className="mx-auto w-full max-w-7xl pt-6 px-6 lg:px-12">
-        <header className="flex items-center justify-between rounded-2xl border-4 border-black bg-white px-6 py-4 shadow-[4px_4px_0px_0px_#000000] lg:px-8">
-          <h1 className="text-2xl font-black uppercase tracking-widest text-black">
+      <div className="mx-auto w-full max-w-7xl pt-4 px-4 sm:pt-6 sm:px-6 lg:px-12">
+        <header className="flex items-center justify-between rounded-2xl border-4 border-black bg-white px-4 py-3 sm:px-6 sm:py-4 shadow-[4px_4px_0px_0px_#000000] lg:px-8">
+          <h1 className="text-xl sm:text-2xl font-black uppercase tracking-widest text-black">
             Canvas<span className="text-[#0099FF]">Flow</span>
           </h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/signin"
-              className="hidden sm:block font-mono text-sm font-bold text-black hover:underline underline-offset-4"
+              className="block font-mono text-xs sm:text-sm font-bold text-black hover:underline underline-offset-4"
             >
               LOGIN
             </Link>
             <Link
               href="/signup"
-              className="flex items-center gap-2 rounded-xl border-2 border-black bg-black px-4 py-2 font-mono text-sm font-bold text-white shadow-[4px_4px_0px_0px_#0099FF] transition-transform hover:-translate-y-1 hover:translate-x-1"
+              className="flex items-center gap-2 rounded-xl border-2 border-black bg-black px-3 py-1.5 sm:px-4 sm:py-2 font-mono text-xs sm:text-sm font-bold text-white shadow-[2px_2px_0px_0px_#0099FF] sm:shadow-[4px_4px_0px_0px_#0099FF] transition-transform hover:-translate-y-1 hover:translate-x-1"
             >
               SIGN UP
             </Link>

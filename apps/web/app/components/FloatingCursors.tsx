@@ -24,8 +24,6 @@ export function FloatingCursors() {
     const interval = setInterval(() => {
       setCursors((prev) =>
         prev.map((cursor) => {
-          // Generate new positions within safer bounds (e.g., X: 20-75%, Y: 30-65%)
-          // to prevent them from going over the toolbar at the top, bottom, or sides.
           const newX = Math.max(20, Math.min(75, cursor.x + (Math.random() * 20 - 10)));
           const newY = Math.max(30, Math.min(65, cursor.y + (Math.random() * 20 - 10)));
           
@@ -46,19 +44,18 @@ export function FloatingCursors() {
       {cursors.map((cursor) => (
         <div
           key={cursor.id}
-          className="pointer-events-none absolute transition-all duration-[2000ms] ease-in-out"
+          className="pointer-events-none absolute transition-all duration-2000 ease-in-out"
           style={{ left: `${cursor.x}%`, top: `${cursor.y}%` }}
         >
           <MousePointer2
-            size={32}
             strokeWidth={2.5}
             fill={cursor.color}
             color="#000000"
-            className="-rotate-12"
+            className="w-5 h-5 sm:w-8 sm:h-8 -rotate-12"
             style={{ filter: "drop-shadow(1px 1px 0px #000000)" }}
           />
           <div
-            className="absolute left-6 top-6 whitespace-nowrap rounded-md border-2 border-black px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-black shadow-[2px_2px_0px_0px_#000000]"
+            className="absolute left-4 top-4 sm:left-6 sm:top-6 whitespace-nowrap rounded-md border-2 border-black px-1.5 py-0.5 sm:px-2 sm:py-1 font-mono text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-black shadow-[2px_2px_0px_0px_#000000]"
             style={{ backgroundColor: cursor.color }}
           >
             {cursor.name}

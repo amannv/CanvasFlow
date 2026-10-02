@@ -18,7 +18,7 @@ export function CTASection() {
   return (
     <div className="mx-auto w-full max-w-7xl px-6 lg:px-12 mt-32 pb-32">
       <div className="relative flex flex-col items-center justify-center rounded-3xl border-4 border-black bg-[#0099FF] px-8 py-16 shadow-[8px_8px_0px_0px_#000000] sm:px-16 sm:py-24 text-center overflow-hidden">
-        {/* Decorative background elements */}
+      
         <div className="absolute -top-12 -right-12 text-black/5 rotate-12">
           <PenTool size={200} strokeWidth={1} />
         </div>
