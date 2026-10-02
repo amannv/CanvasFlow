@@ -238,10 +238,10 @@ export function Canvas({
         />
       )}
       <div className="pointer-events-none fixed inset-0 z-50">
-        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex w-[95vw] max-w-100 sm:max-w-none sm:w-auto -translate-x-1/2 flex-wrap items-center justify-center gap-2 sm:gap-4">
+        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex w-max max-w-[95vw] sm:max-w-none sm:w-auto -translate-x-1/2 items-stretch justify-center gap-2 sm:gap-4">
           <div className="flex items-center justify-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-1.5 sm:p-2">
             <div
-              className="flex flex-wrap items-center justify-center gap-1 sm:gap-1"
+              className="grid grid-cols-5 sm:flex items-center justify-center gap-1 sm:gap-1"
               role="toolbar"
               aria-label="Drawing tools"
             >
@@ -287,6 +287,7 @@ export function Canvas({
               onClick={() => router.push("/dashboard")}
               size="icon"
               title="Exit to dashboard"
+              className="h-full w-full sm:h-10 sm:w-10"
             >
               <LogOut size={20} strokeWidth={2.2} />
             </Button>
