@@ -238,10 +238,10 @@ export function Canvas({
         />
       )}
       <div className="pointer-events-none fixed inset-0 z-50">
-        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex w-max max-w-[95vw] sm:max-w-none sm:w-auto -translate-x-1/2 items-center justify-center gap-1 sm:gap-4 overflow-x-auto no-scrollbar">
-          <div className="flex items-center justify-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-1 sm:p-2">
+        <div className="pointer-events-auto absolute bottom-5 left-1/2 flex w-max max-w-[95vw] sm:max-w-none sm:w-auto -translate-x-1/2 items-stretch justify-center gap-2 sm:gap-4">
+          <div className="flex items-center justify-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-1.5 sm:p-2">
             <div
-              className="flex items-center justify-center gap-0.5 sm:gap-1"
+              className="grid grid-cols-5 sm:flex items-center justify-center gap-1 sm:gap-1"
               role="toolbar"
               aria-label="Drawing tools"
             >
@@ -251,45 +251,45 @@ export function Canvas({
                   type="button"
                   onClick={() => setShape(tool as ShapeType)}
                   variant="outline"
-                  className={`${
+                  className={
                     shape === tool
                       ? "bg-main text-white hover:bg-main hover:text-white"
                       : "bg-[#ffffff] text-black hover:bg-[#ffffff]"
-                  } h-7 w-7 sm:h-10 sm:w-10`}
+                  }
                   size="icon"
                   title={label as string}
                   aria-label={label as string}
                   aria-pressed={shape === tool}
                 >
-                  <Icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" strokeWidth={2.2} />
+                  <Icon size={20} strokeWidth={2.2} />
                 </Button>
               ))}
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowGrid(!showGrid)}
-                className={`${
+                className={
                   showGrid
                     ? "bg-main text-white hover:bg-main hover:text-white"
                     : "bg-[#ffffff] text-black hover:bg-[#ffffff]"
-                } h-7 w-7 sm:h-10 sm:w-10`}
+                }
                 size="icon"
                 title={showGrid ? "Hide Grid" : "Show Grid"}
               >
-                <Grid3x3 className="w-3.5 h-3.5 sm:w-5 sm:h-5" strokeWidth={2.2} />
+                <Grid3x3 size={20} strokeWidth={2.2} />
               </Button>
             </div>
           </div>
-          <div className="flex shrink-0 items-center justify-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-1 sm:p-2">
+          <div className="flex shrink-0 items-center justify-center rounded-base border-2 border-border shadow-shadow bg-[#ffffff] p-1.5 sm:p-2">
             <Button
               type="button"
               variant="destructive"
               onClick={() => router.push("/dashboard")}
               size="icon"
               title="Exit to dashboard"
-              className="h-7 w-7 sm:h-10 sm:w-10"
+              className="h-full w-10 sm:h-10 sm:w-10"
             >
-              <LogOut className="w-3.5 h-3.5 sm:w-5 sm:h-5" strokeWidth={2.2} />
+              <LogOut size={20} strokeWidth={2.2} />
             </Button>
           </div>
         </div>
