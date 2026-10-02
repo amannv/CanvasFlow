@@ -12,6 +12,7 @@ export function SignupForm({
   className,
   onSubmit,
   error,
+  isLoading,
   ...props
 }: Omit<React.ComponentProps<"div">, "onSubmit"> & {
   onSubmit?: (data: SignupData) => void;

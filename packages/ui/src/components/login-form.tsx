@@ -11,6 +11,7 @@ export function LoginForm({
   className,
   onSubmit,
   error,
+  isLoading,
   ...props
 }: Omit<React.ComponentProps<"div">, "onSubmit"> & {
   onSubmit?: (data: SigninType) => void;

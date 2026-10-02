@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { FloatingCursors } from "./FloatingCursors";
 import { FeatureCard } from "./FeatureCard";
 import { ShortcutCard } from "./ShortcutCard";
 import { CTASection } from "./CTASection";
@@ -125,10 +126,11 @@ export function Hero() {
           </div>
 
           {/* Screenshot Section */}
-          <div className="mt-16 mx-auto max-w-5xl rounded-3xl border-4 border-black bg-white p-2 sm:p-4 shadow-[8px_8px_0px_0px_#000000] overflow-hidden transform transition-transform hover:-translate-y-2 hover:translate-x-2 duration-300">
-            <div className="relative w-full aspect-video rounded-xl border-2 border-black overflow-hidden bg-gray-100">
+          <div className="mt-16 mx-auto max-w-5xl rounded-3xl border-4 border-black bg-[#0099FF] p-2 sm:p-4 shadow-[8px_8px_0px_0px_#000000] overflow-hidden transform transition-transform hover:-translate-y-2 hover:translate-x-2 duration-300">
+            <div className="relative w-full aspect-video rounded-xl border-4 border-black overflow-hidden bg-[#0099FF]">
+              <FloatingCursors />
               <img
-                src="/bg2.png"
+                src="/hero-bg.png"
                 alt="CanvasFlow Digital Whiteboard"
                 className="object-cover w-full h-full"
               />
