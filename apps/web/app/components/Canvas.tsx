@@ -19,7 +19,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { createText } from "../draw/tools/text/textTool";
 import { createElementSender } from "../draw/network/socket";
 import { ShapeType, RemoteCursor } from "../draw/utils/types";
-import { CursorPresence, PresenceMessage } from "./CursorPresence";
+import { CursorPresence, CursorPresenceRef, PresenceMessage } from "./CursorPresence";
 
 const cursorColors = ["#38bdf8", "#fb7185", "#a3e635", "#fbbf24", "#c084fc"];
 
@@ -41,10 +41,7 @@ export function Canvas({
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [shape, setShape] = useState<ShapeType>("none");
-  const [cursors, setCursors] = useState<Record<number, RemoteCursor>>({});
-  const [presenceMessages, setPresenceMessages] = useState<PresenceMessage[]>(
-    [],
-  );
+  const cursorOverlayRef = useRef<CursorPresenceRef>(null);
   const [showGrid, setShowGrid] = useState(true);
   const shapeRef = useRef<ShapeType>("none");
   const engineRef = useRef<DrawEngine | null>(null);
@@ -98,54 +95,24 @@ export function Canvas({
         setCameraVersion((v) => v + 1);
       },
       (userId, name, worldX, worldY) => {
-        setCursors((prev) => ({
-          ...prev,
-          [userId]: {
-            userId,
-            x: worldX,
-            y: worldY,
-            name: getFirstName(name),
-            color: getCursorColor(userId),
-          },
-        }));
+        cursorOverlayRef.current?.updateCursor(userId, getFirstName(name), getCursorColor(userId), worldX, worldY);
       },
 
       (userId) => {
-        setCursors((prev) => {
-          const next = { ...prev };
-          delete next[userId];
-          return next;
-        });
+        cursorOverlayRef.current?.removeCursor(userId);
       },
       (userId, name) => {
-        const message = {
+        cursorOverlayRef.current?.addMessage({
           id: `${userId}-${Date.now()}`,
           text: `${getFirstName(name)} joined the canvas`,
-        };
-        setPresenceMessages((previous) => [...previous, message]);
-        window.setTimeout(() => {
-          setPresenceMessages((previous) =>
-            previous.filter((item) => item.id !== message.id),
-          );
-        }, 3000);
+        });
       },
       (userId, name) => {
-        setCursors((previous) => {
-          const next = { ...previous };
-          delete next[userId];
-          return next;
-        });
-
-        const message = {
+        cursorOverlayRef.current?.removeCursor(userId);
+        cursorOverlayRef.current?.addMessage({
           id: `${userId}-${Date.now()}`,
           text: `${getFirstName(name)} left the canvas`,
-        };
-        setPresenceMessages((previous) => [...previous, message]);
-        window.setTimeout(() => {
-          setPresenceMessages((previous) =>
-            previous.filter((item) => item.id !== message.id),
-          );
-        }, 3000);
+        });
       },
     );
 
@@ -185,9 +152,8 @@ export function Canvas({
     <div className="relative">
       <canvas ref={canvasRef} className="fixed inset-0 bg-[#ffffff]" />
       <CursorPresence
-        cursors={cursors}
+        ref={cursorOverlayRef}
         worldToScreen={worldToScreen}
-        messages={presenceMessages}
       />
 
       {textEditor && (

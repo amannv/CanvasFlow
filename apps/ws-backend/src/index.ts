@@ -206,17 +206,6 @@ wss.on("connection", async (socket, request) => {
 
       console.log("Sending shape:", shape);
 
-      const roomExist = await prisma.room.findUnique({
-        where: {
-          id: roomId,
-        },
-      });
-
-      if (!roomExist) {
-        console.error("Room doesn't exists!");
-        return;
-      }
-
       const rooms = socketToRoomId.get(socket);
       if (!rooms?.has(roomId)) {
         console.error("This user has not joined this room");
@@ -225,27 +214,38 @@ wss.on("connection", async (socket, request) => {
 
       const sockets = roomToSockets.get(roomId);
 
-      const shapeCreated = await prisma.element.create({
-        data: {
-          shapeId: shape.id,
-          roomId: roomId,
-          userId: userId,
-          data: shape,
-        },
-      });
-
       const sentMessage = {
         messageId: crypto.randomUUID(),
-        shapeId: shapeCreated.shapeId,
+        shapeId: shape.id,
         type: "create_element",
-        userId: shapeCreated.userId,
-        shape: shapeCreated.data,
-        roomId: shapeCreated.roomId,
+        userId: userId,
+        shape: shape,
+        roomId: roomId,
       };
 
-      sockets?.forEach((socket) => {
-        socket.send(JSON.stringify(sentMessage));
+      sockets?.forEach((client) => {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(sentMessage));
+        }
       });
+
+     
+      prisma.room.findUnique({
+        where: { id: roomId },
+      }).then(roomExist => {
+        if (!roomExist) {
+          console.error("Room doesn't exists!");
+          return;
+        }
+        prisma.element.create({
+          data: {
+            shapeId: shape.id,
+            roomId: roomId,
+            userId: userId,
+            data: shape,
+          },
+        }).catch(console.error);
+      }).catch(console.error);
     }
 
     if (parsedMessage.type === "update_element") {
@@ -265,43 +265,33 @@ wss.on("connection", async (socket, request) => {
         return;
       }
 
-      const elementExist = await prisma.element.findUnique({
-        where: {
-          shapeId: elementId,
-        },
-      });
-
-      if (!elementExist || elementExist.roomId !== roomId) {
-        console.error("Element doesn't exist in this room!");
-        return;
-      }
-
-      const updateElement = await prisma.element.update({
-        where: {
-          shapeId: elementId,
-        },
-        data: {
-          data: data,
-        },
-      });
-
-      if (!updateElement) {
-        console.error("Error while updating element!");
-        return;
-      }
-
       const sentMessage = {
         messageId: crypto.randomUUID(),
-        shapeId: updateElement.shapeId,
+        shapeId: elementId,
         type: "update_element",
-        roomId: updateElement.roomId,
-        userId: updateElement.userId,
-        shape: updateElement.data,
+        roomId: roomId,
+        userId: userId,
+        shape: data,
       };
 
-      sockets.forEach((socket) => {
-        socket.send(JSON.stringify(sentMessage));
+      sockets.forEach((client) => {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(sentMessage));
+        }
       });
+
+      prisma.element.findUnique({
+        where: { shapeId: elementId },
+      }).then(elementExist => {
+        if (!elementExist || elementExist.roomId !== roomId) {
+          console.error("Element doesn't exist in this room!");
+          return;
+        }
+        prisma.element.update({
+          where: { shapeId: elementId },
+          data: { data: data },
+        }).catch(console.error);
+      }).catch(console.error);
     }
 
     if (parsedMessage.type === "delete_element") {
@@ -320,38 +310,30 @@ wss.on("connection", async (socket, request) => {
         return;
       }
 
-      const elementExist = await prisma.element.findUnique({
-        where: {
-          shapeId: elementId,
-        },
-      });
-
-      if (!elementExist || elementExist.roomId !== roomId) {
-        console.error("Element doesn't exist in this room!");
-        return;
-      }
-
-      const deleteElement = await prisma.element.delete({
-        where: {
-          shapeId: elementId,
-        },
-      });
-
-      if (!deleteElement) {
-        console.error("Error while deleting element!");
-        return;
-      }
-
       const sentMessage = {
         messageId: crypto.randomUUID(),
-        shapeId: deleteElement.shapeId,
+        shapeId: elementId,
         type: "delete_element",
         message: "Element successfully deleted",
       };
 
-      sockets.forEach((socket) => {
-        socket.send(JSON.stringify(sentMessage));
+      sockets.forEach((client) => {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(sentMessage));
+        }
       });
+      
+      prisma.element.findUnique({
+        where: { shapeId: elementId },
+      }).then(elementExist => {
+        if (!elementExist || elementExist.roomId !== roomId) {
+          console.error("Element doesn't exist in this room!");
+          return;
+        }
+        prisma.element.delete({
+          where: { shapeId: elementId },
+        }).catch(console.error);
+      }).catch(console.error);
     }
 
     if (parsedMessage.type === "cursor_move") {
