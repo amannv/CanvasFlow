@@ -4,6 +4,7 @@ import {
   deleteElementSender,
   socketMessageListener,
   updateElementSender,
+  syncElementSender,
 } from "../network/socket";
 import { clearCanvas } from "../utils/clearCanvas";
 import { getCanvasCoordinates } from "../utils/getCanvasCoordinates";
@@ -66,7 +67,10 @@ export class DrawEngine {
   private attachedEvents = false;
 
   private lastCursorUpdate = 0;
-  private readonly CURSOR_UPDATE_INTERVAL = 30;
+  private readonly CURSOR_UPDATE_INTERVAL = 100;
+
+  private lastShapeSync = 0;
+  private readonly SHAPE_SYNC_INTERVAL = 30;
 
   private History: HistoryAction[] = [];
   private redoStack: HistoryAction[] = [];
@@ -528,6 +532,23 @@ export class DrawEngine {
     );
   };
 
+  private syncSelectedShape() {
+    const now = Date.now();
+    if (now - this.lastShapeSync < this.SHAPE_SYNC_INTERVAL) {
+      return;
+    }
+    this.lastShapeSync = now;
+
+    if (this.state.selectedShapeId) {
+      const selectedShape = this.existingShapes.find(
+        (s) => s.id === this.state.selectedShapeId
+      );
+      if (selectedShape) {
+        syncElementSender(selectedShape.id, this.socket, selectedShape, this.roomId);
+      }
+    }
+  }
+
   private mouseMoveHandler = (e: MouseEvent) => {
     const pos = this.getCanvasPosition(e);
     const world = this.screenToWorld(pos.x, pos.y);
@@ -702,6 +723,7 @@ export class DrawEngine {
           }));
 
           this.render();
+          this.syncSelectedShape();
           return;
         }
 

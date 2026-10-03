@@ -248,6 +248,37 @@ wss.on("connection", async (socket, request) => {
       }).catch(console.error);
     }
 
+    if (parsedMessage.type === "sync_element") {
+      const elementId = parsedMessage.payload.elementId;
+      const data = parsedMessage.payload.data;
+      const roomId = parsedMessage.payload.roomId;
+
+      const rooms = socketToRoomId.get(socket);
+      if (!rooms?.has(roomId)) {
+        return;
+      }
+
+      const sockets = roomToSockets.get(roomId);
+      if (!sockets?.has(socket)) {
+        return;
+      }
+
+      const sentMessage = {
+        messageId: crypto.randomUUID(),
+        shapeId: elementId,
+        type: "sync_element",
+        roomId: roomId,
+        userId: userId,
+        shape: data,
+      };
+
+      sockets.forEach((client) => {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(sentMessage));
+        }
+      });
+    }
+
     if (parsedMessage.type === "update_element") {
       const result = updateElementSchema.safeParse(parsedMessage);
 

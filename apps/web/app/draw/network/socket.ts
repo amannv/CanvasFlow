@@ -40,7 +40,7 @@ export function socketMessageListener(
       }
     }
 
-    if (parsedMessage.type === "update_element") {
+    if (parsedMessage.type === "update_element" || parsedMessage.type === "sync_element") {
       const index = existingShapes.findIndex(
         (shape) => shape.id === parsedMessage.shapeId,
       );
@@ -154,6 +154,26 @@ export function deleteElementSender(
       type: "delete_element",
       payload: {
         elementId: id,
+        roomId: Number(roomId),
+      },
+    }),
+  );
+}
+
+export function syncElementSender(
+  id: string,
+  socket: WebSocket,
+  shape: Shape,
+  roomId: string,
+) {
+  if (socket.readyState !== WebSocket.OPEN) return;
+
+  socket.send(
+    JSON.stringify({
+      type: "sync_element",
+      payload: {
+        elementId: id,
+        data: shape,
         roomId: Number(roomId),
       },
     }),

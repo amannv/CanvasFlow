@@ -56,7 +56,11 @@ export const CursorPresence = forwardRef<CursorPresenceRef, CursorPresenceProps>
               <div
                 key={cursor.userId}
                 className="pointer-events-none fixed z-40"
-                style={{ left: screen.screenX, top: screen.screenY }}
+                style={{
+                  left: screen.screenX,
+                  top: screen.screenY,
+                  transition: "left 0.1s linear, top 0.1s linear",
+                }}
               >
                 <MousePointer2
                   size={32}

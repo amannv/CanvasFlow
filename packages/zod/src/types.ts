@@ -75,3 +75,12 @@ export const CursorLeaveSchema = z.object({
     roomId: z.number(),
   }),
 });
+
+export const syncElementSchema = z.object({
+  type: z.literal("sync_element"),
+  payload: z.object({
+    elementId: z.string(),
+    data: z.any(),
+    roomId: z.number(),
+  }),
+});
