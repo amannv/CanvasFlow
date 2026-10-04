@@ -17,8 +17,66 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CanvasFlow",
-  description: "Excalidraw Clone",
+  metadataBase: new URL("https://canvas-flow-web.vercel.app"),
+  title: {
+    default: "CanvasFlow | Real-time Collaborative Whiteboard",
+    template: "%s | CanvasFlow",
+  },
+  description:
+    "CanvasFlow is an open-source, real-time collaborative whiteboard and drawing tool. Sketch diagrams, wireframes, and brainstorm ideas seamlessly with your team.",
+  keywords: [
+    "whiteboard",
+    "excalidraw clone",
+    "collaborative drawing",
+    "canvasflow",
+    "real-time whiteboard",
+    "drawing tool",
+    "system design tool",
+    "diagramming",
+    "mind mapping",
+    "visual collaboration",
+  ],
+  authors: [{ name: "Aman Verma" }],
+  creator: "Aman Verma",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://canvas-flow-web.vercel.app",
+    title: "CanvasFlow | Real-time Collaborative Whiteboard",
+    description:
+      "Sketch diagrams, wireframes, and brainstorm ideas seamlessly with your team on CanvasFlow.",
+    siteName: "CanvasFlow",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "CanvasFlow - Real-time Collaborative Whiteboard",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CanvasFlow | Real-time Collaborative Whiteboard",
+    description:
+      "Sketch diagrams, wireframes, and brainstorm ideas seamlessly with your team on CanvasFlow.",
+    creator: "@amanntwt",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -28,8 +86,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} ${spaceMono.variable} font-sans antialiased`}>
-        {/* Hidden element to ensure Sniglet is loaded for the Canvas text tool */}
+      <body className={`${poppins.variable} ${spaceMono.variable} font-sans antialiased scrollbar-hide`}>
         <div style={{ fontFamily: "Sniglet", position: "absolute", opacity: 0, pointerEvents: "none" }}>preload</div>
         {children}
         <Toaster position="bottom-right" />
