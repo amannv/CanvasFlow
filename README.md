@@ -1,159 +1,130 @@
-# Turborepo starter
+# CanvasFlow
 
-This Turborepo starter is maintained by the Turborepo core team.
+CanvasFlow is a real-time collaborative digital whiteboard application that enables users to create drawing rooms, sketch ideas, and collaborate live on an infinite canvas with synchronized cursors and shapes.
 
-## Using this example
+## Table of Contents
 
-Run the following command:
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [License](#license)
 
-```sh
-npx create-turbo@latest
+## Features
+
+- **8 Core Drawing Tools**: Select/Pointer, Pan/Move, Pencil, Line, Rectangle, Circle, Arrow, and Text.
+- **Real-Time Collaboration**: Live shape updates, WebSocket synchronization, user presence messages, and remote cursor tracking.
+- **Interactive Infinite Canvas**: Canvas panning, zooming, custom camera position tracking, and an optional technical grid background.
+- **Canvas History**: Step-by-step canvas history with undo (`Ctrl+Z`), redo (`Ctrl+Y` / `Ctrl+Shift+Z`), and shape deletion (`Backspace` / `Delete`).
+- **Room Management**: Create custom room slugs, list user-owned rooms, share room join links, and delete rooms.
+- **User Authentication**: User registration and login utilizing JWT-based authorization and bcrypt password hashing.
+- **Data Persistence**: Automatic database persistence for rooms and drawn canvas elements powered by Prisma and PostgreSQL.
+
+## Project Structure
+
+This monorepo is managed using Turborepo and `pnpm` workspaces:
+
+```text
+├── apps/
+│   ├── http-backend/   # Express REST API for auth and room/element management
+│   ├── web/            # Next.js frontend and HTML5 Canvas rendering engine
+│   └── ws-backend/     # WebSocket server for real-time canvas state sync and cursor tracking
+└── packages/
+    ├── database/       # Prisma client and PostgreSQL database adapter
+    ├── eslint-config/  # Shared ESLint configuration rules
+    ├── typescript-config/ # Shared tsconfig bases
+    ├── ui/             # Shared React UI component library
+    └── zod/            # Shared Zod validation schemas for HTTP requests & WebSocket messages
 ```
 
-## What's inside?
+## Requirements
 
-This Turborepo includes the following packages/apps:
+- **Node.js**: `>= 18`
+- **Package Manager**: `pnpm` (`^9.0.0`)
+- **Database**: PostgreSQL
 
-### Apps and Packages
+## Installation
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+1. Clone the repository:
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+   ```sh
+   git clone https://github.com/amannv/CanvasFlow.git
+   cd CanvasFlow
+   ```
 
-### Utilities
+2. Install dependencies:
 
-This Turborepo has some additional tools already setup for you:
+   ```sh
+   pnpm install
+   ```
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Configuration
 
-### Build
+Create `.env` files in `apps/http-backend`, `apps/ws-backend`, `apps/web`, and `packages/database` containing the required environment variables:
 
-To build all apps and packages, run the following command:
+### Database (`packages/database/.env`, `apps/http-backend/.env`, `apps/ws-backend/.env`)
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/canvasflow
 ```
 
-Without global `turbo`, use your package manager:
+### HTTP Backend (`apps/http-backend/.env`)
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+```env
+PORT=8000
+FRONTEND_URL=http://localhost:3000
+JWT_SECRET=your_jwt_secret_key
+DATABASE_URL=postgresql://user:password@localhost:5432/canvasflow
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### WebSocket Backend (`apps/ws-backend/.env`)
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+```env
+PORT=8080
+FRONTEND_URL=http://localhost:3000
+JWT_SECRET=your_jwt_secret_key
+DATABASE_URL=postgresql://user:password@localhost:5432/canvasflow
 ```
 
-Without global `turbo`:
+### Web Frontend (`apps/web/.env`)
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000/api/v1/user
+NEXT_PUBLIC_WS_URL=ws://localhost:8080
 ```
 
-### Develop
+## Usage
 
-To develop all apps and packages, run the following command:
+### Run All Applications in Development Mode
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
+Run the HTTP backend, WebSocket backend, and Next.js web application concurrently:
 
 ```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
+pnpm dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+The frontend application will start at `http://localhost:3000`.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+### Build All Applications
+
+Compile all workspace applications and packages:
 
 ```sh
-turbo dev --filter=web
+pnpm build
 ```
 
-Without global `turbo`:
+### Linting and Code Formatting
+
+Check and apply formatting rules across the monorepo:
 
 ```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+pnpm lint
+pnpm format
+pnpm check-types
 ```
 
-### Remote Caching
+## License
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+ISC
