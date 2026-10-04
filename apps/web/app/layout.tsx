@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     siteName: "CanvasFlow",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "CanvasFlow - Real-time Collaborative Whiteboard",
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     description:
       "Sketch diagrams, wireframes, and brainstorm ideas seamlessly with your team on CanvasFlow.",
     creator: "@amanntwt",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
